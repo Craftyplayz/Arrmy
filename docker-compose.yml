@@ -1,0 +1,112 @@
+# The Arrmy Stack, Milestone 1 (Movies + TV). Run ./setup.sh once, then `docker compose up -d`.
+# Only Arrmy is public (through Cloudflare Tunnel); the other ports are for you on the home network.
+
+x-linuxserver: &linuxserver
+  restart: unless-stopped
+  environment: &env
+    PUID: ${PUID}
+    PGID: ${PGID}
+    TZ: ${TZ}
+
+services:
+  arrmy:
+    build: .
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    environment:
+      TZ: ${TZ}
+      RADARR_API_KEY: ${RADARR_API_KEY}
+      SONARR_API_KEY: ${SONARR_API_KEY}
+      PROWLARR_API_KEY: ${PROWLARR_API_KEY}
+      QBIT_PASSWORD: ${QBIT_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+    volumes:
+      - ./config/arrmy:/config
+    ports:
+      - 3000:3000
+
+  plex:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/plex:latest
+    environment:
+      <<: *env
+      VERSION: docker
+      PLEX_CLAIM: ${PLEX_CLAIM}
+    volumes:
+      - ./config/plex:/config
+      - ${DATA_DIR}/media:/data/media
+    ports:
+      - 32400:32400
+
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    restart: unless-stopped
+    cap_add: [NET_ADMIN]
+    devices: [/dev/net/tun:/dev/net/tun]
+    environment:
+      TZ: ${TZ}
+      VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
+      VPN_TYPE: ${VPN_TYPE}
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+      WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
+      SERVER_COUNTRIES: ${SERVER_COUNTRIES}
+    ports:
+      - 8080:8080 # qBittorrent web UI: qBittorrent lives inside gluetun's network
+
+  qbittorrent:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/qbittorrent:latest
+    network_mode: service:gluetun # all torrent traffic goes through the VPN or nowhere
+    environment:
+      <<: *env
+      WEBUI_PORT: 8080
+    volumes:
+      - ./config/qbittorrent:/config
+      - ${DATA_DIR}:/data
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+  prowlarr:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/prowlarr:latest
+    environment:
+      <<: *env
+      PROWLARR__AUTH__APIKEY: ${PROWLARR_API_KEY}
+    volumes:
+      - ./config/prowlarr:/config
+    ports:
+      - 9696:9696
+
+  radarr:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/radarr:latest
+    environment:
+      <<: *env
+      RADARR__AUTH__APIKEY: ${RADARR_API_KEY}
+    volumes:
+      - ./config/radarr:/config
+      - ${DATA_DIR}:/data
+    ports:
+      - 7878:7878
+
+  sonarr:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/sonarr:latest
+    environment:
+      <<: *env
+      SONARR__AUTH__APIKEY: ${SONARR_API_KEY}
+    volumes:
+      - ./config/sonarr:/config
+      - ${DATA_DIR}:/data
+    ports:
+      - 8989:8989
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on: [arrmy]
