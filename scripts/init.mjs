@@ -42,6 +42,7 @@ if (!existsSync(conf)) {
     '',
     '[Preferences]',
     'WebUI\\Port=8080',
+    'WebUI\\LocalHostAuth=false', // only gluetun shares qBittorrent's localhost; it sets the forwarded port
     'WebUI\\Username=admin',
     `WebUI\\Password_PBKDF2="@ByteArray(${salt.toString('base64')}:${hash.toString('base64')})"`,
   ]

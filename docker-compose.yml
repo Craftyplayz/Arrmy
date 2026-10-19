@@ -67,9 +67,19 @@ services:
       TZ: ${TZ}
       VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
       VPN_TYPE: ${VPN_TYPE}
-      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
-      WIREGUARD_ADDRESSES: ${WIREGUARD_ADDRESSES}
-      SERVER_COUNTRIES: ${SERVER_COUNTRIES}
+      OPENVPN_USER: ${OPENVPN_USER}
+      OPENVPN_PASSWORD: ${OPENVPN_PASSWORD}
+      SERVER_REGIONS: ${SERVER_REGIONS}
+      PORT_FORWARD_ONLY: ${PORT_FORWARD_ONLY}
+      VPN_PORT_FORWARDING: ${VPN_PORT_FORWARDING}
+      # From the gluetun wiki: hands qBittorrent the forwarded port and binds it to the VPN interface.
+      # Works because init sets qBittorrent's "bypass authentication for localhost".
+      VPN_PORT_FORWARDING_UP_COMMAND: >-
+        /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":{{PORT}},\"current_network_interface\":\"{{VPN_INTERFACE}}\",\"random_port\":false,\"upnp\":false}" http://127.0.0.1:8080/api/v2/app/setPreferences'
+      VPN_PORT_FORWARDING_DOWN_COMMAND: >-
+        /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://127.0.0.1:8080/api/v2/app/setPreferences'
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/gluetun:/gluetun # keeps the forwarded port across restarts
     ports:
       - 8080:8080 # qBittorrent web UI: qBittorrent lives inside gluetun's network
 
