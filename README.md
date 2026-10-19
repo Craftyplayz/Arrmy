@@ -4,21 +4,27 @@ One website where family and friends request movies and TV, and the Admin runs t
 
 Vocabulary is in [GLOSSARY.md](GLOSSARY.md). The reasons behind the design are in [docs/adr/](docs/adr/).
 
-## Set up the Stack
+## Deploy with Portainer
 
-Needs a fresh Linux box with Docker and the Compose plugin.
+Needs a Linux box running Docker and Portainer. GitHub builds the Arrmy image on every push to `main` (`ghcr.io/craftyplayz/arrmy`), so the box never builds anything.
 
-1. Copy this folder to the box and `cd` into it.
-2. Run `bash setup.sh`. It creates `.env` with fresh secrets.
-3. Fill in `.env`: `PUID`/`PGID` (run `id`), `TZ`, `DATA_DIR`, the VPN values, `CLOUDFLARE_TUNNEL_TOKEN`, and optionally `DISCORD_WEBHOOK_URL`.
-4. Run `bash setup.sh` again. It creates the `/data` folders and qBittorrent's login, and builds Arrmy.
-5. Copy a claim token from <https://plex.tv/claim> into `PLEX_CLAIM`. Within 4 minutes, run `docker compose up -d`.
-6. In Cloudflare Zero Trust, give the tunnel a public hostname (e.g. `arrmy.yourdomain.com`) that points to `http://arrmy:3000`.
-7. Open Arrmy and **Sign in with Plex**. As the Plex server owner you become the Admin, and Arrmy adds the Movies and TV Shows libraries to Plex.
-8. Add indexers in Prowlarr (`http://<box>:9696`). This is the only step Arrmy can't do for you. Prowlarr copies the indexers into Radarr and Sonarr.
-9. Share your Plex libraries with family. Anyone you share with can sign in to Arrmy as a Requester.
+1. Fill in a copy of [.env.example](.env.example). Generate the five secrets with the one-liner at the top of the file, then set `PUID`/`PGID` (run `id` on the box), `TZ`, the VPN values, `CLOUDFLARE_TUNNEL_TOKEN`, and optionally `DISCORD_WEBHOOK_URL`.
+2. In Portainer: **Stacks → Add stack**, name it `arrmy`, choose **Repository**.
+   - Repository URL: `https://github.com/Craftyplayz/Arrmy`
+   - Repository reference: `refs/heads/main`
+   - Compose path: `docker-compose.yml`
+3. Under **Environment variables**, click **Load variables from .env file** and pick your file.
+4. Copy a claim token from <https://plex.tv/claim> into `PLEX_CLAIM`. Within 4 minutes, click **Deploy the stack**.
+5. In Cloudflare Zero Trust, give the tunnel a public hostname (e.g. `arrmy.yourdomain.com`) that points to `http://arrmy:3000`.
+6. Open Arrmy and **Sign in with Plex**. As the Plex server owner you become the Admin, and Arrmy adds the Movies and TV Shows libraries to Plex.
+7. Add indexers in Prowlarr (`http://<box>:9696`). This is the only step Arrmy can't do for you. Prowlarr copies the indexers into Radarr and Sonarr.
+8. Share your Plex libraries with family. Anyone you share with can sign in to Arrmy as a Requester.
 
-On first boot, Arrmy wires everything else: root folders, qBittorrent, Prowlarr sync and the import webhooks. Follow it with `docker compose logs -f arrmy`. When it's done, the log says `[wire] Stack wired`.
+On first start, the `init` container creates the `/data` folders and qBittorrent's login, then exits. After that, Arrmy wires everything else: root folders, qBittorrent, Prowlarr sync and the import webhooks. Follow it in Portainer under **Containers → arrmy → Logs**. When it's done, the log says `[wire] Stack wired`.
+
+**Updating:** open the stack and click **Pull and redeploy**, with **Re-pull image** turned on.
+
+**Without Portainer:** clone the repo on the box, save your filled-in file as `.env` next to `docker-compose.yml`, and run `docker compose up -d`. Update with `git pull && docker compose pull && docker compose up -d`.
 
 ## On the home network
 

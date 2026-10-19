@@ -1,5 +1,6 @@
-# The Arrmy Stack, Milestone 1 (Movies + TV). Run ./setup.sh once, then `docker compose up -d`.
-# Only Arrmy is public (through Cloudflare Tunnel); the other ports are for you on the home network.
+# The Arrmy Stack, Milestone 1 (Movies + TV). Deploy as a Portainer stack from this repo, or with `docker compose up -d`.
+# Settings come from the environment variables in .env.example. Only Arrmy is public (through Cloudflare Tunnel);
+# the other ports are for you on the home network.
 
 x-linuxserver: &linuxserver
   restart: unless-stopped
@@ -8,9 +9,26 @@ x-linuxserver: &linuxserver
     PGID: ${PGID}
     TZ: ${TZ}
 
+x-after-init: &after-init
+  init:
+    condition: service_completed_successfully
+
 services:
+  # Runs once per deploy: creates the /data folders and qBittorrent's login, then exits.
+  init:
+    image: ghcr.io/craftyplayz/arrmy:latest
+    user: root
+    command: [node, init.mjs]
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      QBIT_PASSWORD: ${QBIT_PASSWORD}
+    volumes:
+      - ${DATA_DIR:-/data}:/data
+      - ${CONFIG_DIR:-/opt/arrmy}:/config
+
   arrmy:
-    build: .
+    image: ghcr.io/craftyplayz/arrmy:latest
     restart: unless-stopped
     user: "${PUID}:${PGID}"
     environment:
@@ -22,9 +40,10 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
     volumes:
-      - ./config/arrmy:/config
+      - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
     ports:
       - 3000:3000
+    depends_on: *after-init
 
   plex:
     <<: *linuxserver
@@ -34,8 +53,8 @@ services:
       VERSION: docker
       PLEX_CLAIM: ${PLEX_CLAIM}
     volumes:
-      - ./config/plex:/config
-      - ${DATA_DIR}/media:/data/media
+      - ${CONFIG_DIR:-/opt/arrmy}/plex:/config
+      - ${DATA_DIR:-/data}/media:/data/media
     ports:
       - 32400:32400
 
@@ -62,9 +81,10 @@ services:
       <<: *env
       WEBUI_PORT: 8080
     volumes:
-      - ./config/qbittorrent:/config
-      - ${DATA_DIR}:/data
+      - ${CONFIG_DIR:-/opt/arrmy}/qbittorrent:/config
+      - ${DATA_DIR:-/data}:/data
     depends_on:
+      <<: *after-init # init must write the login before qBittorrent creates its own config
       gluetun:
         condition: service_healthy
 
@@ -75,7 +95,7 @@ services:
       <<: *env
       PROWLARR__AUTH__APIKEY: ${PROWLARR_API_KEY}
     volumes:
-      - ./config/prowlarr:/config
+      - ${CONFIG_DIR:-/opt/arrmy}/prowlarr:/config
     ports:
       - 9696:9696
 
@@ -86,8 +106,8 @@ services:
       <<: *env
       RADARR__AUTH__APIKEY: ${RADARR_API_KEY}
     volumes:
-      - ./config/radarr:/config
-      - ${DATA_DIR}:/data
+      - ${CONFIG_DIR:-/opt/arrmy}/radarr:/config
+      - ${DATA_DIR:-/data}:/data
     ports:
       - 7878:7878
 
@@ -98,8 +118,8 @@ services:
       <<: *env
       SONARR__AUTH__APIKEY: ${SONARR_API_KEY}
     volumes:
-      - ./config/sonarr:/config
-      - ${DATA_DIR}:/data
+      - ${CONFIG_DIR:-/opt/arrmy}/sonarr:/config
+      - ${DATA_DIR:-/data}:/data
     ports:
       - 8989:8989
 
