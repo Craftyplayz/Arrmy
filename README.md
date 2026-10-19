@@ -30,7 +30,7 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 | App | Address | Login |
 |---|---|---|
-| Arrmy | `http://<box>:3000` | Plex |
+| Arrmy | `http://<box>:3000` (or your `ARRMY_PORT`) | Plex |
 | Plex | `http://<box>:32400/web` | Plex |
 | qBittorrent | `http://<box>:8080` | `admin` / `QBIT_PASSWORD` from `.env` |
 | Prowlarr, Radarr, Sonarr | `:9696`, `:7878`, `:8989` | create one on first visit |

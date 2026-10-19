@@ -42,7 +42,7 @@ services:
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
     ports:
-      - 3000:3000
+      - ${ARRMY_PORT:-3000}:3000 # only the port on the box changes; inside Docker it's always 3000
     depends_on: *after-init
 
   plex:
