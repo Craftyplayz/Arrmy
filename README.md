@@ -17,7 +17,7 @@ Needs a Linux box running Docker and Portainer. GitHub builds the Arrmy image on
 4. Copy a claim token from <https://plex.tv/claim> into `PLEX_CLAIM`. Within 4 minutes, click **Deploy the stack**.
 5. In Cloudflare Zero Trust, give the tunnel a public hostname (e.g. `arrmy.yourdomain.com`) that points to `http://arrmy:3000`.
 6. Open Arrmy and **Sign in with Plex**. As the Plex server owner you become the Admin, and Arrmy adds the Movies and TV Shows libraries to Plex.
-7. Add indexers in Prowlarr (`http://<box>:9696`). This is the only step Arrmy can't do for you. Prowlarr copies the indexers into Radarr and Sonarr.
+7. Add indexers in Prowlarr (`http://<box>:7656`). This is the only step Arrmy can't do for you. Prowlarr copies the indexers into Radarr and Sonarr.
 8. Share your Plex libraries with family. Anyone you share with can sign in to Arrmy as a Requester.
 
 On first start, the `init` container creates the `/data` folders and qBittorrent's login, then exits. After that, Arrmy wires everything else: root folders, qBittorrent, Prowlarr sync and the import webhooks. Follow it in Portainer under **Containers → arrmy → Logs**. When it's done, the log says `[wire] Stack wired`.
@@ -30,10 +30,10 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 | App | Default address | Login |
 |---|---|---|
-| Arrmy | `http://<box>:3000` | Plex |
+| Arrmy | `http://<box>:7654` | Plex |
 | Plex | `http://<box>:32400/web` | Plex |
-| qBittorrent | `http://<box>:8080` | `admin` / `QBIT_PASSWORD` from `.env` |
-| Prowlarr, Radarr, Sonarr | `:9696`, `:7878`, `:8989` | create one on first visit |
+| qBittorrent | `http://<box>:7655` | `admin` / `QBIT_PASSWORD` from `.env` |
+| Prowlarr, Radarr, Sonarr | `:7656`, `:7657`, `:7658` | create one on first visit |
 
 If a port is already taken on your box, change it with the `*_PORT` settings in [.env.example](.env.example).
 

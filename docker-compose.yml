@@ -42,7 +42,7 @@ services:
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
     ports:
-      - ${ARRMY_PORT:-3000}:3000 # only the port on the box changes; inside Docker it's always 3000
+      - ${ARRMY_PORT:-7654}:3000 # only the port on the box changes; inside Docker it's always 3000
     depends_on: *after-init
 
   plex:
@@ -81,7 +81,7 @@ services:
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/gluetun:/gluetun # keeps the forwarded port across restarts
     ports:
-      - ${QBIT_PORT:-8080}:8080 # qBittorrent web UI: qBittorrent lives inside gluetun's network
+      - ${QBIT_PORT:-7655}:8080 # qBittorrent web UI: qBittorrent lives inside gluetun's network
 
   qbittorrent:
     <<: *linuxserver
@@ -107,7 +107,7 @@ services:
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/prowlarr:/config
     ports:
-      - ${PROWLARR_PORT:-9696}:9696
+      - ${PROWLARR_PORT:-7656}:9696
 
   radarr:
     <<: *linuxserver
@@ -119,7 +119,7 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}/radarr:/config
       - ${DATA_DIR:-/data}:/data
     ports:
-      - ${RADARR_PORT:-7878}:7878
+      - ${RADARR_PORT:-7657}:7878
 
   sonarr:
     <<: *linuxserver
@@ -131,7 +131,7 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}/sonarr:/config
       - ${DATA_DIR:-/data}:/data
     ports:
-      - ${SONARR_PORT:-8989}:8989
+      - ${SONARR_PORT:-7658}:8989
 
   cloudflared:
     image: cloudflare/cloudflared:latest
