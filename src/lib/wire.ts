@@ -24,6 +24,11 @@ async function ensureProvider(
   await arr(svc, `/${resource}`, 'POST', { ...schema, ...extra, name, fields })
 }
 
+async function ensureTag(svc: ServiceName, label: string) {
+  const tags = await arr<{ id: number; label: string }[]>(svc, '/tag')
+  return (tags.find((t) => t.label === label) ?? (await arr<{ id: number }>(svc, '/tag', 'POST', { label }))).id
+}
+
 /** Wires the Stack through the Services' APIs. Idempotent; failed steps retry every 30s until the Service is up. */
 export function startWiring() {
   const qbit = { host: 'gluetun', port: 8080, username: 'admin', password: process.env.QBIT_PASSWORD }
@@ -40,6 +45,11 @@ export function startWiring() {
     ['Sonarr → Arrmy', () => ensureProvider('sonarr', 'notification', 'Webhook', 'Arrmy', webhook, onImport)],
     ['Prowlarr → Radarr', () => ensureProvider('prowlarr', 'applications', 'Radarr', 'Radarr', app('radarr'), { syncLevel: 'fullSync' })],
     ['Prowlarr → Sonarr', () => ensureProvider('prowlarr', 'applications', 'Sonarr', 'Sonarr', app('sonarr'), { syncLevel: 'fullSync' })],
+    // Prowlarr only sends an indexer through FlareSolverr when the indexer has the same tag.
+    ['Prowlarr → FlareSolverr', async () => {
+      const tag = await ensureTag('prowlarr', 'flaresolverr')
+      await ensureProvider('prowlarr', 'indexerproxy', 'FlareSolverr', 'FlareSolverr', { host: 'http://gluetun:8191/' }, { tags: [tag] })
+    }],
   ]
 
   const run = async () => {

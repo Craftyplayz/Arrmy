@@ -72,6 +72,7 @@ services:
       SERVER_REGIONS: ${SERVER_REGIONS}
       PORT_FORWARD_ONLY: ${PORT_FORWARD_ONLY}
       VPN_PORT_FORWARDING: ${VPN_PORT_FORWARDING}
+      HTTPPROXY: "on" # gluetun:8888 inside Docker; Prowlarr's proxy setting sends indexer traffic through the VPN
       # From the gluetun wiki: hands qBittorrent the forwarded port and binds it to the VPN interface.
       # Works because init sets qBittorrent's "bypass authentication for localhost".
       VPN_PORT_FORWARDING_UP_COMMAND: >-
@@ -108,6 +109,18 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}/prowlarr:/config
     ports:
       - ${PROWLARR_PORT:-7656}:9696
+
+  # Solves Cloudflare challenges for indexers tagged "flaresolverr" in Prowlarr. Lives in gluetun's
+  # network like qBittorrent, so sites blocked on the home connection work; Prowlarr reaches it at gluetun:8191.
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    restart: unless-stopped
+    network_mode: service:gluetun
+    environment:
+      TZ: ${TZ}
+    depends_on:
+      gluetun:
+        condition: service_healthy
 
   radarr:
     <<: *linuxserver
