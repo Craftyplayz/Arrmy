@@ -63,6 +63,8 @@ services:
     restart: unless-stopped
     cap_add: [NET_ADMIN]
     devices: [/dev/net/tun:/dev/net/tun]
+    healthcheck:
+      start_period: 2m # PIA can take longer than the image's default to connect; keeps its own health test
     environment:
       TZ: ${TZ}
       VPN_SERVICE_PROVIDER: ${VPN_SERVICE_PROVIDER}
