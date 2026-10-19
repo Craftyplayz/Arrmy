@@ -28,12 +28,14 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 ## On the home network
 
-| App | Address | Login |
+| App | Default address | Login |
 |---|---|---|
-| Arrmy | `http://<box>:3000` (or your `ARRMY_PORT`) | Plex |
+| Arrmy | `http://<box>:3000` | Plex |
 | Plex | `http://<box>:32400/web` | Plex |
 | qBittorrent | `http://<box>:8080` | `admin` / `QBIT_PASSWORD` from `.env` |
 | Prowlarr, Radarr, Sonarr | `:9696`, `:7878`, `:8989` | create one on first visit |
+
+If a port is already taken on your box, change it with the `*_PORT` settings in [.env.example](.env.example).
 
 Plex runs on Docker's bridge network. Set **Plex → Settings → Network → LAN Networks** to your home subnet (e.g. `192.168.1.0/24`); otherwise Plex treats devices at home as remote.
 
