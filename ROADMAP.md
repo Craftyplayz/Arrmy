@@ -11,10 +11,11 @@
 - **Media files on your PC.** Through the server's existing Samba share (port 445 is already in use there, so the stack doesn't run its own).
 - **Config backups.** Every app's settings are copied nightly and kept for a week (restore steps in the README).
 - **Size limits.** The Admin sets a maximum per movie, per hour of episode and per show (Settings). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate.
+- **Admin view.** One page with Problems (Missing, Failed Download, Failed Import) and one-click fixes, what's downloading, library and disk stats, and Requests by person.
 
 ## Next
 
-1. **Admin view.** Problems (Missing, Failed Download, Failed Import) with one-click fixes; stats (library counts, disk space, live queue, Requests by person).
+Pick from Later.
 
 ## Later
 

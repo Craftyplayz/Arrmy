@@ -9,7 +9,8 @@ async function login() {
     body: new URLSearchParams({ username: 'admin', password: process.env.QBIT_PASSWORD ?? '' }),
     cache: 'no-store',
   })
-  sid = res.headers.getSetCookie().find((c) => c.startsWith('SID='))?.split(';')[0]
+  // qBittorrent 5 names the cookie after its port (QBT_SID_8080); older versions call it SID.
+  sid = res.headers.getSetCookie().find((c) => /^(QBT_)?SID(_\d+)?=/.test(c))?.split(';')[0]
   if (!sid) throw new Error(`qBittorrent login → ${res.status}`)
 }
 
@@ -33,6 +34,12 @@ async function qbit(path: string, body?: URLSearchParams, retry = true): Promise
 export async function liveProgress(): Promise<Map<string, { size: number; sizeleft: number }>> {
   const torrents: { hash: string; size: number; amount_left: number }[] = await (await qbit('/torrents/info')).json()
   return new Map(torrents.map((t) => [t.hash.toUpperCase(), { size: t.size, sizeleft: t.amount_left }]))
+}
+
+/** Total download and upload speed right now, in bytes per second. */
+export async function transferSpeeds() {
+  const t: { dl_info_speed: number; up_info_speed: number } = await (await qbit('/transfer/info')).json()
+  return { down: t.dl_info_speed, up: t.up_info_speed }
 }
 
 /** Deletes torrents and their downloaded data. The library copy is a separate hardlink that Radarr/Sonarr delete. */

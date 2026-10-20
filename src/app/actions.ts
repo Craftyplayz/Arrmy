@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { addMovie, addSeries, posterOf, removeMovie, removeSeasons } from '@/lib/arr'
+import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons } from '@/lib/arr'
 import {
   addRequest,
   deleteRequest,
@@ -27,6 +27,23 @@ const positiveInt = (value: FormDataEntryValue | null) => {
 }
 
 const union = (...lists: number[][]) => [...new Set(lists.flat())].sort((a, b) => a - b)
+
+/** One-click fix for a Problem on the Admin page. */
+export async function fixProblem(form: FormData) {
+  const user = await requireUser()
+  if (!user.is_admin) throw new Error('Only the Admin can fix Problems')
+  const service = form.get('service')
+  if (service !== 'radarr' && service !== 'sonarr') throw new Error(`Unknown service: ${service}`)
+  const ids = form.getAll('id').map(positiveInt)
+  if (form.get('fix') === 'retry') {
+    // Blocklist the release so it's never grabbed again, remove it from qBittorrent, and look for another.
+    await arr(service, '/queue/bulk?removeFromClient=true&blocklist=true&skipRedownload=false', 'DELETE', { ids })
+  } else if (form.get('fix') === 'search') {
+    const command = service === 'radarr' ? { name: 'MoviesSearch', movieIds: ids } : { name: 'EpisodeSearch', episodeIds: ids }
+    await arr(service, '/command', 'POST', command)
+  } else throw new Error(`Unknown fix: ${form.get('fix')}`)
+  revalidatePath('/admin')
+}
 
 export async function saveLimits(form: FormData) {
   const user = await requireUser()

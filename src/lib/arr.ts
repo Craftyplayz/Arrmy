@@ -50,9 +50,25 @@ export const posterOf = (media: Media) => media.images?.find((i) => i.coverType 
 
 const libraryMovie = async (tmdbId: number) => (await arr<LibraryMovie[]>('radarr', `/movie?tmdbId=${tmdbId}`))[0]
 const librarySeries = async (tvdbId: number) => (await arr<LibrarySeries[]>('sonarr', `/series?tvdbId=${tvdbId}`))[0]
-async function queueOf(name: 'radarr' | 'sonarr'): Promise<QueueItem[]> {
+export type QueueRecord = QueueItem & {
+  id: number
+  title: string
+  status?: string
+  trackedDownloadStatus?: string
+  trackedDownloadState?: string
+  statusMessages?: { title: string; messages: string[] }[]
+  errorMessage?: string
+  downloadId?: string
+  episodeId?: number
+  seasonNumber?: number
+  movie?: { title: string; year?: number }
+  series?: { title: string }
+}
+
+/** The Service's download queue, with progress replaced by qBittorrent's live numbers where it has them. */
+export async function queueOf(name: 'radarr' | 'sonarr'): Promise<QueueRecord[]> {
   const [queue, live] = await Promise.all([
-    arr<{ records: (QueueItem & { downloadId?: string })[] }>(name, '/queue?pageSize=1000'),
+    arr<{ records: QueueRecord[] }>(name, `/queue?pageSize=1000${name === 'radarr' ? '&includeMovie=true' : '&includeSeries=true'}`),
     liveProgress().catch(() => new Map()), // qBittorrent unreachable: fall back to the Service's minute-old numbers
   ])
   return queue.records.map((r) => ({ ...r, ...live.get(r.downloadId?.toUpperCase() ?? '') }))
@@ -99,17 +115,28 @@ export async function search(type: MediaType, term: string): Promise<SearchResul
   )
 }
 
-export type RequestDetails = { status: Status | null; seasons: number[] }
+export type RequestDetails = { status: Status | null; seasons: number[]; bytes: number }
 
-/** Live status per Request (null = no longer in Radarr/Sonarr) and, for TV, every season the show has. Same order. */
+/**
+ * Live status per Request (null = no longer in Radarr/Sonarr), for TV every season the show has, and the space its
+ * files take. Same order as `requests`.
+ */
 export async function requestDetails(requests: RequestRow[]): Promise<RequestDetails[]> {
   if (!requests.length) return []
   const [movieQueue, tvQueue] = await Promise.all([queueOf('radarr'), queueOf('sonarr')])
   return Promise.all(
     requests.map(async (r) => {
-      if (r.media_type === 'movie') return { status: movieStatus(await libraryMovie(r.external_id), movieQueue), seasons: [] }
+      if (r.media_type === 'movie') {
+        const movie = await libraryMovie(r.external_id)
+        return { status: movieStatus(movie, movieQueue), seasons: [], bytes: movie?.sizeOnDisk ?? 0 }
+      }
       const series = await librarySeries(r.external_id)
-      return { status: seriesStatus(series, tvQueue, seasonsOf(r)), seasons: series ? seasonNumbers(series.seasons) : [] }
+      const requested = series?.seasons.filter((s) => seasonsOf(r).includes(s.seasonNumber)) ?? []
+      return {
+        status: seriesStatus(series, tvQueue, seasonsOf(r)),
+        seasons: series ? seasonNumbers(series.seasons) : [],
+        bytes: requested.reduce((n, s) => n + (s.statistics?.sizeOnDisk ?? 0), 0),
+      }
     }),
   )
 }

@@ -1,7 +1,11 @@
 // Status rules for Requests. No I/O here, so they can be unit-tested.
 
-export type Movie = { id: number; hasFile: boolean }
-export type Season = { seasonNumber: number; monitored: boolean; statistics?: { episodeFileCount: number; episodeCount: number } }
+export type Movie = { id: number; hasFile: boolean; sizeOnDisk?: number }
+export type Season = {
+  seasonNumber: number
+  monitored: boolean
+  statistics?: { episodeFileCount: number; episodeCount: number; sizeOnDisk?: number }
+}
 export type Series = { id: number; seasons: Season[] }
 export type QueueItem = { movieId?: number; seriesId?: number; size: number; sizeleft: number }
 export type Status = { label: 'Available' | 'Partially available' | 'Downloading' | 'Requested'; progress?: number }

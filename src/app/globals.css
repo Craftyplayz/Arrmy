@@ -73,6 +73,24 @@ button.danger { background: var(--error); color: #fff; }
 summary { cursor: pointer; font-weight: 600; }
 .seasons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-top: 8px; }
 
+h2 { font-size: 17px; margin: 24px 0 8px; }
+.badge.bad { color: var(--error); border-color: currentColor; }
+
+.downloads { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.downloads li { display: grid; grid-template-columns: 1fr minmax(80px, 160px) auto; align-items: center; gap: 10px; }
+.downloads li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+progress { width: 100%; accent-color: var(--accent); }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.tile { display: grid; gap: 2px; padding: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.tile strong { font-size: 20px; }
+.tile.warn strong { color: var(--error); }
+
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+tr:last-child td { border-bottom: 0; }
+
 .limits { display: grid; gap: 4px; max-width: 520px; }
 .limits label { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 600; }
 .limits label span { width: 72px; }
