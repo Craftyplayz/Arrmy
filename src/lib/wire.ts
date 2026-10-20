@@ -1,5 +1,5 @@
 import { arr, MOVIES_ROOT, serviceKey, serviceUrl, setCustomFormat, TV_ROOT, type ServiceName } from './arr'
-import { getLimits } from './db'
+import { getLimits, getSetting, setSetting } from './db'
 import { applyLimits } from './limits'
 import { MULTI_AUDIO } from './releases'
 import { LAZYLIBRARIAN_URL, ll } from './books'
@@ -63,10 +63,15 @@ export function startWiring() {
     // Set once: after that the address is ours, and switching AudioBook Bay off in LazyLibrarian is left alone.
     ['LazyLibrarian → AudioBook Bay', async () => {
       const host = relayAddress()
-      if ((await ll<string>('readCFG', { name: 'ABB_HOST', group: 'ABB' })) === `[${host}]`) return
-      await ll('writeCFG', { name: 'ABB_HOST', group: 'ABB', value: host })
-      await ll('writeCFG', { name: 'ABB', group: 'ABB', value: '1' })
-      await ll('forceBookSearch', { type: 'AudioBook' }) // look again for every wanted audiobook
+      if (getSetting<string>('wired:audiobookBay') === host) return
+      if ((await ll<string>('readCFG', { name: 'ABB_HOST', group: 'ABB' })) !== `[${host}]`) {
+        await ll('writeCFG', { name: 'ABB_HOST', group: 'ABB', value: host })
+        await ll('writeCFG', { name: 'ABB', group: 'ABB', value: '1' })
+      }
+      // Look again for every wanted audiobook. Fails while LazyLibrarian is starting, or has blocked its sources (for
+      // an hour after errors, e.g. a restart mid-search), so it's only marked done once the search has started.
+      await ll('forceBookSearch', { type: 'AudioBook' })
+      setSetting('wired:audiobookBay', host)
     }],
     // Re-applied every start, so a rebuilt Radarr or Sonarr gets the Admin's Size Limits back.
     ['Size limits', () => applyLimits(getLimits())],
