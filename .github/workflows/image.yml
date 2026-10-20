@@ -27,6 +27,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/craftyplayz/arrmy
+          flavor: latest=false # only main moves latest, never a release tag
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
