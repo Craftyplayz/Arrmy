@@ -12,8 +12,9 @@
 
 ## Next
 
-1. **Size limits.** A maximum size per movie, per episode and per show, set by the Admin. A TV Request whose estimate goes over the show limit is refused with the estimate.
-2. **Admin view.** Problems (Missing, Failed Download, Failed Import) with one-click fixes; stats (library counts, disk space, live queue, Requests by person).
+1. **Config backups.** A nightly copy of every app's settings folder, so a deleted or broken config can be restored.
+2. **Size limits.** A maximum size per movie, per episode and per show, set by the Admin. A TV Request whose estimate goes over the show limit is refused with the estimate.
+3. **Admin view.** Problems (Missing, Failed Download, Failed Import) with one-click fixes; stats (library counts, disk space, live queue, Requests by person).
 
 ## Later
 
