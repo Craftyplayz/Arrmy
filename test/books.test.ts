@@ -7,16 +7,19 @@ const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary',
 test('LazyLibrarian audio statuses as Arrmy shows them', () => {
   assert.equal(audiobookStatus(undefined), null)
   assert.equal(audiobookStatus(book({ audiostatus: 'Skipped' })), null, 'cancelled')
-  assert.deepEqual(audiobookStatus(book({ audiostatus: 'Wanted' })), { label: 'Requested' })
+  assert.deepEqual(audiobookStatus(book({ AudioStatus: 'Wanted' })), { label: 'Requested' }, 'as the real server spells it')
+  assert.deepEqual(audiobookStatus(book({ audiostatus: 'Wanted' })), { label: 'Requested' }, 'lowercase fallback')
   assert.deepEqual(audiobookStatus(book({ audiostatus: 'Snatched' }), { size: 200, sizeleft: 50 }), { label: 'Downloading', progress: 75 })
   assert.deepEqual(audiobookStatus(book({ audiostatus: 'Snatched' })), { label: 'Downloading', progress: 0 }, 'not in qBittorrent yet')
   assert.deepEqual(audiobookStatus(book({ audiostatus: 'Open' })), { label: 'Available' })
-  assert.deepEqual(audiobookStatus(book({ audiostatus: 'Skipped', audiolibrary: '2026-10-20 05:00:00' })), { label: 'Available' }, 'filed')
+  assert.deepEqual(audiobookStatus(book({ AudioStatus: 'Skipped', AudioLibrary: '2026-10-20 05:00:00' })), { label: 'Available' }, 'filed')
 })
 
 test('covers: OpenLibrary at medium size over https, placeholders dropped', () => {
   assert.equal(coverUrl('http://covers.openlibrary.org/b/id/11200092-S.jpg'), 'https://covers.openlibrary.org/b/id/11200092-M.jpg')
   assert.equal(coverUrl('images/nocover.png'), undefined)
+  assert.equal(coverUrl('cache/book/OL66554W.jpg', 'OL66554W'), 'https://covers.openlibrary.org/w/olid/OL66554W-M.jpg', 'LazyLibrarian cache: OpenLibrary work cover')
+  assert.equal(coverUrl('cache/book/123.jpg', '123'), undefined, 'not an OpenLibrary work')
   assert.equal(coverUrl(null), undefined)
 })
 

@@ -1,13 +1,18 @@
 // Audiobook rules. No I/O here, so they can be unit-tested.
 import type { Status } from './status'
 
-/** A book as LazyLibrarian's getAllBooks lists it (it lowercases a few column names). */
+/**
+ * A book as LazyLibrarian's getAllBooks lists it. The real server returns AudioStatus/AudioLibrary even though its query
+ * spells them in lowercase, so both spellings are read.
+ */
 export type LLBook = {
   BookID: string
   BookName: string
   AuthorName: string
   BookImg?: string | null
   BookDate?: string | null
+  AudioStatus?: string | null
+  AudioLibrary?: string | null
   audiostatus?: string | null
   audiolibrary?: string | null
 }
@@ -15,9 +20,9 @@ export type LLBook = {
 /** The audiobook's status as Arrmy shows it. null = not wanted: never requested, or cancelled. */
 export function audiobookStatus(book: LLBook | undefined, download?: { size: number; sizeleft: number }): Status | null {
   if (!book) return null
-  const status = book.audiostatus ?? ''
+  const status = book.AudioStatus ?? book.audiostatus ?? ''
   // Open is LazyLibrarian's default FOUND_STATUS once it has filed the book; Have = found in its library scan.
-  if (book.audiolibrary || status === 'Open' || status === 'Have') return { label: 'Available' }
+  if (book.AudioLibrary || book.audiolibrary || status === 'Open' || status === 'Have') return { label: 'Available' }
   if (status === 'Snatched') {
     const progress = download?.size ? Math.round(((download.size - download.sizeleft) / download.size) * 100) : 0
     return { label: 'Downloading', progress }
@@ -26,10 +31,14 @@ export function audiobookStatus(book: LLBook | undefined, download?: { size: num
   return null
 }
 
-/** OpenLibrary covers at a usable size over https. LazyLibrarian's own placeholders aren't reachable from a browser. */
-export function coverUrl(img?: string | null) {
-  if (!img || !/^https?:\/\//.test(img)) return undefined
-  return img.replace(/^http:/, 'https:').replace(/-S\.jpg$/, '-M.jpg')
+/**
+ * OpenLibrary covers at a usable size over https. Once a book is in LazyLibrarian its image is a cached file the browser
+ * can't reach, so OpenLibrary works (OL…W) fall back to OpenLibrary's own cover for that work.
+ */
+export function coverUrl(img?: string | null, bookId?: string) {
+  if (img && /^https?:\/\//.test(img)) return img.replace(/^http:/, 'https:').replace(/-S\.jpg$/, '-M.jpg')
+  if (bookId && /^OL\d+W$/.test(bookId)) return `https://covers.openlibrary.org/w/olid/${bookId}-M.jpg`
+  return undefined
 }
 
 export const yearOf = (date?: string | null) => Number(date?.slice(0, 4)) || undefined

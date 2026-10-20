@@ -106,7 +106,7 @@ export async function searchAudiobooks(term: string) {
         title: b.bookname,
         year: yearOf(b.bookdate),
         overview: `by ${b.authorname}`,
-        poster: coverUrl(b.bookimg),
+        poster: coverUrl(b.bookimg, b.bookid),
         seasons: [],
         requestedSeasons: [],
         status: inLibrary ? ({ label: 'Available' } as const) : status(b.bookid),
@@ -125,7 +125,7 @@ export async function addAudiobook(bookId: string) {
   }
   await ll('queueBook', { id: bookId, type: 'AudioBook' })
   await ll('searchBook', { id: bookId, type: 'AudioBook' })
-  return { title: book.BookName, author: book.AuthorName, year: yearOf(book.BookDate), poster: coverUrl(book.BookImg) }
+  return { title: book.BookName, author: book.AuthorName, year: yearOf(book.BookDate), poster: coverUrl(book.BookImg, book.BookID) }
 }
 
 /**
