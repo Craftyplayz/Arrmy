@@ -68,6 +68,8 @@ button.link { background: none; color: var(--muted); padding: 0; font-weight: 40
 .badge.busy { color: var(--busy); border-color: currentColor; }
 
 details { margin-top: 8px; }
+.manage { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+button.danger { background: var(--error); color: #fff; }
 summary { cursor: pointer; font-weight: 600; }
 .seasons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-top: 8px; }
 

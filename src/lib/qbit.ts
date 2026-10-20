@@ -1,4 +1,4 @@
-// Live download progress straight from qBittorrent: Radarr and Sonarr only refresh theirs once a minute.
+// Talks to qBittorrent directly: live progress (Radarr and Sonarr only refresh theirs once a minute) and deleting torrents.
 
 const QBIT_URL = process.env.QBIT_URL ?? 'http://gluetun:8080'
 let sid: string | undefined
@@ -13,15 +13,30 @@ async function login() {
   if (!sid) throw new Error(`qBittorrent login → ${res.status}`)
 }
 
-/** Size and bytes left per torrent hash (uppercase, as Radarr/Sonarr store it in downloadId). */
-export async function liveProgress(retry = true): Promise<Map<string, { size: number; sizeleft: number }>> {
+async function qbit(path: string, body?: URLSearchParams, retry = true): Promise<Response> {
   if (!sid) await login()
-  const res = await fetch(`${QBIT_URL}/api/v2/torrents/info`, { headers: { Cookie: sid! }, cache: 'no-store' })
+  const res = await fetch(`${QBIT_URL}/api/v2${path}`, {
+    method: body ? 'POST' : 'GET',
+    headers: { Cookie: sid! },
+    body,
+    cache: 'no-store',
+  })
   if (res.status === 403 && retry) {
     sid = undefined // session expired or qBittorrent restarted
-    return liveProgress(false)
+    return qbit(path, body, false)
   }
-  if (!res.ok) throw new Error(`qBittorrent torrents → ${res.status}`)
-  const torrents: { hash: string; size: number; amount_left: number }[] = await res.json()
+  if (!res.ok) throw new Error(`qBittorrent ${path} → ${res.status}`)
+  return res
+}
+
+/** Size and bytes left per torrent hash (uppercase, as Radarr/Sonarr store it in downloadId). */
+export async function liveProgress(): Promise<Map<string, { size: number; sizeleft: number }>> {
+  const torrents: { hash: string; size: number; amount_left: number }[] = await (await qbit('/torrents/info')).json()
   return new Map(torrents.map((t) => [t.hash.toUpperCase(), { size: t.size, sizeleft: t.amount_left }]))
+}
+
+/** Deletes torrents and their downloaded data. The library copy is a separate hardlink that Radarr/Sonarr delete. */
+export async function deleteTorrents(hashes: string[]) {
+  if (!hashes.length) return
+  await qbit('/torrents/delete', new URLSearchParams({ hashes: hashes.join('|').toLowerCase(), deleteFiles: 'true' }))
 }

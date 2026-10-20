@@ -1,4 +1,4 @@
-import { requestStatuses } from '@/lib/arr'
+import { requestDetails } from '@/lib/arr'
 import { markAvailable, waitingRequests, type RequestRow } from '@/lib/db'
 import { seasonLabel } from '@/lib/status'
 import { hookToken, safeEqual, sessionSecret } from '@/lib/token'
@@ -13,9 +13,9 @@ export async function POST(request: Request) {
   if (event.eventType !== 'Download' || !id) return new Response(null, { status: 204 })
 
   const waiting = waitingRequests(event.movie ? 'movie' : 'tv', id)
-  const statuses = await requestStatuses(waiting)
+  const details = await requestDetails(waiting)
   for (const [i, r] of waiting.entries()) {
-    if (statuses[i]?.label !== 'Available') continue
+    if (details[i].status?.label !== 'Available') continue
     markAvailable(r.id)
     await tellDiscord(r).catch((e) => console.warn(`[discord] ${e.message}`))
   }

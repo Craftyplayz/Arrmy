@@ -84,7 +84,26 @@ export const listRequests = (userId?: number) =>
     ? db().prepare(`${SELECT} ORDER BY requests.id DESC`).all()
     : db().prepare(`${SELECT} WHERE user_id = ? ORDER BY requests.id DESC`).all(userId)) as RequestRow[]
 
-export const waitingRequests = (type: MediaType, externalId: number) =>
+export const getRequest = (id: number) => db().prepare(`${SELECT} WHERE requests.id = ?`).get(id) as RequestRow | undefined
+
+export const deleteRequest = (id: number) => db().prepare('DELETE FROM requests WHERE id = ?').run(id)
+
+/** Everyone else's Requests for the same title; whatever they ask for must not be deleted. */
+export const otherRequests = (r: RequestRow) =>
+  db()
+    .prepare(`${SELECT} WHERE media_type = ? AND external_id = ? AND requests.id != ?`)
+    .all(r.media_type, r.external_id, r.id) as RequestRow[]
+
+export const seasonsOf = (r: RequestRow): number[] => JSON.parse(r.seasons ?? '[]')
+
+/** `reopen`: new seasons were added, so the Request isn't Available any more until they arrive. */
+export function setSeasons(id: number, seasons: number[], reopen: boolean) {
+  db()
+    .prepare(`UPDATE requests SET seasons = ?${reopen ? ", status = 'requested'" : ''} WHERE id = ?`)
+    .run(JSON.stringify(seasons), id)
+}
+
+export const waitingRequests =(type: MediaType, externalId: number) =>
   db()
     .prepare(`${SELECT} WHERE media_type = ? AND external_id = ? AND status = 'requested'`)
     .all(type, externalId) as RequestRow[]

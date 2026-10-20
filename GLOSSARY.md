@@ -28,6 +28,10 @@ _Avoid_: newspaper, magazine (as Media Type names)
 A Requester's ask for the smallest useful unit of a known title (a movie, chosen seasons, an album, a book, a comic series) to be added to the library. Approved the moment it is made.
 _Avoid_: order, ticket
 
+**Remove**:
+Taking back a Request. Cancels it if nothing has downloaded yet; otherwise deletes the download and the files, except what another Request still wants.
+_Avoid_: unrequest, delete request
+
 **Available**:
 A Request whose media is fully imported and can be watched in a Media Server.
 _Avoid_: done, complete, ready

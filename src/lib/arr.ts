@@ -1,5 +1,5 @@
-import type { MediaType, RequestRow } from './db'
-import { liveProgress } from './qbit'
+import { seasonsOf, type MediaType, type RequestRow } from './db'
+import { deleteTorrents, liveProgress } from './qbit'
 import { movieStatus, seriesStatus, type Movie, type QueueItem, type Season, type Series, type Status } from './status'
 
 export const MOVIES_ROOT = '/data/media/movies'
@@ -99,17 +99,54 @@ export async function search(type: MediaType, term: string): Promise<SearchResul
   )
 }
 
-/** Live status per Request, in the same order. null = no longer in Radarr/Sonarr. */
-export async function requestStatuses(requests: RequestRow[]): Promise<(Status | null)[]> {
+export type RequestDetails = { status: Status | null; seasons: number[] }
+
+/** Live status per Request (null = no longer in Radarr/Sonarr) and, for TV, every season the show has. Same order. */
+export async function requestDetails(requests: RequestRow[]): Promise<RequestDetails[]> {
   if (!requests.length) return []
   const [movieQueue, tvQueue] = await Promise.all([queueOf('radarr'), queueOf('sonarr')])
   return Promise.all(
-    requests.map(async (r) =>
-      r.media_type === 'movie'
-        ? movieStatus(await libraryMovie(r.external_id), movieQueue)
-        : seriesStatus(await librarySeries(r.external_id), tvQueue, JSON.parse(r.seasons ?? '[]')),
-    ),
+    requests.map(async (r) => {
+      if (r.media_type === 'movie') return { status: movieStatus(await libraryMovie(r.external_id), movieQueue), seasons: [] }
+      const series = await librarySeries(r.external_id)
+      return { status: seriesStatus(series, tvQueue, seasonsOf(r)), seasons: series ? seasonNumbers(series.seasons) : [] }
+    }),
   )
+}
+
+type History = { downloadId?: string; episode?: { seasonNumber: number } }
+const torrentsIn = (history: History[], only = (_: History) => true) => [
+  ...new Set(history.filter((h) => h.downloadId && only(h)).map((h) => h.downloadId!)),
+]
+
+/** Stops Radarr looking for the movie and deletes its file, torrent and downloaded data. Nothing downloaded = just cancelled. */
+export async function removeMovie(tmdbId: number) {
+  const movie = await libraryMovie(tmdbId)
+  if (!movie) return
+  const history = await arr<History[]>('radarr', `/history/movie?movieId=${movie.id}`) // read before the movie (and its history) is gone
+  await arr('radarr', `/movie/${movie.id}?deleteFiles=true&addImportExclusion=false`, 'DELETE')
+  await deleteTorrents(torrentsIn(history))
+}
+
+/** Same for some seasons of a show; when no monitored season is left, the whole show goes. */
+export async function removeSeasons(tvdbId: number, seasons: number[]) {
+  const series = await librarySeries(tvdbId)
+  if (!series || !seasons.length) return
+  const history = await arr<History[]>('sonarr', `/history/series?seriesId=${series.id}&includeEpisode=true`)
+  const torrents = torrentsIn(history, (h) => seasons.includes(h.episode?.seasonNumber ?? -1))
+  const left = seasonNumbers(series.seasons, (s) => s.monitored && !seasons.includes(s.seasonNumber))
+
+  if (!left.length) {
+    await arr('sonarr', `/series/${series.id}?deleteFiles=true&addImportListExclusion=false`, 'DELETE')
+  } else {
+    // Unmonitor before deleting, or Sonarr downloads the episodes again.
+    const unmonitor = (s: Season) => (seasons.includes(s.seasonNumber) ? { ...s, monitored: false } : s)
+    await arr('sonarr', `/series/${series.id}`, 'PUT', { ...series, seasons: series.seasons.map(unmonitor) })
+    const files = await arr<{ id: number; seasonNumber: number }[]>('sonarr', `/episodefile?seriesId=${series.id}`)
+    const ids = files.filter((f) => seasons.includes(f.seasonNumber)).map((f) => f.id)
+    if (ids.length) await arr('sonarr', '/episodefile/bulk', 'DELETE', { episodeFileIds: ids })
+  }
+  await deleteTorrents(torrents)
 }
 
 export async function addMovie(tmdbId: number): Promise<Media> {
