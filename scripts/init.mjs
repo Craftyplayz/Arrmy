@@ -43,6 +43,7 @@ if (!existsSync(conf)) {
     '[Preferences]',
     'WebUI\\Port=8080',
     'WebUI\\LocalHostAuth=false', // only gluetun shares qBittorrent's localhost; it sets the forwarded port
+    'WebUI\\HostHeaderValidation=false', // else it refuses the browser, whose port (QBIT_PORT) differs from 8080 inside Docker
     'WebUI\\Username=admin',
     `WebUI\\Password_PBKDF2="@ByteArray(${salt.toString('base64')}:${hash.toString('base64')})"`,
   ]
