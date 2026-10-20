@@ -149,9 +149,10 @@ services:
       - ${SONARR_PORT:-7658}:8989
 
   # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps
-  # listening progress and stats when the files move on the server. Pinned: upgrade deliberately.
+  # listening progress and stats when the files move on the server. Follows latest: it's public, so it
+  # needs security fixes. ABS upgrades its database on start (one-way); the nightly backup holds the old one.
   audiobookshelf:
-    image: ghcr.io/advplyr/audiobookshelf:2.21.0
+    image: ghcr.io/advplyr/audiobookshelf:latest
     restart: unless-stopped
     user: "${PUID}:${PGID}"
     environment:
