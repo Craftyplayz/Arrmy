@@ -5,6 +5,7 @@ import { allCells } from './barart'
 import { CHANNELS, type Channel } from './botrules'
 import { getSetting, setSetting } from './db'
 import { distinctLinks, type Embed } from './embeds'
+import { drawLogo, LOGO_VERSION } from './logo'
 
 const API = 'https://discord.com/api/v10'
 
@@ -173,6 +174,13 @@ export async function syncBarEmoji() {
   for (const [name, image] of allCells())
     have[name] ??= (await serial(() => discord<{ id: string }>(`/applications/${id}/emojis`, 'POST', { name, image: `data:image/png;base64,${image.toString('base64')}` }))).id
   setSetting('bot:emoji', have)
+}
+
+/** Gives the bot Arrmy's logo as its avatar, once per version of the logo: Discord allows only a few changes an hour. */
+export async function syncAvatar() {
+  if (getSetting<number>('bot:avatar') === LOGO_VERSION) return
+  await discord('/users/@me', 'PATCH', { avatar: `data:image/png;base64,${drawLogo().toString('base64')}` })
+  setSetting('bot:avatar', LOGO_VERSION)
 }
 
 /** The bar's emoji ids by name; empty until syncBarEmoji has run, and the bar falls back to text. */

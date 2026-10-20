@@ -62,7 +62,7 @@ body {
     max-width: 1280px; height: var(--header-h); margin: 0 auto; padding: 0 16px;
 }
 .site-header .sh-brand {
-    display: flex; align-items: center; flex: none; margin: 0 10px 0 0;
+    display: flex; align-items: center; gap: 8px; flex: none; margin: 0 10px 0 0;
     color: var(--text); font-size: 17px; font-weight: 700; text-decoration: none;
 }
 

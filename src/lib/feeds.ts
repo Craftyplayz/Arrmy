@@ -9,7 +9,7 @@ import { abs, ABS_URL, ll } from './books'
 import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, size } from './botrules'
 import { COMMANDS } from './commands'
 import { getSetting, setSetting } from './db'
-import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncBarEmoji } from './discord'
+import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncAvatar, syncBarEmoji } from './discord'
 import { COLOUR, downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
 import { bookArt, downloadMeta, plexArt } from './media'
 import { plex, PLEX_URL } from './plex'
@@ -593,6 +593,7 @@ export function startBot() {
   if (!botEnabled()) return
   registerCommands(COMMANDS).catch((e) => console.warn(`[bot] slash commands: ${e.message}`))
   syncBarEmoji().catch((e) => console.warn(`[bot] progress bar emoji: ${e.message}`))
+  syncAvatar().catch((e) => console.warn(`[bot] avatar: ${e.message}`))
   arrmyRunning()
   every(5 / 60, 'downloads', downloads)
   every(1, 'apps', apps)

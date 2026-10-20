@@ -30,6 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <header className="site-header">
             <div className="sh-inner">
               <Link href="/" className="sh-brand">
+                <img src="/icon.svg" alt="" width={24} height={24} />
                 Arrmy
               </Link>
               <Nav links={NAV.filter(([, , adminOnly]) => !adminOnly || user.is_admin).map(([href, label]) => [href, label])} />
