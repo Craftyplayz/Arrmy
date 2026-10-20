@@ -49,6 +49,14 @@ function db() {
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL                    -- JSON
       );
+      CREATE TABLE IF NOT EXISTS dead_releases (
+        hash TEXT PRIMARY KEY,                 -- qBittorrent torrent hash, lowercase
+        item TEXT NOT NULL,                    -- radarr:<movieId>, sonarr:<seriesId>:<season> or book:<BookID>
+        title TEXT NOT NULL,
+        kept INTEGER NOT NULL DEFAULT 0,       -- 1 = the strike that made it a Problem, so it was left in qBittorrent
+        search_pending INTEGER NOT NULL DEFAULT 0, -- audiobooks: LazyLibrarian still has to search for another release
+        at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
     `)
     // Before 1.1.0 media_type only allowed movie and tv. SQLite can't change a CHECK, so rebuild the table once.
     const { sql } = conn.prepare("SELECT sql FROM sqlite_master WHERE name = 'requests'").get() as { sql: string }
@@ -148,3 +156,25 @@ export const markAvailable = (id: number) => db().prepare(`UPDATE requests SET s
 /** Every Request of one Media Type still waiting to become Available. */
 export const waitingOfType = (type: MediaType) =>
   db().prepare(`${SELECT} WHERE media_type = ? AND status = 'requested'`).all(type) as RequestRow[]
+
+/** A torrent that never started (see deadReason). */
+export type DeadRelease = { hash: string; item: string; title: string; kept: number; search_pending: number; at: string }
+
+export function addDeadRelease(d: { hash: string; item: string; title: string; kept: boolean; searchPending: boolean }) {
+  db()
+    .prepare('INSERT OR IGNORE INTO dead_releases (hash, item, title, kept, search_pending) VALUES (?, ?, ?, ?, ?)')
+    .run(d.hash, d.item, d.title, d.kept ? 1 : 0, d.searchPending ? 1 : 0)
+}
+
+export const isDeadRelease = (hash: string) => !!db().prepare('SELECT 1 FROM dead_releases WHERE hash = ?').get(hash)
+
+/** Dead releases for one title in the last week, so a later Request for it starts with a clean slate. */
+export const deadReleaseCount = (item: string) =>
+  (db().prepare("SELECT count(*) AS n FROM dead_releases WHERE item = ? AND at > datetime('now', '-7 days')").get(item) as { n: number }).n
+
+export const keptDeadReleases = () => db().prepare('SELECT * FROM dead_releases WHERE kept = 1').all() as DeadRelease[]
+
+export const pendingBookSearches = () => db().prepare('SELECT * FROM dead_releases WHERE search_pending = 1').all() as DeadRelease[]
+
+export const setSearchPending = (hash: string, pending: boolean) =>
+  db().prepare('UPDATE dead_releases SET search_pending = ? WHERE hash = ?').run(pending ? 1 : 0, hash)

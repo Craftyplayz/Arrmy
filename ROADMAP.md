@@ -29,8 +29,8 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 |---|---|---|
 | Search | The Audiobooks tab searches OpenLibrary directly, in about a second. With an Audiobookshelf API key, books already in Audiobookshelf show as Available. | Unit, Fake, Live |
 | Request | LazyLibrarian adds the book, searches the indexers through Prowlarr and sends the best release to qBittorrent. | Fake, Live |
-| Status | Requested → Downloading % → Available. Arrmy checks LazyLibrarian every 2 minutes. | Unit, Fake, Live up to Downloading |
-| Filing | Every 10 minutes LazyLibrarian copies finished downloads to `media/audiobooks/Author/Title` (the torrent keeps seeding). Audiobookshelf picks the book up, and Discord gets a message. | Fake. **Not yet live.** |
+| Status | Requested → Downloading % → Available. Arrmy checks LazyLibrarian every 2 minutes. | Unit, Fake, Live |
+| Filing | Every 10 minutes LazyLibrarian copies finished downloads to `media/audiobooks/Author/Title` (the torrent keeps seeding). Audiobookshelf picks the book up, and Discord gets a message. | Fake, Live (Dune, 2026-10-20). **Not yet live:** the Discord message. |
 | Remove | Cancels the Request, or deletes the torrent. Once the book is in Audiobookshelf, deletes that copy too, but only one added after the Request was made, so books you already had are never touched. | Unit (the matching rule), Fake, Live during a download. **Not yet live:** after it's in Audiobookshelf. |
 | Existing library | The Audiobookshelf already in use moved into the stack with all its books, users, progress and stats. | Live |
 
@@ -40,6 +40,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 |---|---|---|
 | Admin view | Problems (Missing, Failed Download, Failed Import) with one-click fixes: search again, or blocklist the release and try another. Also what's downloading, speeds, library counts, disk space and Requests by person. | Unit (the Problem rules), Fake, Live (the page). **Not yet live:** a real Problem and its fix. |
 | Settings | Size limits (see Movies and TV). | Fake |
+| Dead releases | A torrent with no file list 5 minutes after it was added, or nothing downloaded after 15, is swapped for another release: Radarr and Sonarr blocklist it and search again; for audiobooks Arrmy deletes it, has LazyLibrarian mark it Failed, then searches again (about 2 minutes). After 3 dead releases in a row for the same title, the third is left alone, it shows as a Failed Download Problem, and Discord @mentions the Admin (`DISCORD_ADMIN_ID`). Torrents in other qBittorrent categories, and paused ones, are never touched. | Unit (the rule), Fake. **Not yet live.** |
 
 ### Stack and deployment
 
@@ -52,7 +53,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Bulk indexers | `scripts/add-indexers.mjs` adds every public English indexer that passes Prowlarr's test. | Live (25 indexers) |
 | Configurable ports | Every port is a variable. Defaults: 7654–7659, Plex 32400, Audiobookshelf 13378. | Live |
 | VPN | PIA with port forwarding. qBittorrent only connects through the VPN; Prowlarr and FlareSolverr reach indexers through it. | Live |
-| Seeding | Every torrent seeds, not just a few at a time. | Live (the setting). **Not yet seen:** a finished torrent seeding. |
+| Seeding | Every torrent seeds, not just a few at a time. | Live (Dune seeds after filing) |
 | Config backups | Every app's settings copied nightly and kept for a week (restore steps in the README). | Live (a backup ran and includes Audiobookshelf's database). **Never tried:** a restore. |
 | Cloudflare Tunnel | Public addresses for Arrmy and the apps. | Live |
 | Media files on your PC | Through the server's own Samba share, so the stack doesn't run one. | Not part of Arrmy |
@@ -63,7 +64,7 @@ Finish testing on the server, then publish v1.1.0.
 
 Audiobooks:
 
-1. An audiobook goes all the way into Audiobookshelf and shows Available.
+1. ~~An audiobook goes all the way into Audiobookshelf and shows Available.~~ Done: Dune, 2026-10-20.
 2. Remove an audiobook that's already in Audiobookshelf.
 
 Movies and TV:
@@ -76,10 +77,99 @@ Everyone:
 
 6. A Discord message arrives (set `DISCORD_WEBHOOK_URL` first).
 7. A Requester signs in.
+8. A dead release is swapped by itself, and a third in a row becomes a Problem and @mentions you (set `DISCORD_ADMIN_ID` first).
 
 Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since the stack's Samba was dropped, and can be deleted.
 
 ## Later
+
+### Request Log
+
+A full log for each Request, from the moment it's made to the moment it can be played in Plex or Audiobookshelf. Choices settled on 2026-10-20.
+
+What it shows:
+
+- Who requested it, and every step with its start time, end time and how long it took. The step running now has a ticking timer. At the end, the total from Request to playable.
+- Every release the indexers returned, with its score, size and seeders, and for the ones not picked, why (over the Size Limit, wrong quality and so on). Which indexers answered, how fast, and which errored or timed out.
+- The release that was grabbed, with a link to download its .torrent file.
+- The download: speed, seeders and peers along the way, and the average speed at the end.
+- Where the file ended up: size, quality, video codec, audio languages, subtitles.
+- Anything that went wrong and what was done about it, whether by Arrmy, Radarr or Sonarr, or a person (who clicked, and when). Edits and removals too.
+- A Copy log button that copies the whole log as plain text.
+
+Rules:
+
+- The Admin sees everything. Requesters see their own Request's steps and times, without the releases, .torrent links or error details.
+- Refused Requests (over the Size Limit) get a log too, with the estimate.
+- Auto-fix: a download that fails, or stalls for too long, is blocklisted and the next-best release from the list is grabbed, with each step logged. After a few tries it becomes a Problem on the Admin page instead.
+- Discord gets a message when something fails or is auto-fixed, not just when it's Available.
+- The log ends when the item shows in Plex or Audiobookshelf, not when Arrmy marks it Available.
+
+How:
+
+- Arrmy runs the search itself: it asks Radarr or Sonarr for every release (`GET /release`), logs them all, then grabs the top one (`POST /release`). That's the same pick Radarr or Sonarr would make, from a single search. Movies and shows are added with their own automatic search turned off.
+- The webhook Radarr and Sonarr call also sends Grab events (the release and its download id), not just imports.
+- qBittorrent: speeds and seeders come from what Arrmy already reads every 5 seconds. The .torrent comes from `/torrents/export` and is saved to the config folder when the download starts, so the link still works after the torrent is deleted.
+- Indexer health from Prowlarr's history of the search; file details from Radarr's and Sonarr's media info.
+- After the import, Arrmy checks Plex (or Audiobookshelf) until the item appears.
+- A new table in Arrmy's database holds the steps.
+
+Audiobooks come second. LazyLibrarian has no webhook and doesn't share its candidates or scores through its API, so their log covers the steps, the grabbed release and its .torrent, with LazyLibrarian checked every 30 seconds while a book is downloading. The candidate list comes later, if LazyLibrarian's own log can be read.
+
+How long counts as stalled and how many tries before a Problem were settled and built on 2026-10-20: see Dead releases under Done. The Request Log takes that over and logs each step.
+
+To decide: for TV, how Arrmy picks between a season pack and single episodes the way Sonarr does now.
+
+### Admin: what's stuck and why
+
+A list on the Admin page of every Request that hasn't started downloading or has stopped, saying where it stopped and why. Asked for on 2026-10-20.
+
+Where a Request can stop, and what the list says:
+
+- **Not searched yet, or still searching.** How long ago the search started.
+- **Not released yet.** The movie is only in cinemas, or the episode hasn't aired. Shows the release or air date.
+- **Nothing found.** No indexer had it, or every release was rejected, and why (over the Size Limit, wrong quality and so on).
+- **Indexer error.** Which indexer failed and its full error (blocked by Cloudflare, timed out, rate-limited, or disabled by Prowlarr until a set time).
+- **In qBittorrent but not downloading.** Fetching metadata, queued behind other downloads, stalled (how far it got, seeders seen, when it last moved), stopped, or in an error state. If qBittorrent has no connection at all (the VPN is down), that shows once at the top, not on every item.
+
+Each entry links to its Request Log and keeps the one-click fixes the Admin view already has (search again, or blocklist the release and grab another).
+
+How:
+
+- qBittorrent's torrent state (`metaDL`, `queuedDL`, `stalledDL`, `stoppedDL`, `error`) and last activity come from the read Arrmy already does every 5 seconds; its connection status from `/transfer/info`.
+- Indexer errors from Prowlarr's indexer status and search history.
+- "Every release was rejected, and why" needs Arrmy to run the search itself (see Request Log). Everything else works without it, so this doesn't have to wait for the Request Log.
+- Audiobooks too: LazyLibrarian's wanted list shows what it hasn't found, and qBittorrent's states work the same. This replaces the separate Audiobook Problems item.
+
+### Discord bot
+
+A bot that runs in the stack and posts everything that happens, each topic in its own channel. It's read-only: it never changes anything, and its update notices link to an Admin-only button in Arrmy instead. Every message links to the app it's about at its public address (`arrmy`, `radarr`, `sonarr`, `prowlarr`, `qbit`, `plex`, `books` `.craftyplayz.com`). Choices settled on 2026-10-20.
+
+Channels, in an Arrmy category the bot creates:
+
+- **#requests**: new Requests, edits and removals, with who did it; Requests refused for the Size Limit, with the estimate; Available.
+- **#downloads**: one live message per download, edited every 30 seconds or so with a progress bar, speed, seeders and time left, then marked done.
+- **#problems**: every new Problem (Failed Download, Failed Import, Missing, dead releases) and every auto-fix. The Request Log's Discord messages land here.
+- **#admin-log**: Arrmy's settings and Admin actions (what changed, who did it). Settings changed inside Radarr, Sonarr, Prowlarr, qBittorrent and LazyLibrarian, found by comparing them every few minutes, so without who. People given or losing access to Plex or Audiobookshelf.
+- **#system**: an app down or restarting, the VPN down or its forwarded port changing, an indexer failing, disk space low, the nightly backup (its size, or that it failed).
+- **#updates**: Arrmy commits on GitHub, new Arrmy releases, and when the server starts running one. New releases of every other app in the stack, from their GitHub release pages, with a link to an Admin-only **Update** button in Arrmy that pulls the new image and restarts that app through Portainer.
+- **#activity**: someone signs in to Arrmy, or starts watching in Plex or listening in Audiobookshelf (one message per session, with the device).
+
+It @mentions the Admin for: any new Problem, an app update, an app or the VPN going down, disk space low, a failed backup.
+
+Slash commands, answers only: `/status` (apps, VPN, disks), `/queue` (downloading now), `/requests [person]`, `/problems`, `/search` (is it in the library?).
+
+Not wanted: a daily or weekly digest, and messages to Requesters (they keep checking status in Arrmy).
+
+How:
+
+- A separate service in the stack, running from the Arrmy image, with a Discord bot token and server id in the stack's settings. It replaces `DISCORD_WEBHOOK_URL` once it runs.
+- Arrmy records an event for everything it does (Requests, edits, Admin actions, Problems, auto-fixes) in its database, and the bot posts them. Radarr and Sonarr events come from the webhook Arrmy already gets; download progress from the qBittorrent read Arrmy already does every 5 seconds.
+- App versions from each app's own API, compared with the latest release on its GitHub page every few hours. Arrmy commits from GitHub's API for the public repo.
+- Plex sessions from Plex's `/status/sessions`, Audiobookshelf's from its sessions API. Plex and Audiobookshelf users compared every few minutes.
+- Public addresses: one setting per app. LazyLibrarian has no public address yet, so it needs a tunnel route first (e.g. `lazylibrarian.craftyplayz.com`).
+
+To decide before building: the Update button means Arrmy holds a Portainer API token, so whoever is the Admin in Arrmy can redeploy apps. Where that token lives, and whether it's limited to the Arrmy stack. Also the disk-space threshold (10% free suggested).
 
 ### Series and Author Requests
 
@@ -94,7 +184,6 @@ Both change the rule that a Request is the smallest useful unit (one book), so t
 
 ### Other planned
 
-- **Audiobook Problems** in the Admin view (wanted but never found), like Missing for movies.
 - **More Media Types.** Music (Lidarr → Plex); Books and Periodicals (LazyLibrarian → Kavita); Comics (Kapowarr → Kavita); Manga (Mangarr → Kavita).
 - **Better Movies + TV.** Anime routed to anime-tuned Radarr and Sonarr, Recyclarr quality profiles, Bazarr subtitles.
 - **YouTube channels** (TubeArchivist), once its Plex plugin is confirmed to work.

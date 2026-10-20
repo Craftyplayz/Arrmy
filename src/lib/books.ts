@@ -181,6 +181,44 @@ export async function removeAudiobook(r: RequestRow): Promise<string | undefined
   await abs(`/items/${item.id}?hard=1`, 'DELETE')
 }
 
+/** LazyLibrarian's audiobook downloads: BookID per torrent hash (lowercase). */
+export async function audiobookDownloads() {
+  const snatched = await ll<Download[]>('getSnatched')
+  return new Map(snatched.filter((s) => s.AuxInfo === 'AudioBook' && s.DownloadID).map((s) => [s.DownloadID!.toLowerCase(), s.BookID]))
+}
+
+// Runs LazyLibrarian's postprocessor now instead of at its next scheduled run. It can take a while when a finished
+// download is being copied, and the scheduled run does the same job anyway, so a timeout is fine.
+const processNow = () => ll('forceProcess', {}, 120).catch((e) => console.warn(`[books] ${(e as Error).message}`))
+
+/**
+ * Drops an audiobook release that never started. LazyLibrarian has no command for "this release failed", so the
+ * torrent is deleted and its postprocessor run: the first run marks the release Aborted, the next marks it Failed
+ * (never grabbed again) and wants the book again. searchDroppedBooks then searches for another release.
+ */
+export async function dropAudiobookRelease(hash: string) {
+  await deleteTorrents([hash])
+  await processNow()
+}
+
+/**
+ * Searches for another release of each book whose dead one was dropped, once LazyLibrarian wants the book again.
+ * Returns the hashes that are done waiting: searched, grabbed something else already, or no longer wanted.
+ */
+export async function searchDroppedBooks(dropped: { hash: string; bookId: string }[]) {
+  const [books, downloads] = await Promise.all([ll<LLBook[]>('getAllBooks'), audiobookDownloads()])
+  const status = (id: string) => {
+    const b = books.find((x) => x.BookID === id)
+    return b?.AudioStatus ?? b?.audiostatus
+  }
+  const grabbedOther = (d: (typeof dropped)[0]) => [...downloads].some(([hash, id]) => id === d.bookId && hash !== d.hash)
+  const waiting = dropped.filter((d) => status(d.bookId) === 'Snatched' && !grabbedOther(d))
+  if (waiting.length) await processNow() // moves the release on from Aborted to Failed
+  for (const d of dropped.filter((d) => status(d.bookId) === 'Wanted'))
+    await ll('searchBook', { id: d.bookId, type: 'AudioBook' })
+  return dropped.filter((d) => !waiting.includes(d)).map((d) => d.hash)
+}
+
 /** LazyLibrarian has no webhook, so audiobook Requests are checked every 2 minutes for becoming Available. */
 export function startAudiobookWatch() {
   setInterval(async () => {

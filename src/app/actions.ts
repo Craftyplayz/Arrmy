@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons } from '@/lib/arr'
-import { addAudiobook, removeAudiobook } from '@/lib/books'
+import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, retryRelease } from '@/lib/arr'
+import { addAudiobook, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
 import {
   addRequest,
   deleteRequest,
@@ -13,6 +13,7 @@ import {
   otherRequests,
   requestsFor,
   seasonsOf,
+  setSearchPending,
   setSeasons,
   setSetting,
   type Limits,
@@ -34,11 +35,18 @@ export async function fixProblem(form: FormData) {
   const user = await requireUser()
   if (!user.is_admin) throw new Error('Only the Admin can fix Problems')
   const service = form.get('service')
+  if (service === 'lazylibrarian' && form.get('fix') === 'retry') {
+    // An audiobook's dead release (see dead.ts): drop it, and search again once LazyLibrarian has marked it Failed.
+    const hash = String(form.get('hash'))
+    if (!/^[a-f0-9]{40}$/.test(hash)) throw new Error(`Bad torrent hash: ${hash}`)
+    await dropAudiobookRelease(hash)
+    setSearchPending(hash, true)
+    return revalidatePath('/admin')
+  }
   if (service !== 'radarr' && service !== 'sonarr') throw new Error(`Unknown service: ${service}`)
   const ids = form.getAll('id').map(positiveInt)
   if (form.get('fix') === 'retry') {
-    // Blocklist the release so it's never grabbed again, remove it from qBittorrent, and look for another.
-    await arr(service, '/queue/bulk?removeFromClient=true&blocklist=true&skipRedownload=false', 'DELETE', { ids })
+    await retryRelease(service, ids)
   } else if (form.get('fix') === 'search') {
     const command = service === 'radarr' ? { name: 'MoviesSearch', movieIds: ids } : { name: 'EpisodeSearch', episodeIds: ids }
     await arr(service, '/command', 'POST', command)

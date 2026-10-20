@@ -1,13 +1,25 @@
 // The Admin view: Problems with one-click fixes, what's downloading, and library and disk stats.
-import { arr, queueOf } from './arr'
-import { byDownload, missingProblems, nameOf, queueProblem, type Download, type MissingEpisode, type MissingMovie } from './problems'
-import { transferSpeeds } from './qbit'
+import { arr, queueOf, type QueueRecord } from './arr'
+import { keptDeadReleases } from './db'
+import {
+  byDownload,
+  DEAD_DETAIL,
+  missingProblems,
+  nameOf,
+  queueProblem,
+  type Download,
+  type MissingEpisode,
+  type MissingMovie,
+  type Problem,
+  type Service,
+} from './problems'
+import { liveProgress, transferSpeeds } from './qbit'
 
 export type { Problem } from './problems'
 
 // shortcut: reads whole libraries and queues each time; fine for a family server, page them past a few thousand titles.
 export async function adminOverview() {
-  const [movieQueue, tvQueue, missingMovies, missingEpisodes, movies, series, disks, speeds] = await Promise.all([
+  const [movieQueue, tvQueue, missingMovies, missingEpisodes, movies, series, disks, speeds, live] = await Promise.all([
     queueOf('radarr'),
     queueOf('sonarr'),
     arr<{ records: MissingMovie[] }>('radarr', '/wanted/missing?pageSize=500&monitored=true'),
@@ -16,14 +28,24 @@ export async function adminOverview() {
     arr<{ statistics?: { episodeFileCount: number; sizeOnDisk: number } }[]>('sonarr', '/series'),
     arr<{ path: string; freeSpace: number; totalSpace: number }[]>('radarr', '/diskspace'),
     transferSpeeds().catch(() => undefined), // qBittorrent down: no speeds, everything else still shows
+    liveProgress().catch(() => new Map<string, unknown>()),
   ])
 
+  // The last of STRIKES dead releases in a row (see dead.ts), while it's still in qBittorrent.
+  const dead = keptDeadReleases().filter((d) => live.has(d.hash.toUpperCase()))
+  const deadProblem = (service: Service, g: QueueRecord[]): Problem | undefined =>
+    dead.some((d) => d.hash === g[0].downloadId?.toLowerCase())
+      ? { kind: 'Failed Download', service, title: nameOf(g[0]), detail: DEAD_DETAIL, fix: 'retry', ids: g.map((r) => r.id) }
+      : undefined
   const groups = [
     ...byDownload(movieQueue).map((g) => ({ service: 'radarr' as const, g })),
     ...byDownload(tvQueue).map((g) => ({ service: 'sonarr' as const, g })),
-  ].map((d) => ({ ...d, problem: queueProblem(d.service, d.g) }))
-  const problems = [
+  ].map((d) => ({ ...d, problem: deadProblem(d.service, d.g) ?? queueProblem(d.service, d.g) }))
+  const problems: Problem[] = [
     ...groups.flatMap((d) => (d.problem ? [d.problem] : [])),
+    ...dead
+      .filter((d) => d.item.startsWith('book:'))
+      .map((d): Problem => ({ kind: 'Failed Download', service: 'lazylibrarian', title: d.title, detail: DEAD_DETAIL, fix: 'retry', ids: [], hash: d.hash })),
     ...missingProblems(missingMovies.records, missingEpisodes.records, movieQueue, tvQueue),
   ]
   const downloads: Download[] = groups

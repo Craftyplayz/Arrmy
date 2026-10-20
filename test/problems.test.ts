@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { byDownload, missingProblems, queueProblem } from '../src/lib/problems.ts'
+import { byDownload, deadReason, missingProblems, queueProblem } from '../src/lib/problems.ts'
 
 const ago = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString()
 const record = (over: object) => ({ id: 1, title: 'Release.1080p', size: 100, sizeleft: 50, ...over })
@@ -28,6 +28,22 @@ test('queue states become the right Problem, with every queue id of the download
   assert.equal(queueProblem('radarr', [record({ trackedDownloadStatus: 'warning', trackedDownloadState: 'importPending' })])?.kind, 'Failed Import')
   assert.equal(queueProblem('radarr', [record({ trackedDownloadStatus: 'ok', trackedDownloadState: 'importPending' })]), undefined, 'importing normally')
   assert.equal(queueProblem('radarr', [record({ trackedDownloadState: 'failedPending' })])?.kind, 'Failed Download')
+})
+
+test('dead releases: no file list after 5 minutes, or nothing downloaded after 15', () => {
+  const now = Date.now()
+  const torrent = (state: string, minutes: number, downloaded = 0) => ({
+    hash: 'a', name: 'x', category: 'movies', state, downloaded, added_on: (now - minutes * 60_000) / 1000,
+  })
+  assert.equal(deadReason(torrent('metaDL', 4), now), undefined, 'still fetching its file list')
+  assert.equal(deadReason(torrent('metaDL', 6), now), 'No file list after 5 minutes')
+  assert.equal(deadReason(torrent('forcedMetaDL', 6), now), 'No file list after 5 minutes')
+  assert.equal(deadReason(torrent('stalledDL', 14), now), undefined)
+  assert.equal(deadReason(torrent('stalledDL', 16), now), 'Nothing downloaded after 15 minutes')
+  assert.equal(deadReason(torrent('downloading', 16), now), 'Nothing downloaded after 15 minutes', 'connected, but nothing arrives')
+  assert.equal(deadReason(torrent('stalledDL', 60, 1), now), undefined, 'slow but alive')
+  assert.equal(deadReason(torrent('stoppedDL', 60), now), undefined, 'paused by hand')
+  assert.equal(deadReason(torrent('queuedDL', 60), now), undefined)
 })
 
 test('Missing skips fresh Requests, unreleased titles and anything downloading', () => {

@@ -75,7 +75,7 @@ export default async function AdminPage() {
           </h2>
           <div className="rows">
             {problems.map((p) => (
-              <ProblemRow key={`${p.service}-${p.kind}-${p.ids.join('-')}`} p={p} />
+              <ProblemRow key={`${p.service}-${p.kind}-${p.hash ?? p.ids.join('-')}`} p={p} />
             ))}
           </div>
         </>
@@ -148,6 +148,7 @@ function ProblemRow({ p }: { p: Problem }) {
         {p.ids.map((id) => (
           <input key={id} type="hidden" name="id" value={id} />
         ))}
+        {p.hash && <input type="hidden" name="hash" value={p.hash} />}
         <SubmitButton className="btn small" pending="Working...">
           {p.fix === 'retry' ? 'Try another release' : 'Search again'}
         </SubmitButton>

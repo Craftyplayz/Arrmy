@@ -8,7 +8,7 @@ Vocabulary is in [GLOSSARY.md](GLOSSARY.md). The reasons behind the design are i
 
 Needs a Linux box running Docker and Portainer. GitHub builds the Arrmy image on every push to `main` (`ghcr.io/craftyplayz/arrmy`), so the box never builds anything.
 
-1. Fill in a copy of [.env.example](.env.example). Generate the five secrets with the one-liner at the top of the file, then set `PUID`/`PGID` (run `id` on the box), `TZ`, the VPN values, `CLOUDFLARE_TUNNEL_TOKEN`, and optionally `DISCORD_WEBHOOK_URL`.
+1. Fill in a copy of [.env.example](.env.example). Generate the five secrets with the one-liner at the top of the file, then set `PUID`/`PGID` (run `id` on the box), `TZ`, the VPN values, `CLOUDFLARE_TUNNEL_TOKEN`, and optionally `DISCORD_WEBHOOK_URL` and `DISCORD_ADMIN_ID`.
 2. In Portainer: **Stacks → Add stack**, name it `arrmy`, choose **Repository**.
    - Repository URL: `https://github.com/Craftyplayz/Arrmy`
    - Repository reference: `refs/heads/main`

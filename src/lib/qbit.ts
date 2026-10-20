@@ -1,4 +1,5 @@
 // Talks to qBittorrent directly: live progress (Radarr and Sonarr only refresh theirs once a minute) and deleting torrents.
+import type { Torrent } from './problems'
 
 const QBIT_URL = process.env.QBIT_URL ?? 'http://gluetun:8080'
 let sid: string | undefined
@@ -29,6 +30,8 @@ async function qbit(path: string, body?: URLSearchParams, retry = true): Promise
   if (!res.ok) throw new Error(`qBittorrent ${path} → ${res.status}`)
   return res
 }
+
+export const torrents = async (): Promise<Torrent[]> => (await qbit('/torrents/info')).json()
 
 /** Size and bytes left per torrent hash (uppercase, as Radarr/Sonarr store it in downloadId). */
 export async function liveProgress(): Promise<Map<string, { size: number; sizeleft: number }>> {

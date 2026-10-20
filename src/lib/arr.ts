@@ -107,6 +107,10 @@ export async function queueOf(name: 'radarr' | 'sonarr'): Promise<QueueRecord[]>
   ])
   return queue.records.map((r) => ({ ...r, ...live.get(r.downloadId?.toUpperCase() ?? '') }))
 }
+
+/** Blocklists a release so it's never grabbed again, removes it from qBittorrent, and has the Service look for another. */
+export const retryRelease = (name: 'radarr' | 'sonarr', queueIds: number[]) =>
+  arr(name, '/queue/bulk?removeFromClient=true&blocklist=true&skipRedownload=false', 'DELETE', { ids: queueIds })
 const seasonNumbers = (seasons: Season[], only = (_: Season) => true) =>
   seasons.filter((s) => s.seasonNumber > 0 && only(s)).map((s) => s.seasonNumber)
 

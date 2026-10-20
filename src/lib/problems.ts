@@ -4,13 +4,33 @@ import type { QueueRecord } from './arr'
 export type Service = 'radarr' | 'sonarr'
 export type Problem = {
   kind: 'Missing' | 'Failed Download' | 'Failed Import'
-  service: Service
+  service: Service | 'lazylibrarian'
   title: string
   detail: string
   /** retry = blocklist this release and grab another; search = look for a release again. */
   fix: 'retry' | 'search'
   /** Queue ids for retry; movie or episode ids for search. */
   ids: number[]
+  /** The torrent, for an audiobook's retry. */
+  hash?: string
+}
+
+/** A torrent as qBittorrent's /torrents/info lists it. */
+export type Torrent = { hash: string; name: string; category: string; state: string; added_on: number; downloaded: number }
+
+/** Dead releases in a row for one title before Arrmy stops swapping them and makes it a Problem. */
+export const STRIKES = 3
+export const DEAD_DETAIL = `${STRIKES} releases in a row never started: nobody is sharing them.`
+
+/**
+ * Why a torrent counts as dead, or undefined if it doesn't: no file list (metadata) after 5 minutes, or nothing
+ * downloaded 15 minutes after it was added. Stopped, queued and checking torrents never count.
+ */
+export function deadReason(t: Torrent, now = Date.now()) {
+  const minutes = (now - t.added_on * 1000) / 60_000
+  if (t.state === 'metaDL' || t.state === 'forcedMetaDL') return minutes > 5 ? 'No file list after 5 minutes' : undefined
+  if (['stalledDL', 'downloading', 'forcedDL'].includes(t.state) && t.downloaded === 0 && minutes > 15)
+    return 'Nothing downloaded after 15 minutes'
 }
 export type Download = { title: string; size: number; sizeleft: number }
 
