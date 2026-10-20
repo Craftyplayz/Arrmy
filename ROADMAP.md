@@ -104,6 +104,24 @@ Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since t
 
 ## Later
 
+### Downloads overhaul
+
+The Admin page's Downloading list, rebuilt on live numbers from qBittorrent. Asked for on 2026-10-20.
+
+Today each row is the title, a bar and "x% of size", taken from Radarr's and Sonarr's queue, which lags behind qBittorrent; only the total speeds come from qBittorrent itself.
+
+What each row shows:
+
+- The title (movie, show and season, or book) with its poster, and who requested it.
+- Live progress, download speed and time left (ETA), read straight from qBittorrent and updated every few seconds without reloading the page.
+- Seeders and peers, and the state in words: Downloading, Stalled, Fetching file list, Queued, Paused, Checking.
+- Audiobooks too, not just movies and TV.
+
+How:
+
+- qBittorrent's `/torrents/info` (`dlspeed`, `eta`, `progress`, `num_seeds`, `state`), which Arrmy already reads every 5 seconds for Discord's #downloads cards. Torrents are matched to Requests by their hash (Radarr's and Sonarr's `downloadId`, LazyLibrarian's snatched list).
+- The page polls a small JSON route instead of reloading the whole page, so the bars move smoothly.
+
 ### Request Log
 
 A full log for each Request, from the moment it's made to the moment it can be played in Plex or Audiobookshelf. Choices settled on 2026-10-20.
