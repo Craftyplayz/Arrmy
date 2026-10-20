@@ -81,6 +81,7 @@ const repostable = (e: Embed): Embed => ({
  * down) move to #downloaded if they're Done cards, and go either way.
  */
 let tidied = false
+const looked = new Set<string>() // torrents whose details were looked up since this start
 async function tidyDownloads(tracked: Tracked) {
   tidied = true
   const live = new Set(Object.values(tracked).map((s) => s.id))
@@ -97,8 +98,9 @@ async function downloads() {
   const tracked = getSetting<Tracked>('bot:downloads') ?? {}
   const saved = JSON.stringify(tracked)
   const now = Date.now()
-  // What each new torrent is for (poster, title, who asked), looked up at most every 30 seconds until it's known.
-  const unknown = list.filter((t) => t.progress < 1 && !tracked[t.hash.toLowerCase()]?.meta && now - (tracked[t.hash.toLowerCase()]?.tried ?? 0) > 30_000)
+  // What each torrent is for (poster, title, who asked), looked up at most every 30 seconds until it's known, and once
+  // more after each start, so cards made by an older Arrmy get what this one knows.
+  const unknown = list.filter((t) => t.progress < 1 && !looked.has(t.hash.toLowerCase()) && now - (tracked[t.hash.toLowerCase()]?.tried ?? 0) > 30_000)
   const metas = unknown.length ? await downloadMeta(unknown).catch(() => new Map<string, DownloadMeta>()) : new Map<string, DownloadMeta>()
   const emoji = barEmoji()
 
@@ -110,8 +112,10 @@ async function downloads() {
     s.name ??= t.name // tracked by 1.1.0-rc.10, before cards
     s.started ??= now
     s.edited ??= 0
-    if (metas.has(hash)) s.meta = metas.get(hash)
-    else if (unknown.includes(t)) s.tried = now
+    if (metas.has(hash)) {
+      s.meta = metas.get(hash)
+      looked.add(hash)
+    } else if (unknown.includes(t)) s.tried = now
     const card = downloadEmbed(t, s.meta, emoji, s.started)
     const { timestamp: _, ...rest } = card
     const sig = JSON.stringify(rest)

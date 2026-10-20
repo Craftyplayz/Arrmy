@@ -1,8 +1,8 @@
 // Art and links for the Discord bot's cards: what a torrent is for, the poster of something playing in Plex, a book's
 // cover. Posters come from Radarr and Sonarr (TMDB/TVDB images) and OpenLibrary, so Discord can show them.
 import { arr, posterOf, queueOf, type Media } from './arr'
-import { coverUrl, fromOpenLibrary } from './bookrules'
-import { audiobookTorrents, openLibrary } from './books'
+import { coverUrl, fromOpenLibrary, type LLBook } from './bookrules'
+import { audiobookTorrents, ll, openLibrary } from './books'
 import { requestsFor } from './db'
 import { publicUrl } from './discord'
 import { mediaUrl, type DownloadMeta } from './embeds'
@@ -41,13 +41,17 @@ export async function downloadMeta(list: Torrent[]) {
       by: s.tvdbId ? requestsFor('tv', s.tvdbId).map((x) => x.username) : [],
     })
   }
+  // Books wanted in LazyLibrarian itself, not through Arrmy, have no Request: their title and cover come from it instead.
+  const unrequested = [...books.values()].some((book) => !requestsFor('audiobook', book).length)
+  const library = unrequested ? await ll<LLBook[]>('getAllBooks').catch(() => []) : []
   for (const [hash, book] of books) {
     const requests = requestsFor('audiobook', book)
+    const known = library.find((b) => b.BookID === book)
     metas.set(hash, {
       app: 'LazyLibrarian',
-      title: requests[0]?.title ?? book,
+      title: requests[0]?.title ?? known?.BookName ?? book,
       url: mediaUrl('audiobook', book),
-      art: requests[0]?.poster ?? coverUrl(undefined, book),
+      art: requests[0]?.poster ?? coverUrl(known?.BookImg, book),
       by: requests.map((x) => x.username),
     })
   }
