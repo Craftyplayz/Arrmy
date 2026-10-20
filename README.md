@@ -43,6 +43,8 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 | Plex | `http://<box>:32400/web` | Plex |
 | qBittorrent | `http://<box>:7655` | `admin` / `QBIT_PASSWORD` from `.env` |
 | Prowlarr, Radarr, Sonarr | `:7656`, `:7657`, `:7658` | create one on first visit |
+| LazyLibrarian | `http://<box>:7659` | `admin` / `QBIT_PASSWORD` from `.env` |
+| Audiobookshelf | `http://<box>:13378` | your Audiobookshelf account |
 
 If a port is already taken on your box, change it with the `*_PORT` settings in [.env.example](.env.example).
 

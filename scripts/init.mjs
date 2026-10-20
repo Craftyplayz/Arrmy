@@ -1,11 +1,12 @@
 // One-shot setup the Stack needs before qBittorrent and Arrmy start (the `init` service, run as root):
-// the TRaSH /data folders, Arrmy's config folder and qBittorrent's login. Safe to re-run; never overwrites.
-import { pbkdf2Sync, randomBytes } from 'node:crypto'
+// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login and LazyLibrarian's settings. Safe to re-run;
+// never overwrites.
+import { createHmac, pbkdf2Sync, randomBytes } from 'node:crypto'
 import { chownSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
 
 const [data = '/data', config = '/config'] = process.argv.slice(2)
-const { PUID, PGID, QBIT_PASSWORD } = process.env
-if (!PUID || !PGID || !QBIT_PASSWORD) throw new Error('PUID, PGID and QBIT_PASSWORD must be set')
+const { PUID, PGID, QBIT_PASSWORD, SESSION_SECRET } = process.env
+if (!PUID || !PGID || !QBIT_PASSWORD || !SESSION_SECRET) throw new Error('PUID, PGID, QBIT_PASSWORD and SESSION_SECRET must be set')
 
 function own(path) {
   try {
@@ -16,13 +17,13 @@ function own(path) {
 }
 
 // TRaSH-guide layout: downloads and media share one /data tree, so imports are instant hardlinks, not copies.
-for (const dir of ['torrents/movies', 'torrents/tv', 'media/movies', 'media/tv', 'media/audiobooks', 'media/podcasts', 'media/books']) {
+for (const dir of ['torrents/movies', 'torrents/tv', 'torrents/books', 'media/movies', 'media/tv', 'media/audiobooks', 'media/podcasts', 'media/books']) {
   const [parent] = dir.split('/')
   mkdirSync(`${data}/${dir}`, { recursive: true })
   own(`${data}/${parent}`)
   own(`${data}/${dir}`)
 }
-for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata']) {
+for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian']) {
   mkdirSync(`${config}/${dir}`, { recursive: true })
   own(`${config}/${dir}`)
 }
@@ -51,4 +52,42 @@ if (!existsSync(conf)) {
   writeFileSync(conf, `${lines.join('\n')}\n`)
   own(conf)
 }
-console.log('[init] folders and qBittorrent login ready')
+
+const books = `${config}/lazylibrarian/config.ini`
+if (!existsSync(books)) {
+  // LazyLibrarian reads on/off settings as numbers: 1, never True. Its API key is the one Arrmy derives
+  // (src/lib/token.ts lazyLibrarianKey); keep the two in sync.
+  const apiKey = createHmac('sha256', SESSION_SECRET).update('lazylibrarian').digest('hex').slice(0, 32)
+  const lines = [
+    '[API]',
+    'api_enabled = 1',
+    `api_key = ${apiKey}`,
+    'ol_api = 1', // OpenLibrary, the default book search, is off until switched on
+    '',
+    '[WebServer]',
+    'http_user = admin',
+    `http_pass = ${QBIT_PASSWORD}`,
+    '',
+    '[General]',
+    'ebook_dir = /data/media/books',
+    'audio_dir = /data/media/audiobooks', // the same folder Audiobookshelf watches
+    'download_dir = /data/torrents/books',
+    '',
+    '[TORRENT]',
+    'tor_downloader_qbittorrent = 1',
+    'keep_seeding = 1', // LazyLibrarian can't hardlink, so it copies the finished book and the torrent keeps seeding
+    '',
+    '[QBITTORRENT]',
+    'qbittorrent_host = gluetun',
+    'qbittorrent_port = 8080',
+    'qbittorrent_user = admin',
+    `qbittorrent_pass = ${QBIT_PASSWORD}`,
+    'qbittorrent_label = books',
+    '',
+    '[PostProcess]',
+    'audiobook_dest_folder = $Author/$Title',
+  ]
+  writeFileSync(books, `${lines.join('\n')}\n`)
+  own(books)
+}
+console.log('[init] folders, qBittorrent login and LazyLibrarian settings ready')

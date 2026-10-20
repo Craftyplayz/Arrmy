@@ -2,7 +2,8 @@ import { arr, MOVIES_ROOT, serviceKey, serviceUrl, setCustomFormat, TV_ROOT, typ
 import { getLimits } from './db'
 import { applyLimits } from './limits'
 import { MULTI_AUDIO } from './releases'
-import { hookToken, sessionSecret } from './token'
+import { LAZYLIBRARIAN_URL } from './books'
+import { hookToken, lazyLibrarianKey, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
 
@@ -48,6 +49,10 @@ export function startWiring() {
     ['Sonarr → Arrmy', () => ensureProvider('sonarr', 'notification', 'Webhook', 'Arrmy', webhook, onImport)],
     ['Prowlarr → Radarr', () => ensureProvider('prowlarr', 'applications', 'Radarr', 'Radarr', app('radarr'), { syncLevel: 'fullSync' })],
     ['Prowlarr → Sonarr', () => ensureProvider('prowlarr', 'applications', 'Sonarr', 'Sonarr', app('sonarr'), { syncLevel: 'fullSync' })],
+    ['Prowlarr → LazyLibrarian', () =>
+      ensureProvider('prowlarr', 'applications', 'LazyLibrarian', 'LazyLibrarian',
+        { prowlarrUrl: serviceUrl('prowlarr'), baseUrl: LAZYLIBRARIAN_URL, apiKey: lazyLibrarianKey(sessionSecret()) },
+        { syncLevel: 'fullSync' })],
     // Prowlarr only sends an indexer through FlareSolverr when the indexer has the same tag.
     ['Prowlarr → FlareSolverr', async () => {
       const tag = await ensureTag('prowlarr', 'flaresolverr')

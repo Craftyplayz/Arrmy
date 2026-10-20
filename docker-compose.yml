@@ -14,7 +14,7 @@ x-after-init: &after-init
     condition: service_completed_successfully
 
 services:
-  # Runs once per deploy: creates the /data folders and qBittorrent's login, then exits.
+  # Runs once per deploy: creates the /data folders, qBittorrent's login and LazyLibrarian's settings, then exits.
   init:
     image: ghcr.io/craftyplayz/arrmy:latest
     user: root
@@ -23,6 +23,7 @@ services:
       PUID: ${PUID}
       PGID: ${PGID}
       QBIT_PASSWORD: ${QBIT_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET} # LazyLibrarian's API key is derived from it
     volumes:
       - ${DATA_DIR:-/data}:/data
       - ${CONFIG_DIR:-/opt/arrmy}:/config
@@ -147,6 +148,18 @@ services:
       - ${DATA_DIR:-/data}:/data
     ports:
       - ${SONARR_PORT:-7658}:8989
+
+  # Finds and downloads audiobooks and ebooks for Requests, as Radarr does for movies. Finished audiobooks land
+  # in /data/media/audiobooks, which Audiobookshelf watches. init presets its settings; Arrmy derives its API key.
+  lazylibrarian:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/lazylibrarian:latest
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/lazylibrarian:/config
+      - ${DATA_DIR:-/data}:/data
+    ports:
+      - ${LL_PORT:-7659}:5299
+    depends_on: *after-init
 
   # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps
   # listening progress and stats when the files move on the server. Follows latest: it's public, so it
