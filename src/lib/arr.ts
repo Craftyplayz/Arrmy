@@ -1,3 +1,4 @@
+import { audiobookStatuses, searchAudiobooks } from './books'
 import { seasonsOf, type MediaType, type RequestRow } from './db'
 import { deleteTorrents, liveProgress } from './qbit'
 import { movieStatus, seriesStatus, type Movie, type QueueItem, type Season, type Series, type Status } from './status'
@@ -68,7 +69,8 @@ type LibraryMovie = LookupMovie & Movie & { monitored: boolean }
 type LibrarySeries = LookupSeries & Series
 
 export type SearchResult = {
-  id: number
+  /** TMDB id (movie), TVDB id (TV) or LazyLibrarian's BookID (audiobook). */
+  id: number | string
   title: string
   year?: number
   overview?: string
@@ -115,6 +117,7 @@ async function qualityProfile(name: 'radarr' | 'sonarr') {
 
 // shortcut: one library lookup per result/Request; fine at family scale, batch it if Requests reach the hundreds.
 export async function search(type: MediaType, term: string): Promise<SearchResult[]> {
+  if (type === 'audiobook') return searchAudiobooks(term)
   const q = encodeURIComponent(term)
   const card = (m: Media) => ({ title: m.title, year: m.year, overview: m.overview, poster: posterOf(m) })
   if (type === 'movie') {
@@ -155,14 +158,17 @@ export type RequestDetails = { status: Status | null; seasons: number[]; bytes: 
  */
 export async function requestDetails(requests: RequestRow[]): Promise<RequestDetails[]> {
   if (!requests.length) return []
-  const [movieQueue, tvQueue] = await Promise.all([queueOf('radarr'), queueOf('sonarr')])
+  const books = requests.filter((r) => r.media_type === 'audiobook').map((r) => String(r.external_id))
+  const [movieQueue, tvQueue, bookStatuses] = await Promise.all([queueOf('radarr'), queueOf('sonarr'), audiobookStatuses(books)])
   return Promise.all(
     requests.map(async (r) => {
+      if (r.media_type === 'audiobook')
+        return { status: bookStatuses[books.indexOf(String(r.external_id))] ?? null, seasons: [], bytes: 0 }
       if (r.media_type === 'movie') {
-        const movie = await libraryMovie(r.external_id)
+        const movie = await libraryMovie(Number(r.external_id))
         return { status: movieStatus(movie, movieQueue), seasons: [], bytes: movie?.sizeOnDisk ?? 0 }
       }
-      const series = await librarySeries(r.external_id)
+      const series = await librarySeries(Number(r.external_id))
       const requested = series?.seasons.filter((s) => seasonsOf(r).includes(s.seasonNumber)) ?? []
       return {
         status: seriesStatus(series, tvQueue, seasonsOf(r)),

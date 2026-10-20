@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons } from '@/lib/arr'
+import { addAudiobook, removeAudiobook } from '@/lib/books'
 import {
   addRequest,
   deleteRequest,
@@ -94,14 +95,35 @@ async function ownRequest(form: FormData) {
 export async function removeRequest(form: FormData) {
   const request = await ownRequest(form)
   const others = otherRequests(request)
-  if (request.media_type === 'movie') {
-    if (!others.length) await removeMovie(request.external_id)
+  let note: string | undefined
+  if (request.media_type === 'audiobook') {
+    if (!others.length) note = await removeAudiobook(request)
+  } else if (request.media_type === 'movie') {
+    if (!others.length) await removeMovie(Number(request.external_id))
   } else {
     const wanted = new Set(others.flatMap(seasonsOf))
-    await removeSeasons(request.external_id, seasonsOf(request).filter((n) => !wanted.has(n)))
+    await removeSeasons(Number(request.external_id), seasonsOf(request).filter((n) => !wanted.has(n)))
   }
   deleteRequest(request.id)
+  if (note) redirect(`/requests?notice=${encodeURIComponent(note)}`)
   revalidatePath('/requests')
+}
+
+/** LazyLibrarian BookIDs: OpenLibrary works (OL123W), Goodreads numbers, Google ids. Nothing else reaches its API. */
+const bookId = (value: FormDataEntryValue | null) => {
+  const id = String(value ?? '')
+  if (!/^[A-Za-z0-9_-]{1,40}$/.test(id)) throw new Error(`Not a valid book id: ${id}`)
+  return id
+}
+
+export async function requestAudiobook(form: FormData) {
+  const user = await requireUser()
+  const id = bookId(form.get('id'))
+  const book = await addAudiobook(id)
+  if (!hasRequest(user.id, 'audiobook', id)) {
+    addRequest({ userId: user.id, type: 'audiobook', externalId: id, title: book.title, year: book.year, poster: book.poster })
+  }
+  revalidatePath('/')
 }
 
 /** Adds and removes seasons of a TV Request; removed seasons follow the same rules as removing a Request. */
@@ -114,13 +136,13 @@ export async function editSeasons(form: FormData) {
   const added = after.filter((n) => !before.includes(n))
   const removed = before.filter((n) => !after.includes(n))
   if (added.length) {
-    const problem = await showLimitProblem(request.external_id, union(otherRequests(request).flatMap(seasonsOf), after))
+    const problem = await showLimitProblem(Number(request.external_id), union(otherRequests(request).flatMap(seasonsOf), after))
     if (problem) redirect(`/requests?notice=${encodeURIComponent(problem)}`)
-    await addSeries(request.external_id, added)
+    await addSeries(Number(request.external_id), added)
   }
   if (removed.length) {
     const wanted = new Set(otherRequests(request).flatMap(seasonsOf))
-    await removeSeasons(request.external_id, removed.filter((n) => !wanted.has(n)))
+    await removeSeasons(Number(request.external_id), removed.filter((n) => !wanted.has(n)))
   }
   setSeasons(request.id, after, added.length > 0)
   revalidatePath('/requests')

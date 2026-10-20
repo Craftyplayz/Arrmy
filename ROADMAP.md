@@ -13,6 +13,7 @@
 - **Size limits.** The Admin sets a maximum per movie, per hour of episode and per show (Settings). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate.
 - **Admin view.** One page with Problems (Missing, Failed Download, Failed Import) and one-click fixes, what's downloading, library and disk stats, and Requests by person.
 - **English-only audio.** At the same quality, Radarr and Sonarr pick a release with only English audio over MULTi, Dual Audio or another language, so files are smaller. Untagged releases count as the original language, so foreign films and anime are left alone. In Plex, each person still sets their own preferred audio language.
+- **Audiobooks.** An Audiobooks tab: LazyLibrarian finds and downloads the book and files it where Audiobookshelf watches; status, Discord and Remove work as for movies. With an Audiobookshelf API key, books you already own show as Available and Remove deletes the downloaded copy.
 
 ## Next
 
@@ -20,6 +21,7 @@ Pick from Later.
 
 ## Later
 
-- **More Media Types.** Music (Lidarr); Books, Audiobooks and Periodicals (LazyLibrarian, Kavita, Audiobookshelf); Comics (Kapowarr); Manga (Mangarr).
+- **More Media Types.** Music (Lidarr); Books and Periodicals (LazyLibrarian is already here; reading in Kavita); Comics (Kapowarr); Manga (Mangarr).
+- **Audiobook Problems** in the Admin view (wanted but never found), like Missing for movies.
 - **Better Movies + TV.** Anime routing to anime-tuned Radarr/Sonarr, Recyclarr quality profiles, Bazarr subtitles.
 - **YouTube channels** (TubeArchivist), once its Plex plugin is confirmed to work.

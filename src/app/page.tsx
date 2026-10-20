@@ -3,14 +3,16 @@ import Link from 'next/link'
 import { search, type SearchResult } from '@/lib/arr'
 import type { MediaType } from '@/lib/db'
 import { requireUser } from '@/lib/session'
-import { requestMovie, requestTv } from './actions'
+import { requestAudiobook, requestMovie, requestTv } from './actions'
 import { AutoRefresh } from './auto-refresh'
 import { Badge, Card } from './ui'
 
 const TABS: [MediaType, string][] = [
   ['movie', 'Movies'],
   ['tv', 'TV Shows'],
+  ['audiobook', 'Audiobooks'],
 ]
+const LABELS = { movie: ['Radarr', 'Search movies'], tv: ['Sonarr', 'Search TV shows'], audiobook: ['LazyLibrarian', 'Search audiobooks'] }
 
 export default async function SearchPage({
   searchParams,
@@ -19,7 +21,7 @@ export default async function SearchPage({
 }) {
   await requireUser()
   const params = await searchParams
-  const type: MediaType = params.type === 'tv' ? 'tv' : 'movie'
+  const type: MediaType = params.type === 'tv' || params.type === 'audiobook' ? params.type : 'movie'
   const q = params.q?.trim() ?? ''
 
   let results: SearchResult[] | undefined
@@ -29,7 +31,7 @@ export default async function SearchPage({
       results = await search(type, q)
     } catch (e) {
       console.error(e)
-      error = `${type === 'movie' ? 'Radarr' : 'Sonarr'} isn't responding. Try again in a minute.`
+      error = `${LABELS[type][0]} isn't responding. Try again in a minute.`
     }
   }
 
@@ -48,7 +50,7 @@ export default async function SearchPage({
           type="search"
           name="q"
           defaultValue={q}
-          placeholder={type === 'movie' ? 'Search movies' : 'Search TV shows'}
+          placeholder={LABELS[type][1]}
           aria-label="Search"
           autoFocus
         />
@@ -62,7 +64,7 @@ export default async function SearchPage({
         {results?.map((r) => (
           <Card key={r.id} title={r.title} year={r.year} poster={r.poster}>
             <p className="overview">{r.overview}</p>
-            {type === 'movie' ? <MovieAction r={r} /> : <TvAction r={r} q={q} />}
+            {type === 'tv' ? <TvAction r={r} q={q} /> : <RequestButton r={r} action={type === 'movie' ? requestMovie : requestAudiobook} />}
           </Card>
         ))}
       </ul>
@@ -70,10 +72,11 @@ export default async function SearchPage({
   )
 }
 
-function MovieAction({ r }: { r: SearchResult }) {
+/** Movies and audiobooks: one thing to request, so a status or a Request button. */
+function RequestButton({ r, action }: { r: SearchResult; action: (form: FormData) => Promise<void> }) {
   if (r.status) return <Badge status={r.status} />
   return (
-    <form action={requestMovie}>
+    <form action={action}>
       <input type="hidden" name="id" value={r.id} />
       <button>Request</button>
     </form>

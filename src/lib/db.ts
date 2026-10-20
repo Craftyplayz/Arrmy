@@ -1,13 +1,14 @@
 import { DatabaseSync } from 'node:sqlite'
 
-export type MediaType = 'movie' | 'tv'
+export type MediaType = 'movie' | 'tv' | 'audiobook'
 export type User = { id: number; username: string; is_admin: number }
 export type RequestRow = {
   id: number
   user_id: number
   username: string
   media_type: MediaType
-  external_id: number
+  /** TMDB id (movie), TVDB id (TV) or LazyLibrarian's BookID, e.g. OL21745884W (audiobook). */
+  external_id: number | string
   title: string
   year: number | null
   poster: string | null
@@ -17,6 +18,20 @@ export type RequestRow = {
 }
 
 let conn: DatabaseSync | undefined
+
+const REQUESTS = `
+  CREATE TABLE IF NOT EXISTS requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    media_type TEXT NOT NULL CHECK (media_type IN ('movie', 'tv', 'audiobook')),
+    external_id INTEGER NOT NULL,          -- TMDB id (movie), TVDB id (TV), or LazyLibrarian's text BookID (audiobook)
+    title TEXT NOT NULL,
+    year INTEGER,
+    poster TEXT,
+    seasons TEXT,                          -- JSON array of season numbers, TV only
+    status TEXT NOT NULL DEFAULT 'requested' CHECK (status IN ('requested', 'available')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`
 
 // Opened lazily so `next build` never touches /config.
 function db() {
@@ -29,23 +44,17 @@ function db() {
         username TEXT NOT NULL,
         is_admin INTEGER NOT NULL DEFAULT 0
       );
-      CREATE TABLE IF NOT EXISTS requests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL REFERENCES users(id),
-        media_type TEXT NOT NULL CHECK (media_type IN ('movie', 'tv')),
-        external_id INTEGER NOT NULL,          -- TMDB id for movies, TVDB id for TV
-        title TEXT NOT NULL,
-        year INTEGER,
-        poster TEXT,
-        seasons TEXT,                          -- JSON array of season numbers, TV only
-        status TEXT NOT NULL DEFAULT 'requested' CHECK (status IN ('requested', 'available')),
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
+      ${REQUESTS};
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL                    -- JSON
       );
     `)
+    // Before 1.1.0 media_type only allowed movie and tv. SQLite can't change a CHECK, so rebuild the table once.
+    const { sql } = conn.prepare("SELECT sql FROM sqlite_master WHERE name = 'requests'").get() as { sql: string }
+    if (!sql.includes("'audiobook'"))
+      conn.exec(`BEGIN; ALTER TABLE requests RENAME TO requests_old; ${REQUESTS};
+        INSERT INTO requests SELECT * FROM requests_old; DROP TABLE requests_old; COMMIT;`)
   }
   return conn
 }
@@ -64,7 +73,7 @@ export const getUser = (id: number) => db().prepare('SELECT * FROM users WHERE i
 export function addRequest(r: {
   userId: number
   type: MediaType
-  externalId: number
+  externalId: number | string
   title: string
   year?: number
   poster?: string
@@ -77,7 +86,7 @@ export function addRequest(r: {
     .run(r.userId, r.type, r.externalId, r.title, r.year ?? null, r.poster ?? null, r.seasons ? JSON.stringify(r.seasons) : null)
 }
 
-export const hasRequest = (userId: number, type: MediaType, externalId: number) =>
+export const hasRequest = (userId: number, type: MediaType, externalId: number | string) =>
   !!db().prepare('SELECT 1 FROM requests WHERE user_id = ? AND media_type = ? AND external_id = ?').get(userId, type, externalId)
 
 const SELECT = 'SELECT requests.*, users.username FROM requests JOIN users ON users.id = requests.user_id'
@@ -108,7 +117,7 @@ export function setSeasons(id: number, seasons: number[], reopen: boolean) {
 }
 
 /** Every Request for a title, from anyone. */
-export const requestsFor = (type: MediaType, externalId: number) =>
+export const requestsFor = (type: MediaType, externalId: number | string) =>
   db().prepare(`${SELECT} WHERE media_type = ? AND external_id = ?`).all(type, externalId) as RequestRow[]
 
 export function getSetting<T>(key: string): T | undefined {
@@ -129,9 +138,13 @@ export function setSetting(key: string, value: unknown) {
 export type Limits = { movieGb: number; episodeGb: number; showGb: number }
 export const getLimits = (): Limits => ({ movieGb: 0, episodeGb: 0, showGb: 0, ...getSetting<Limits>('limits') })
 
-export const waitingRequests = (type: MediaType, externalId: number) =>
+export const waitingRequests = (type: MediaType, externalId: number | string) =>
   db()
     .prepare(`${SELECT} WHERE media_type = ? AND external_id = ? AND status = 'requested'`)
     .all(type, externalId) as RequestRow[]
 
 export const markAvailable = (id: number) => db().prepare(`UPDATE requests SET status = 'available' WHERE id = ?`).run(id)
+
+/** Every Request of one Media Type still waiting to become Available. */
+export const waitingOfType = (type: MediaType) =>
+  db().prepare(`${SELECT} WHERE media_type = ? AND status = 'requested'`).all(type) as RequestRow[]

@@ -1,6 +1,6 @@
 # Arrmy
 
-One website where family and friends request movies and TV, and the Admin runs the *arr Stack. This is Milestone 1: Movies + TV.
+One website where family and friends request movies, TV and audiobooks, and the Admin runs the *arr Stack.
 
 Vocabulary is in [GLOSSARY.md](GLOSSARY.md). The reasons behind the design are in [docs/adr/](docs/adr/).
 
@@ -19,6 +19,7 @@ Needs a Linux box running Docker and Portainer. GitHub builds the Arrmy image on
 6. Open Arrmy and **Sign in with Plex**. As the Plex server owner you become the Admin, and Arrmy adds the Movies and TV Shows libraries to Plex.
 7. Add indexers in Prowlarr (`http://<box>:7656`). This is the only step Arrmy can't do for you. Prowlarr copies the indexers into Radarr and Sonarr. To add every public English one that works in one go, run `node --env-file=.env scripts/add-indexers.mjs http://<box>:7656` from a copy of this repo with your `.env`.
 8. Share your Plex libraries with family. Anyone you share with can sign in to Arrmy as a Requester.
+9. Optional: in Audiobookshelf, **Settings → API Keys → Add API Key**, and put it in `ABS_API_KEY`. Then audiobooks you already own show as Available, and removing an audiobook Request deletes the copy Arrmy downloaded.
 
 On first start, the `init` container creates the `/data` folders and qBittorrent's login, then exits. After that, Arrmy wires everything else: root folders, qBittorrent, Prowlarr sync, the import webhooks and a preference for English-only audio. Follow it in Portainer under **Containers → arrmy → Logs**. When it's done, the log says `[wire] Stack wired`.
 

@@ -40,6 +40,7 @@ services:
       QBIT_PASSWORD: ${QBIT_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      ABS_API_KEY: ${ABS_API_KEY:-}
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
     ports:

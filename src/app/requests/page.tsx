@@ -23,7 +23,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
       <h1>{user.is_admin ? 'All Requests' : 'Your Requests'}</h1>
       {details?.some((d) => d.status && d.status.label !== 'Available') && <AutoRefresh seconds={5} />}
       {notice && <p className="error">{notice}</p>}
-      {!details && <p className="error">Radarr or Sonarr isn't responding, so live status is missing.</p>}
+      {!details && <p className="error">Radarr, Sonarr or LazyLibrarian isn't responding, so live status is missing.</p>}
       {requests.length === 0 && (
         <p className="muted">
           Nothing requested yet. <Link href="/">Search</Link> for something to watch.

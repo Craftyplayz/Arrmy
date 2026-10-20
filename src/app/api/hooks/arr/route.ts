@@ -1,6 +1,6 @@
 import { requestDetails } from '@/lib/arr'
-import { markAvailable, waitingRequests, type RequestRow } from '@/lib/db'
-import { seasonLabel } from '@/lib/status'
+import { markAvailable, waitingRequests } from '@/lib/db'
+import { tellDiscord } from '@/lib/notify'
 import { hookToken, safeEqual, sessionSecret } from '@/lib/token'
 
 /** Radarr and Sonarr call this after every import (the "Arrmy" webhook the Wiring adds). */
@@ -20,17 +20,4 @@ export async function POST(request: Request) {
     await tellDiscord(r).catch((e) => console.warn(`[discord] ${e.message}`))
   }
   return new Response(null, { status: 204 })
-}
-
-async function tellDiscord(r: RequestRow) {
-  const url = process.env.DISCORD_WEBHOOK_URL
-  if (!url) return
-  const what = `**${r.title}**${r.year ? ` (${r.year})` : ''}${r.seasons ? `, ${seasonLabel(JSON.parse(r.seasons))}` : ''}`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    // allowed_mentions: a title can't ping @everyone
-    body: JSON.stringify({ content: `${what} is ready to watch. Requested by ${r.username}.`, allowed_mentions: { parse: [] } }),
-  })
-  if (!res.ok) throw new Error(`webhook → ${res.status}`)
 }
