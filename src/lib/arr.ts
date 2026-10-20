@@ -95,8 +95,8 @@ export type QueueRecord = QueueItem & {
   downloadId?: string
   episodeId?: number
   seasonNumber?: number
-  movie?: { title: string; year?: number }
-  series?: { title: string }
+  movie?: { title: string; year?: number; tmdbId?: number; images?: Image[] }
+  series?: { title: string; year?: number; tvdbId?: number; titleSlug?: string; images?: Image[] }
 }
 
 /** The Service's download queue, with progress replaced by qBittorrent's live numbers where it has them. */

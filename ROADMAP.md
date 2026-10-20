@@ -62,11 +62,13 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 
 A Discord app with no live connection: Arrmy calls Discord's API with the bot's token, and Discord sends slash commands to `https://arrmy.<domain>/api/discord`, checked against the app's public key. Read-only: an update is something you start in Portainer (ADR 0001). Setup in the README. Without the bot, `DISCORD_WEBHOOK_URL` still gets #requests and #problems.
 
+Every message is a card in DESIGN.md's colours (green for Available and success, red for failures, --info for Downloading and notes, the accent for something to act on) with art beside it: the poster or cover from Radarr, Sonarr or OpenLibrary, a Plex avatar, a committer's GitHub avatar, or the app's icon. The title links to the title's page on TMDB, TVDB or OpenLibrary, and the author line to the app on this server. No emoji; British English.
+
 | Feature | What it does | Tested |
 |---|---|---|
 | Channels | An Arrmy category with #requests, #downloads, #problems, #admin-log, #system, #updates and #activity, made by the bot (again if one is deleted). Links go to each app's public address (`PUBLIC_DOMAIN`). | Fake |
 | #requests | New Requests, edits and removals (who did it, and whose Request it was), Requests refused for the Size Limit, and Available. | Messages: Fake. **Not yet run:** the calls from Arrmy's pages. |
-| #downloads | One message per download, edited every 30 seconds: progress bar, speed, time left, seeders, or why it's waiting. Then Done, or Removed. | Unit, Fake |
+| #downloads | One card per download, titled with the movie, show or book (the release name small underneath), updated every 5 seconds: a smooth progress bar in DESIGN.md's --btn → --accent gradient (its 50 pieces are drawn by Arrmy and uploaded once as the bot's own emoji), then speed, time left, seeders and who asked. Then Done with how long it took, or Removed. Discord allows about 5 edits per 5 seconds in a channel, so each round edits the 4 that waited longest. | Unit, Fake |
 | #problems | A new Problem once it has lasted 20 minutes (Arrmy fixes most stalled downloads within 15), or at once when Arrmy raised it after 3 dead releases. @mentions the Admin. Also each dead release Arrmy swaps. | Fake |
 | #admin-log | Size Limit changes and one-click fixes, with who. Settings changed inside Radarr, Sonarr, Prowlarr and qBittorrent, checked every 5 minutes, with passwords and keys hidden (not LazyLibrarian: its API reads one setting at a time). People given or losing access to Plex or Audiobookshelf. | Unit, Fake. **Not yet run:** the calls from Arrmy's pages. |
 | #system | An app down (two failed checks a minute apart), back or restarted. The VPN down, or its forwarded port changing. Health warnings from Radarr, Sonarr and Prowlarr (failing indexers). A disk under 10% free. Each nightly backup, or none for 26 hours. @mentions for down, disk and backup. | Fake |

@@ -41,13 +41,13 @@ export const pinToken = async (pinId: number) =>
 /** Who signed in, and whether they own this Plex server (Admin), share it (Requester) or have no access. */
 export async function plexAccount(token: string) {
   const [user, resources, identity] = await Promise.all([
-    plex<{ id: number; username: string; title: string }>('https://plex.tv/api/v2/user', token),
+    plex<{ id: number; username: string; title: string; thumb?: string }>('https://plex.tv/api/v2/user', token),
     plex<{ clientIdentifier: string; owned: boolean }[]>('https://plex.tv/api/v2/resources', token),
     plex<{ MediaContainer: { machineIdentifier: string } }>(`${PLEX_URL}/identity`),
   ])
   const server = resources.find((r) => r.clientIdentifier === identity.MediaContainer.machineIdentifier)
   const access: 'admin' | 'requester' | undefined = server ? (server.owned ? 'admin' : 'requester') : undefined
-  return { id: user.id, username: user.username || user.title, access }
+  return { id: user.id, username: user.username || user.title, access, avatar: user.thumb }
 }
 
 const LIBRARIES = [

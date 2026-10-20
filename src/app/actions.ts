@@ -3,9 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, retryRelease } from '@/lib/arr'
+import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, retryRelease, type Media } from '@/lib/arr'
 import { addAudiobook, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
-import { linked } from '@/lib/botrules'
 import {
   addRequest,
   deleteRequest,
@@ -20,9 +19,10 @@ import {
   setSetting,
   type Limits,
 } from '@/lib/db'
-import { announce, publicUrl } from '@/lib/discord'
+import { announce } from '@/lib/discord'
+import { embed } from '@/lib/embeds'
 import { applyLimits, showLimitProblem } from '@/lib/limits'
-import { requestTitle } from '@/lib/notify'
+import { tellRequest } from '@/lib/notify'
 import { createPin } from '@/lib/plex'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
@@ -40,7 +40,8 @@ export async function fixProblem(form: FormData) {
   const user = await requireUser()
   if (!user.is_admin) throw new Error('Only the Admin can fix Problems')
   const service = form.get('service')
-  const fixed = (what: string) => announce('admin-log', `🛠️ **${user.username}** clicked ${what} for **${String(form.get('title') ?? 'a Problem')}**.`)
+  const fixed = (what: string) =>
+    announce('admin-log', embed({ colour: 'info', app: 'Arrmy', title: String(form.get('title') ?? 'A Problem'), description: `**${user.username}** clicked **${what}** in the Admin view.` }))
   if (service === 'lazylibrarian' && form.get('fix') === 'retry') {
     // An audiobook's dead release (see dead.ts): drop it, and search again once LazyLibrarian has marked it Failed.
     const hash = String(form.get('hash'))
@@ -79,7 +80,16 @@ export async function saveLimits(form: FormData) {
   const changed = (Object.keys(limits) as (keyof Limits)[]).filter((k) => limits[k] !== before[k])
   const names: Record<keyof Limits, string> = { movieGb: 'movie', episodeGb: 'hour of episode', showGb: 'show' }
   if (changed.length)
-    announce('admin-log', `📏 **${user.username}** changed the Size Limits: ${changed.map((k) => `${names[k]} ${shown(before[k])} → ${shown(limits[k])}`).join(', ')}.`)
+    announce(
+      'admin-log',
+      embed({
+        colour: 'info',
+        app: 'Arrmy',
+        title: 'Size Limits changed',
+        description: `**${user.username}** changed them in Settings.`,
+        fields: changed.map((k) => [`Per ${names[k]}`, `${shown(before[k])} → ${shown(limits[k])}`]),
+      }),
+    )
   redirect('/settings?saved=1')
 }
 
@@ -102,7 +112,8 @@ export async function requestMovie(form: FormData) {
   const movie = await addMovie(tmdbId)
   if (!hasRequest(user.id, 'movie', tmdbId)) {
     addRequest({ userId: user.id, type: 'movie', externalId: tmdbId, title: movie.title, year: movie.year, poster: posterOf(movie) })
-    announce('requests', `🎬 **${user.username}** requested ${linked(requestTitle({ ...movie, year: movie.year ?? null, seasons: null }), publicUrl('radarr', `/movie/${tmdbId}`))}.`)
+    const item = { media_type: 'movie' as const, external_id: tmdbId, title: movie.title, year: movie.year ?? null, poster: posterOf(movie) ?? null }
+    tellRequest(item, 'info', `Requested by **${user.username}**.`)
   }
   revalidatePath('/')
 }
@@ -133,7 +144,7 @@ export async function removeRequest(form: FormData) {
     await removeSeasons(Number(request.external_id), seasonsOf(request).filter((n) => !wanted.has(n)))
   }
   deleteRequest(request.id)
-  announce('requests', `🗑️ ${by(user, request)} removed ${requestTitle(request)}.${others.length ? ' Its files stay: someone else requested it too.' : ''}`)
+  tellRequest(request, 'neutral', `${by(user, request)} removed this Request.${others.length ? ' Its files stay: someone else requested it too.' : ''}`)
   if (note) redirect(`/requests?notice=${encodeURIComponent(note)}`)
   revalidatePath('/requests')
 }
@@ -151,7 +162,8 @@ export async function requestAudiobook(form: FormData) {
   const book = await addAudiobook(id)
   if (!hasRequest(user.id, 'audiobook', id)) {
     addRequest({ userId: user.id, type: 'audiobook', externalId: id, title: book.title, year: book.year, poster: book.poster })
-    announce('requests', `🎧 **${user.username}** requested the audiobook **${book.title}** by ${book.author}.`)
+    const item = { media_type: 'audiobook' as const, external_id: id, title: book.title, year: book.year ?? null, poster: book.poster ?? null }
+    tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Author', book.author]])
   }
   revalidatePath('/')
 }
@@ -168,7 +180,7 @@ export async function editSeasons(form: FormData) {
   if (added.length) {
     const problem = await showLimitProblem(Number(request.external_id), union(otherRequests(request).flatMap(seasonsOf), after))
     if (problem) {
-      announce('requests', `🚫 ${by(user, request)} couldn't add ${seasonLabel(added)} to **${request.title}**: ${problem}`)
+      tellRequest(request, 'danger', `${by(user, request)} couldn't add ${seasonLabel(added)}. ${problem}`)
       redirect(`/requests?notice=${encodeURIComponent(problem)}`)
     }
     await addSeries(Number(request.external_id), added)
@@ -179,7 +191,7 @@ export async function editSeasons(form: FormData) {
   }
   setSeasons(request.id, after, added.length > 0)
   const what = [added.length && `added ${seasonLabel(added)}`, removed.length && `removed ${seasonLabel(removed)}`].filter(Boolean).join(' and ')
-  if (what) announce('requests', `✏️ ${by(user, request)} changed **${request.title}**: ${what}.`)
+  if (what) tellRequest(request, 'info', `${by(user, request)} ${what}.`, [['Seasons', after.join(', ')]])
   revalidatePath('/requests')
 }
 
@@ -190,14 +202,19 @@ export async function requestTv(form: FormData) {
   if (!seasons.length) return
   const problem = await showLimitProblem(tvdbId, union(requestsFor('tv', tvdbId).flatMap(seasonsOf), seasons))
   if (problem) {
-    const [show] = await arr<{ title: string }[]>('sonarr', `/series/lookup?term=tvdb:${tvdbId}`).catch(() => [])
-    announce('requests', `🚫 **${user.username}**'s Request for **${show?.title ?? `TVDB ${tvdbId}`}** was refused: ${problem}`)
+    const [show] = await arr<Media[]>('sonarr', `/series/lookup?term=tvdb:${tvdbId}`).catch(() => [])
+    tellRequest(
+      { media_type: 'tv', external_id: tvdbId, title: show?.title ?? `TVDB ${tvdbId}`, year: show?.year ?? null, poster: (show && posterOf(show)) ?? null },
+      'danger',
+      `**${user.username}**'s Request was refused. ${problem}`,
+      [['Seasons', seasons.join(', ')]],
+    )
     redirect(`/?type=tv&q=${encodeURIComponent(String(form.get('q') ?? ''))}&notice=${encodeURIComponent(problem)}`)
   }
   const show = await addSeries(tvdbId, seasons)
   addRequest({ userId: user.id, type: 'tv', externalId: tvdbId, title: show.title, year: show.year, poster: posterOf(show), seasons })
   const slug = (show as { titleSlug?: string }).titleSlug
-  const title = requestTitle({ title: show.title, year: show.year ?? null, seasons: JSON.stringify(seasons) })
-  announce('requests', `📺 **${user.username}** requested ${linked(title, slug && publicUrl('sonarr', `/series/${slug}`))}.`)
+  const item = { media_type: 'tv' as const, external_id: tvdbId, title: show.title, year: show.year ?? null, poster: posterOf(show) ?? null, slug }
+  tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Seasons', seasons.join(', ')]])
   revalidatePath('/')
 }

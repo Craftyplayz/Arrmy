@@ -1,11 +1,13 @@
 // The Admin view: Problems with one-click fixes, what's downloading, and library and disk stats.
 import { arr, queueOf, type QueueRecord } from './arr'
-import { keptDeadReleases } from './db'
+import { coverUrl } from './bookrules'
+import { keptDeadReleases, requestsFor } from './db'
 import {
   byDownload,
   DEAD_DETAIL,
   missingProblems,
   nameOf,
+  posterIn,
   queueProblem,
   type Download,
   type MissingEpisode,
@@ -35,7 +37,7 @@ export async function adminOverview() {
   const dead = [...new Map(keptDeadReleases().map((d) => [d.hash, d])).values()].filter((d) => live.has(d.hash.toUpperCase()))
   const deadProblem = (service: Service, g: QueueRecord[]): Problem | undefined =>
     dead.some((d) => d.hash === g[0].downloadId?.toLowerCase())
-      ? { kind: 'Failed Download', service, title: nameOf(g[0]), detail: DEAD_DETAIL, fix: 'retry', ids: g.map((r) => r.id) }
+      ? { kind: 'Failed Download', service, title: nameOf(g[0]), detail: DEAD_DETAIL, fix: 'retry', ids: g.map((r) => r.id), poster: posterIn(g[0].movie?.images ?? g[0].series?.images) }
       : undefined
   const groups = [
     ...byDownload(movieQueue).map((g) => ({ service: 'radarr' as const, g })),
@@ -45,7 +47,11 @@ export async function adminOverview() {
     ...groups.flatMap((d) => (d.problem ? [d.problem] : [])),
     ...dead
       .filter((d) => d.item.startsWith('book:'))
-      .map((d): Problem => ({ kind: 'Failed Download', service: 'lazylibrarian', title: d.title, detail: DEAD_DETAIL, fix: 'retry', ids: [], hash: d.hash })),
+      .map((d): Problem => {
+        const book = d.item.replace('book:', '')
+        const poster = requestsFor('audiobook', book)[0]?.poster ?? coverUrl(undefined, book)
+        return { kind: 'Failed Download', service: 'lazylibrarian', title: d.title, detail: DEAD_DETAIL, fix: 'retry', ids: [], hash: d.hash, poster }
+      }),
     ...missingProblems(missingMovies.records, missingEpisodes.records, movieQueue, tvQueue),
   ]
   const downloads: Download[] = groups

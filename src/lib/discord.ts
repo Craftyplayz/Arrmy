@@ -1,10 +1,12 @@
-// Talks to Discord. With a bot token Arrmy posts to its own channels (see botrules.ts) through Discord's API, with no
-// live connection: slash commands arrive at /api/discord. Without one, Requests and Problems still go to
-// DISCORD_WEBHOOK_URL if it's set, and everything else is skipped.
+// Talks to Discord. With a bot token Arrmy posts embeds (see embeds.ts) to its own channels (see botrules.ts) through
+// Discord's API, with no live connection: slash commands arrive at /api/discord. Without one, Requests and Problems still
+// go to DISCORD_WEBHOOK_URL if it's set, and everything else is skipped.
+import { allCells } from './barart'
 import { CHANNELS, type Channel } from './botrules'
+import { getSetting, setSetting } from './db'
+import type { Embed } from './embeds'
 
 const API = 'https://discord.com/api/v10'
-const SUPPRESS_EMBEDS = 1 << 2 // links stay one line instead of unfolding into previews
 
 const token = () => process.env.DISCORD_BOT_TOKEN
 const guild = () => process.env.DISCORD_GUILD_ID
@@ -80,20 +82,20 @@ function serial<T>(job: () => Promise<T>): Promise<T> {
   return run
 }
 
-/** Message body. `ping` @mentions the Admin (DISCORD_ADMIN_ID); nothing else in the text can ping anyone. */
-function message(text: string, ping = false) {
+/** Message body. `ping` @mentions the Admin (DISCORD_ADMIN_ID): mentions only notify from the text, never an embed. */
+function message(embeds: Embed | Embed[], ping = false) {
   const admin = ping ? process.env.DISCORD_ADMIN_ID : undefined
   return {
-    content: (admin ? `<@${admin}> ${text}` : text).slice(0, 2000),
+    ...(admin && { content: `<@${admin}>` }),
+    embeds: [embeds].flat().slice(0, 10),
     allowed_mentions: { parse: [], users: admin ? [admin] : [] },
-    flags: SUPPRESS_EMBEDS,
   }
 }
 
 /** Posts to one of the bot's channels and returns the message id. A channel deleted by hand is created again. */
-export function post(channel: Channel, text: string, ping = false) {
+export function post(channel: Channel, embed: Embed, ping = false) {
   return serial(async () => {
-    const send = async () => (await discord<{ id: string }>(`/channels/${await channelId(channel)}/messages`, 'POST', message(text, ping))).id
+    const send = async () => (await discord<{ id: string }>(`/channels/${await channelId(channel)}/messages`, 'POST', message(embed, ping))).id
     try {
       return await send()
     } catch (e) {
@@ -105,10 +107,10 @@ export function post(channel: Channel, text: string, ping = false) {
 }
 
 /** Rewrites a message the bot posted. False if it's gone (deleted by hand). */
-export function edit(channel: Channel, id: string, text: string) {
+export function edit(channel: Channel, id: string, embed: Embed) {
   return serial(async () => {
     try {
-      await discord(`/channels/${await channelId(channel)}/messages/${id}`, 'PATCH', { content: text.slice(0, 2000) })
+      await discord(`/channels/${await channelId(channel)}/messages/${id}`, 'PATCH', { embeds: [embed] })
       return true
     } catch (e) {
       if (e instanceof DiscordError && e.status === 404) return false
@@ -118,15 +120,15 @@ export function edit(channel: Channel, id: string, text: string) {
 }
 
 /** Posts in the background: never slows down or fails whatever Arrmy was doing. */
-export function announce(channel: Channel, text: string, ping = false) {
+export function announce(channel: Channel, embed: Embed, ping = false) {
   const warn = (e: Error) => console.warn(`[discord] #${channel}: ${e.message}`)
-  if (botEnabled()) return void post(channel, text, ping).catch(warn)
+  if (botEnabled()) return void post(channel, embed, ping).catch(warn)
   const webhook = process.env.DISCORD_WEBHOOK_URL
   if (webhook && (channel === 'requests' || channel === 'problems'))
-    serial(() => discord(webhook, 'POST', message(text, ping), false)).catch(warn)
+    serial(() => discord(webhook, 'POST', message(embed, ping), false)).catch(warn)
 }
 
-/** Discord's id for the bot's app, which slash commands are registered under. */
+/** Discord's id for the bot's app, which slash commands and emoji belong to. */
 const appId = async () => (await discord<{ id: string }>('/applications/@me')).id
 
 /** Registers the slash commands in the server. Admin-only to start with: Server Settings → Integrations can open them up. */
@@ -135,6 +137,22 @@ export async function registerCommands(commands: object[]) {
   await discord(`/applications/${id}/guilds/${guild()}/commands`, 'PUT', commands.map((c) => ({ ...c, default_member_permissions: '0' })))
 }
 
+/**
+ * Uploads the progress bar's pieces as the app's own emoji (they work in any server, no permission needed), once, and
+ * remembers their ids for barEmoji.
+ */
+export async function syncBarEmoji() {
+  const id = await appId()
+  const { items } = await discord<{ items: { id: string; name: string }[] }>(`/applications/${id}/emojis`)
+  const have = Object.fromEntries(items.map((e) => [e.name, e.id]))
+  for (const [name, image] of allCells())
+    have[name] ??= (await serial(() => discord<{ id: string }>(`/applications/${id}/emojis`, 'POST', { name, image: `data:image/png;base64,${image.toString('base64')}` }))).id
+  setSetting('bot:emoji', have)
+}
+
+/** The bar's emoji ids by name; empty until syncBarEmoji has run, and the bar falls back to text. */
+export const barEmoji = () => getSetting<Record<string, string>>('bot:emoji') ?? {}
+
 /** Replaces the "thinking…" placeholder of a slash command with its answer. */
-export const answerInteraction = (applicationId: string, interactionToken: string, text: string) =>
-  discord(`/webhooks/${applicationId}/${interactionToken}/messages/@original`, 'PATCH', message(text), false)
+export const answerInteraction = (applicationId: string, interactionToken: string, embeds: Embed[]) =>
+  discord(`/webhooks/${applicationId}/${interactionToken}/messages/@original`, 'PATCH', message(embeds), false)

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { setSetting, upsertUser } from '@/lib/db'
 import { announce } from '@/lib/discord'
+import { embed } from '@/lib/embeds'
 import { pinToken, plexAccount, wirePlex } from '@/lib/plex'
 import { PIN_COOKIE, startSession } from '@/lib/session'
 
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
       // Kept so the Discord bot can see who's watching (/status/sessions) and who the server is shared with.
       setSetting('plexToken', token)
     }
-    announce('activity', `🔑 **${account.username}** signed in to Arrmy${account.access === 'admin' ? ' (Admin)' : ''}.`)
+    const role = account.access === 'admin' ? 'the Admin' : 'a Requester'
+    announce('activity', embed({ colour: 'info', app: 'Arrmy', title: `${account.username} signed in`, description: `Signed in to Arrmy as ${role}.`, art: account.avatar }))
     await startSession(account.id, request.headers.get('x-forwarded-proto')?.startsWith('https') ?? false)
     return go('/')
   } catch (e) {

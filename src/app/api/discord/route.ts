@@ -2,6 +2,7 @@ import { createPublicKey, verify } from 'node:crypto'
 import { after } from 'next/server'
 import { answer } from '@/lib/commands'
 import { answerInteraction } from '@/lib/discord'
+import { embed } from '@/lib/embeds'
 
 // Discord's public key is the raw 32 bytes of an Ed25519 key; this prefix makes it a key node:crypto can read.
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
@@ -33,8 +34,10 @@ export async function POST(request: Request) {
   const { name, options = [] } = interaction.data
   // Discord wants a reply within 3 seconds, so say "thinking…" now and edit in the answer when it's ready.
   after(async () => {
-    const text = await answer(name, Object.fromEntries(options.map((o) => [o.name, String(o.value)]))).catch((e) => `Couldn't answer: ${e.message}`)
-    await answerInteraction(interaction.application_id, interaction.token, text).catch((e) => console.warn(`[discord] /${name}: ${e.message}`))
+    const cards = await answer(name, Object.fromEntries(options.map((o) => [o.name, String(o.value)]))).catch((e) => [
+      embed({ colour: 'danger', app: 'Arrmy', title: "Couldn't answer", description: `${e.message}. Try again in a minute.`, at: false }),
+    ])
+    await answerInteraction(interaction.application_id, interaction.token, cards).catch((e) => console.warn(`[discord] /${name}: ${e.message}`))
   })
   return Response.json({ type: 5, data: { flags: 64 } }) // 64: only whoever asked sees it
 }

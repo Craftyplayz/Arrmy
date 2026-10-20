@@ -3,15 +3,17 @@
 import { queueOf, retryRelease } from './arr'
 import { audiobookTorrents, dropAudiobookRelease, searchDroppedBooks } from './books'
 import { addDeadRelease, deadReleaseCount, isDeadRelease, pendingBookSearches, requestsFor, setSearchPending } from './db'
+import { coverUrl } from './bookrules'
 import { announce } from './discord'
-import { byDownload, deadReason, nameOf, STRIKES } from './problems'
+import { embed } from './embeds'
+import { byDownload, deadReason, nameOf, posterIn, STRIKES } from './problems'
 import { torrents } from './qbit'
 
 // The qBittorrent categories Radarr, Sonarr and LazyLibrarian file their torrents under. Anything else is left alone.
 const CATEGORIES = new Set(['movies', 'tv', 'books'])
 
 /** What each torrent hash is for, and how to swap it for another release. */
-type Target = { item: string; title: string; book?: string; swap: () => Promise<unknown> }
+type Target = { item: string; title: string; app: string; art?: string | null; book?: string; swap: () => Promise<unknown> }
 
 async function targets(categories: Set<string>) {
   const [movies, tv, books] = await Promise.all([
@@ -27,16 +29,22 @@ async function targets(categories: Set<string>) {
       found.set(r.downloadId.toLowerCase(), {
         item: service === 'radarr' ? `radarr:${r.movieId}` : `sonarr:${r.seriesId}:${r.seasonNumber}`,
         title: nameOf(r),
+        app: service === 'radarr' ? 'Radarr' : 'Sonarr',
+        art: posterIn(r.movie?.images ?? r.series?.images),
         swap: () => retryRelease(service, g.map((x) => x.id)),
       })
     }
-  for (const [hash, book] of books)
+  for (const [hash, book] of books) {
+    const request = requestsFor('audiobook', book)[0]
     found.set(hash, {
       item: `book:${book}`,
-      title: requestsFor('audiobook', book)[0]?.title ?? book,
+      title: request?.title ?? book,
+      app: 'LazyLibrarian',
+      art: request?.poster ?? coverUrl(undefined, book),
       book,
       swap: () => dropAudiobookRelease(hash),
     })
+  }
   return found
 }
 
@@ -60,7 +68,17 @@ export async function checkDeadReleases(now = Date.now()) {
       if (last) console.warn(`[dead] ${target.title}: ${t.reason}. ${strike} dead releases in a row, so it's a Problem now`)
       else {
         console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${STRIKES})`)
-        announce('problems', `🔁 **${target.title}**: ${t.reason.toLowerCase()}, so Arrmy is trying another release (${strike} of ${STRIKES}).`)
+        announce(
+          'problems',
+          embed({
+            colour: 'info',
+            app: target.app,
+            title: target.title,
+            art: target.art,
+            description: `${t.reason}, so Arrmy is trying another release.`,
+            fields: [['Try', `${strike} of ${STRIKES}`]],
+          }),
+        )
       }
     }
   }

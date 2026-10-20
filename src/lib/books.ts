@@ -107,7 +107,7 @@ export const audiobookStatuses = async (bookIds: string[]): Promise<(Status | nu
  * popular title) and can take minutes. Same source, same order, same BookIDs, so Request still goes through
  * LazyLibrarian.
  */
-async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
+export async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
   const query = new URLSearchParams({ q: term, limit: '30', fields: 'key,title,author_name,cover_i,first_publish_year' })
   const res = await fetch(`${OPENLIBRARY_URL}/search.json?${query}`, {
     headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' }, // OpenLibrary asks apps to identify themselves

@@ -1,6 +1,6 @@
 // Discord bot rules: its channels, how messages read, and how settings are compared. No I/O here, so they can be unit-tested.
 import { createHash } from 'node:crypto'
-import type { Problem, Torrent } from './problems'
+import type { Problem } from './problems'
 
 /** The bot's channels and their topics, created in this order under an Arrmy category. */
 export const CHANNELS = {
@@ -14,13 +14,8 @@ export const CHANNELS = {
 } as const
 export type Channel = keyof typeof CHANNELS
 
-/** The qBittorrent categories Radarr, Sonarr and LazyLibrarian file their torrents under. */
-export const CATEGORY_NAMES: Record<string, string> = { movies: 'Movie', tv: 'TV', books: 'Audiobook' }
-
-export const bar = (fraction: number, width = 12) => {
-  const n = Math.round(Math.min(1, Math.max(0, fraction)) * width)
-  return '▓'.repeat(n) + '░'.repeat(width - n)
-}
+/** The qBittorrent categories Radarr, Sonarr and LazyLibrarian file their torrents under, and which app each is. */
+export const CATEGORY_APPS: Record<string, string> = { movies: 'Radarr', tv: 'Sonarr', books: 'LazyLibrarian' }
 
 export function duration(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0 || seconds >= 8_640_000) return 'unknown'
@@ -30,28 +25,7 @@ export function duration(seconds: number) {
 }
 
 export const size = (bytes: number) =>
-  bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : bytes >= 1e6 ? `${Math.round(bytes / 1e6)} MB` : `${Math.ceil(bytes / 1e3)} KB`
-
-const WAITING: Record<string, string> = {
-  metaDL: 'fetching its file list',
-  forcedMetaDL: 'fetching its file list',
-  stalledDL: 'nobody sharing it right now',
-  queuedDL: 'queued',
-  stoppedDL: 'paused',
-  pausedDL: 'paused',
-  checkingDL: 'checking files',
-  error: 'error in qBittorrent',
-  missingFiles: 'files missing',
-}
-
-/** A download's live message in #downloads. */
-export function downloadMessage(t: Torrent) {
-  const head = `**${t.name}** · ${CATEGORY_NAMES[t.category] ?? t.category}`
-  if (t.progress >= 1) return `✅ ${head}\nDone · ${size(t.size)}`
-  const pct = Math.floor(t.progress * 100)
-  const moving = t.dlspeed > 0 ? `${(t.dlspeed / 1_048_576).toFixed(1)} MB/s · ${duration(t.eta)} left` : (WAITING[t.state] ?? 'waiting')
-  return `⬇️ ${head}\n${bar(t.progress)} ${pct}% of ${size(t.size)} · ${moving} · ${t.num_seeds} seeds`
-}
+  bytes >= 1e12 ? `${(bytes / 1e12).toFixed(2)} TB` : bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : bytes >= 1e6 ? `${Math.round(bytes / 1e6)} MB` : `${Math.ceil(bytes / 1e3)} KB`
 
 /** Identifies a Problem across checks; the title rather than ids, which change as episodes are found. */
 export const problemKey = (p: Problem) => `${p.service}:${p.kind}:${p.title}`

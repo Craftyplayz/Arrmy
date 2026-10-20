@@ -16,7 +16,7 @@ test('queue states become the right Problem, with every queue id of the download
 
   const stalled = [record({ id: 4, trackedDownloadStatus: 'warning', trackedDownloadState: 'downloading', statusMessages: [{ title: 'x', messages: ['The download is stalled with no connections'] }], movie: { title: 'Dune', year: 2021 } })]
   assert.deepEqual(queueProblem('radarr', stalled), {
-    kind: 'Failed Download', service: 'radarr', title: 'Dune (2021)', detail: 'The download is stalled with no connections', fix: 'retry', ids: [4],
+    kind: 'Failed Download', service: 'radarr', title: 'Dune (2021)', detail: 'The download is stalled with no connections', fix: 'retry', ids: [4], poster: undefined,
   })
 
   const blocked = [5, 6].map((id) => record({ id, trackedDownloadStatus: 'warning', trackedDownloadState: 'importBlocked', statusMessages: [{ title: 'x', messages: ['No files found are eligible for import'] }], series: { title: 'Bluey' }, seasonNumber: 2 }))

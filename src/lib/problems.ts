@@ -13,6 +13,8 @@ export type Problem = {
   ids: number[]
   /** The torrent, for an audiobook's retry. */
   hash?: string
+  /** The poster or cover, for Discord. */
+  poster?: string | null
 }
 
 /** A torrent as qBittorrent's /torrents/info lists it. */
@@ -49,13 +51,16 @@ export function deadReason(t: Torrent, now = Date.now()) {
 }
 export type Download = { title: string; size: number; sizeleft: number }
 
-export type MissingMovie = { id: number; title: string; year?: number; isAvailable: boolean; added: string }
+type Images = { coverType: string; remoteUrl?: string }[]
+export const posterIn = (images?: Images) => images?.find((i) => i.coverType === 'poster')?.remoteUrl
+
+export type MissingMovie = { id: number; title: string; year?: number; isAvailable: boolean; added: string; images?: Images }
 export type MissingEpisode = {
   id: number
   seriesId: number
   seasonNumber: number
   airDateUtc?: string
-  series?: { title: string; added: string }
+  series?: { title: string; added: string; images?: Images }
 }
 
 const HOUR = 3_600_000
@@ -89,7 +94,7 @@ export function queueProblem(service: Service, group: QueueRecord[]): Problem | 
         : undefined
   if (!kind) return
   const detail = r.statusMessages?.flatMap((m) => m.messages).find(Boolean) ?? r.errorMessage ?? r.title
-  return { kind, service, title: nameOf(r), detail, fix: 'retry', ids: group.map((g) => g.id) }
+  return { kind, service, title: nameOf(r), detail, fix: 'retry', ids: group.map((g) => g.id), poster: posterIn(r.movie?.images ?? r.series?.images) }
 }
 
 /** Missing = nothing found for over an hour (a fresh Request's first search gets that long), and not downloading. */
@@ -105,6 +110,7 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
       detail: 'No release found yet.',
       fix: 'search',
       ids: [m.id],
+      poster: posterIn(m.images),
     }))
 
   const seasons = new Map<string, MissingEpisode[]>()
@@ -122,6 +128,7 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
       detail: `${eps.length} episode${eps.length > 1 ? 's' : ''} with no release found yet.`,
       fix: 'search',
       ids: eps.map((e) => e.id),
+      poster: posterIn(eps[0].series?.images),
     })
   }
   return problems

@@ -55,7 +55,7 @@ Plex runs on Docker's bridge network. Set **Plex → Settings → Network → LA
 
 ## Discord
 
-The bot makes an **Arrmy** category in your server with seven channels: #requests, #downloads (a live message per download), #problems, #admin-log, #system, #updates and #activity. It only reads and reports, and @mentions you for Problems, app updates, an app or the VPN going down, low disk space and failed backups. It has no live connection to Discord, so nothing extra runs: Arrmy calls Discord's API, and Discord sends slash commands to Arrmy.
+The bot makes an **Arrmy** category in your server with seven channels: #requests, #downloads (a live card per download, updated every 5 seconds), #problems, #admin-log, #system, #updates and #activity. Every message is a card with the poster, cover or app icon, in [DESIGN.md](DESIGN.md)'s colours; the progress bar's pieces are uploaded once as the bot's own emoji. It only reads and reports, and @mentions you for Problems, app updates, an app or the VPN going down, low disk space and failed backups. It has no live connection to Discord, so nothing extra runs: Arrmy calls Discord's API, and Discord sends slash commands to Arrmy.
 
 1. [discord.com/developers/applications](https://discord.com/developers/applications) → **New Application**, name it Arrmy.
 2. **General Information**: copy the **Public Key** (`DISCORD_PUBLIC_KEY`). Set **Interactions Endpoint URL** to `https://arrmy.<your domain>/api/discord` (after step 5, since Discord checks it).
