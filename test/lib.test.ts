@@ -33,10 +33,25 @@ test('series status only counts the requested seasons', () => {
   const series = { id: 7, seasons: [season(0, 0, 3), season(1, 10, 10), season(2, 4, 10), season(3, 0, 0, false)] }
   assert.deepEqual(seriesStatus(series, [], [1]), { label: 'Available' })
   assert.deepEqual(seriesStatus(series, [], [1, 2]), { label: 'Partially available' })
-  assert.deepEqual(seriesStatus(series, [{ seriesId: 7, size: 10, sizeleft: 5 }], [2]), { label: 'Downloading', progress: 50 })
+  assert.deepEqual(seriesStatus(series, [{ seriesId: 7, size: 10, sizeleft: 5 }], [2]), { label: 'Downloading', progress: 25 })
   assert.deepEqual(seriesStatus(series, []), { label: 'Partially available' }, 'defaults to monitored seasons, skips specials')
   assert.equal(seriesStatus(series, [], [9]), null, 'season not in Sonarr')
   assert.equal(seriesStatus(undefined, []), null)
+})
+
+test('series progress weighs every file of the Request by size', () => {
+  // Season 2: 4 of 10 episodes imported (1 GB each), and a season pack of the rest (6 GB, half done)
+  const series = {
+    id: 7,
+    seasons: [{ seasonNumber: 2, monitored: true, statistics: { episodeFileCount: 4, episodeCount: 10, sizeOnDisk: 4 } }],
+  }
+  const pack = (n: number, size: number, sizeleft: number) =>
+    Array.from({ length: n }, () => ({ seriesId: 7, seasonNumber: 2, downloadId: 'ABC', size, sizeleft }))
+  assert.deepEqual(seriesStatus(series, pack(6, 6, 3), [2]), { label: 'Downloading', progress: 70 }, 'pack counted once')
+  // a pack of 3 episodes not started; the other 3 have no release yet, so they're guessed at the 1 GB average
+  assert.deepEqual(seriesStatus(series, pack(3, 3, 3), [2]), { label: 'Downloading', progress: 40 })
+  const otherSeason = [{ seriesId: 7, seasonNumber: 5, size: 10, sizeleft: 10 }]
+  assert.deepEqual(seriesStatus(series, otherSeason, [2]), { label: 'Partially available' }, 'ignores unrequested seasons')
 })
 
 test('multi-audio release titles', () => {

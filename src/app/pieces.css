@@ -8,6 +8,9 @@
 
 .ar-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 28px 0 12px; font-size: 20px; }
 .ar-h .n { color: var(--muted); font-size: 14px; font-weight: 400; }
+/* a smaller heading inside a drawer: one per season above its episodes */
+.ar-h3 { margin: 0 0 8px; font-size: 15px; }
+.ar-h3 + .rows { margin-bottom: 16px; }
 .ar-more { margin-left: auto; font-size: 14px; font-weight: 400; }
 
 /* ---------- hero (art-led pages) ---------- */

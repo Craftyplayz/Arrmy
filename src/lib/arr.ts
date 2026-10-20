@@ -83,7 +83,7 @@ export type SearchResult = {
 export const posterOf = (media: Media) => media.images?.find((i) => i.coverType === 'poster')?.remoteUrl
 
 const libraryMovie = async (tmdbId: number) => (await arr<LibraryMovie[]>('radarr', `/movie?tmdbId=${tmdbId}`))[0]
-const librarySeries = async (tvdbId: number) => (await arr<LibrarySeries[]>('sonarr', `/series?tvdbId=${tvdbId}`))[0]
+export const librarySeries = async (tvdbId: number) => (await arr<LibrarySeries[]>('sonarr', `/series?tvdbId=${tvdbId}`))[0]
 export type QueueRecord = QueueItem & {
   id: number
   title: string

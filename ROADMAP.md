@@ -17,6 +17,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Sign in with Plex | Plex PIN sign-in. The Plex server's owner is the Admin, people it's shared with are Requesters, anyone else is turned away. | Unit, Fake, Live for the Admin. **Not yet live:** a Requester signing in. |
 | Search and Request | Search movies and shows; request a movie, or chosen seasons of a show. Radarr or Sonarr starts searching straight away. | Fake, Live |
 | Status | Requested → Downloading (live %, read from qBittorrent every 5 seconds) → Available. | Unit, Fake, Live up to Downloading. **Not yet live:** Available (nothing has finished importing yet). |
+| Episode files | A show's panel lists every episode of its requested seasons with its file, its state (Available, Downloading, Queued, Waiting for a release, Not aired yet…) and a progress bar, read live from Sonarr and qBittorrent while the panel is open. Files are matched to episodes by `S01E03`, else by Sonarr's own parser (`1x03`, anime numbering, double episodes). The poster's % covers every file of the Request, weighted by size. | Unit (the poster %), Live (Sonarr's parser). **Not yet live:** the panel itself. |
 | Edit seasons | Add or remove seasons of a requested show. Removed seasons are deleted unless someone else requested them. | Fake. **Not yet live.** |
 | Remove | Cancels a Request if nothing has downloaded; otherwise deletes the download and the files, keeping whatever another Request still wants. | Fake. **Not yet live.** |
 | Discord message | Posts in #requests when a Request becomes Available (see Discord bot). | Fake. **Not yet live.** |
@@ -91,12 +92,13 @@ Movies and TV:
 3. A movie and a TV season import into Plex and show Available.
 4. Edit seasons and Remove on a real show and movie.
 5. Set size limits in Settings and check Radarr and Sonarr picked them up.
+6. Open a downloading show's panel: every episode has a row, and each bar moves on its own.
 
 Everyone:
 
-6. Set up the Discord bot (README → Discord): the channels appear, a Request shows in #requests, and `/status` answers.
-7. A Requester signs in.
-8. A dead release is swapped by itself, and a third in a row becomes a Problem and @mentions you (set `DISCORD_ADMIN_ID` first).
+7. Set up the Discord bot (README → Discord): the channels appear, a Request shows in #requests, and `/status` answers.
+8. A Requester signs in.
+9. A dead release is swapped by itself, and a third in a row becomes a Problem and @mentions you (set `DISCORD_ADMIN_ID` first).
 
 Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since the stack's Samba was dropped, and can be deleted.
 

@@ -6,6 +6,7 @@ import { requireUser } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
 import { editSeasons, removeRequest } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
+import { EpisodeFiles } from '../episode-files'
 import { SubmitButton } from '../submit-button'
 import { Badge, Cover, day, Hero, num } from '../ui'
 
@@ -79,6 +80,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                 <span>Requested on</span>
                 <span>{when}</span>
               </div>
+              {r.media_type === 'tv' && <EpisodeFiles id={r.id} />}
               {details && <Manage r={r} details={details[i]} />}
             </Cover>
           )

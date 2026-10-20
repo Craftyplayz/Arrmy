@@ -39,6 +39,11 @@ export async function liveProgress(): Promise<Map<string, { size: number; sizele
   return new Map(torrents.map((t) => [t.hash.toUpperCase(), { size: t.size, sizeleft: t.amount_left }]))
 }
 
+/** A file in a torrent, with progress from 0 to 1. `name` includes the torrent's folder. */
+export type TorrentFile = { name: string; size: number; progress: number }
+export const torrentFiles = async (hash: string): Promise<TorrentFile[]> =>
+  (await qbit(`/torrents/files?hash=${hash.toLowerCase()}`)).json()
+
 /** Total download and upload speed right now, in bytes per second. */
 export async function transferSpeeds() {
   const t: { dl_info_speed: number; up_info_speed: number } = await (await qbit('/transfer/info')).json()
