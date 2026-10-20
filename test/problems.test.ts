@@ -34,7 +34,7 @@ test('dead releases: no file list after 5 minutes, or nothing downloaded after 1
   const now = Date.now()
   const torrent = (state: string, minutes: number, downloaded = 0) => ({
     hash: 'a', name: 'x', category: 'movies', state, downloaded, added_on: (now - minutes * 60_000) / 1000,
-    progress: 0, size: 1, dlspeed: 0, num_seeds: 0, eta: 8_640_000,
+    progress: 0, size: 1, dlspeed: 0, num_seeds: 0, eta: 8_640_000, completion_on: -1,
   })
   assert.equal(deadReason(torrent('metaDL', 4), now), undefined, 'still fetching its file list')
   assert.equal(deadReason(torrent('metaDL', 6), now), 'No file list after 5 minutes')

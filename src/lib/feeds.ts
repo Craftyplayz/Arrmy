@@ -107,7 +107,11 @@ async function downloads() {
   const due: { hash: string; card: Embed; sig: string; done: boolean }[] = []
   for (const t of list) {
     const hash = t.hash.toLowerCase()
-    if (!tracked[hash] && t.progress >= 1) continue // finished before the bot saw it: no card
+    // After a restart qBittorrent rechecks every torrent, and meanwhile finished ones can read under 100% (so they
+    // looked new, and were posted as "finished in 1 min"). When a torrent finished is kept, so that decides.
+    const finished = t.progress >= 1 || t.completion_on > 0
+    if (!tracked[hash] && finished) continue // finished before the bot saw it: no card
+    if (!finished && /^checking/.test(t.state)) continue // mid-recheck: its numbers aren't real yet
     const s = (tracked[hash] ??= { id: '', sig: '', edited: 0, started: now, name: t.name })
     s.name ??= t.name // tracked by 1.1.0-rc.10, before cards
     s.started ??= now
@@ -116,10 +120,10 @@ async function downloads() {
       s.meta = metas.get(hash)
       looked.add(hash)
     } else if (unknown.includes(t)) s.tried = now
-    const card = downloadEmbed(t, s.meta, emoji, s.started)
+    const card = downloadEmbed(finished ? { ...t, progress: 1 } : t, s.meta, emoji, s.started)
     const { timestamp: _, ...rest } = card
     const sig = JSON.stringify(rest)
-    const done = t.progress >= 1
+    const done = finished
     if (done || (sig !== s.sig && s.id !== 'gone')) due.push({ hash, card, sig, done })
   }
   // Finished ones first (their move to #downloaded is news), then new cards, then whichever has waited longest.

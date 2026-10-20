@@ -33,6 +33,8 @@ export type Torrent = {
   num_seeds: number
   /** Seconds left; 8640000 means never. */
   eta: number
+  /** When it finished (Unix seconds), or -1. Kept across restarts, unlike progress while qBittorrent rechecks. */
+  completion_on: number
 }
 
 /** Dead releases in a row for one title before Arrmy stops swapping them and makes it a Problem. */
