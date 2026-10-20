@@ -148,6 +148,32 @@ services:
     ports:
       - ${SONARR_PORT:-7658}:8989
 
+  # Copies every app's settings at start and nightly at 04:00 (UTC), keeping BACKUP_KEEP_DAYS days.
+  # Plex's cache, artwork and logs are skipped: large, and Plex re-downloads them. Restore steps: README.
+  backup:
+    image: alpine:latest
+    restart: unless-stopped
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}:/config:ro
+      - ${BACKUP_DIR:-/opt/arrmy-backups}:/backups
+    entrypoint: [/bin/sh, -c]
+    command:
+      - |
+        cat > /backup.sh <<'SCRIPT'
+        name=/backups/arrmy-$$(date +%F-%H%M).tar.gz
+        if tar -czf "$$name.part" -C /config \
+            --exclude='*/Plex Media Server/Cache' --exclude='*/Plex Media Server/Media' \
+            --exclude='*/Plex Media Server/Metadata' --exclude='*/Plex Media Server/Logs' .; then
+          mv "$$name.part" "$$name" && echo "[backup] saved $$name ($$(du -h "$$name" | cut -f1))"
+        else
+          rm -f "$$name.part" && echo "[backup] FAILED, kept the older backups"
+        fi
+        find /backups -name 'arrmy-*.tar.gz' -mtime +${BACKUP_KEEP_DAYS:-7} -delete
+        SCRIPT
+        echo '0 4 * * * sh /backup.sh' > /etc/crontabs/root
+        sh /backup.sh
+        exec crond -f
+
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped

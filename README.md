@@ -24,6 +24,13 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 **Updating:** open the stack and click **Pull and redeploy**, with **Re-pull image** turned on.
 
+**Backups:** the `backup` container saves every app's settings to `BACKUP_DIR` when it starts and nightly at 04:00 (UTC), keeping `BACKUP_KEEP_DAYS` days. To restore:
+
+1. Stop the stack in Portainer.
+2. Over SSH, list the backups and pick one: `ls -lh <BACKUP_DIR>`
+3. Unpack it over the settings folder: `sudo tar -xzf <BACKUP_DIR>/arrmy-<date>.tar.gz -C <CONFIG_DIR>`
+4. Start the stack.
+
 **Without Portainer:** clone the repo on the box, save your filled-in file as `.env` next to `docker-compose.yml`, and run `docker compose up -d`. Update with `git pull && docker compose pull && docker compose up -d`.
 
 ## On the home network

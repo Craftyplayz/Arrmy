@@ -10,11 +10,12 @@
 - **Edit and remove Requests.** Add or remove seasons of a show. Removing a Request cancels it if nothing has downloaded yet, otherwise deletes the download and the files, keeping whatever another Request still wants.
 - **Media files on your PC.** Through the server's existing Samba share (port 445 is already in use there, so the stack doesn't run its own).
 
+- **Config backups.** Every app's settings are copied nightly and kept for a week (restore steps in the README).
+
 ## Next
 
-1. **Config backups.** A nightly copy of every app's settings folder, so a deleted or broken config can be restored.
-2. **Size limits.** A maximum size per movie, per episode and per show, set by the Admin. A TV Request whose estimate goes over the show limit is refused with the estimate.
-3. **Admin view.** Problems (Missing, Failed Download, Failed Import) with one-click fixes; stats (library counts, disk space, live queue, Requests by person).
+1. **Size limits.** A maximum size per movie, per episode and per show, set by the Admin. A TV Request whose estimate goes over the show limit is refused with the estimate.
+2. **Admin view.** Problems (Missing, Failed Download, Failed Import) with one-click fixes; stats (library counts, disk space, live queue, Requests by person).
 
 ## Later
 
