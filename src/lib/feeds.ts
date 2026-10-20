@@ -9,8 +9,8 @@ import { abs, ABS_URL, ll } from './books'
 import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, size } from './botrules'
 import { COMMANDS } from './commands'
 import { getSetting, setSetting } from './db'
-import { announce, barEmoji, botEnabled, edit, post, publicUrl, registerCommands, syncBarEmoji } from './discord'
-import { downloadEmbed, embed, ICONS, removedEmbed, sentence, type DownloadMeta, type Embed } from './embeds'
+import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncBarEmoji } from './discord'
+import { COLOUR, downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
 import { bookArt, downloadMeta, plexArt } from './media'
 import { plex, PLEX_URL } from './plex'
 import { DEAD_DETAIL } from './problems'
@@ -57,13 +57,43 @@ const APP_URLS: Record<string, string | undefined> = {
 }
 const appCard = (name: string) => ({ app: name, appUrl: APP_URLS[name], art: ICONS[name] })
 
-// #downloads: one card per torrent, updated every 5 seconds. Discord allows about 5 edits per 5 seconds in a channel, so
-// each round edits the 4 that waited longest; with more downloads each one updates a little less often.
+// #downloads: one card per torrent while it downloads, updated every 5 seconds. Discord allows about 5 edits per 5 seconds
+// in a channel, so each round edits the 4 that waited longest; with more downloads each one updates a little less often.
+// A finished download's card moves to #downloaded; a removed torrent's card just goes.
 const EDITS_PER_ROUND = 4
 type Tracked = Record<string, { id: string; sig: string; edited: number; started: number; name: string; meta?: DownloadMeta; tried?: number }>
 
+/** A card as Discord returns it, cut back to what can be posted again (no proxy addresses, sizes or type). */
+const repostable = (e: Embed): Embed => ({
+  title: e.title,
+  url: e.url,
+  description: e.description,
+  color: e.color,
+  author: e.author && { name: e.author.name, url: e.author.url, icon_url: e.author.icon_url },
+  thumbnail: e.thumbnail && { url: e.thumbnail.url },
+  fields: e.fields,
+  footer: e.footer && { text: e.footer.text },
+  timestamp: e.timestamp,
+})
+
+/**
+ * Once after a start: cards in #downloads that aren't live (from before #downloaded existed, or finished while Arrmy was
+ * down) move to #downloaded if they're Done cards, and go either way.
+ */
+let tidied = false
+async function tidyDownloads(tracked: Tracked) {
+  tidied = true
+  const live = new Set(Object.values(tracked).map((s) => s.id))
+  for (const m of await ownMessages('downloads')) {
+    if (live.has(m.id)) continue
+    if (m.embeds[0]?.color === COLOUR.ok) await post('downloaded', repostable(m.embeds[0]))
+    await remove('downloads', m.id)
+  }
+}
+
 async function downloads() {
   const list = (await torrents()).filter((t) => t.category in CATEGORY_APPS)
+  if (!tidied) await tidyDownloads(getSetting<Tracked>('bot:downloads') ?? {})
   const tracked = getSetting<Tracked>('bot:downloads') ?? {}
   const saved = JSON.stringify(tracked)
   const now = Date.now()
@@ -85,21 +115,27 @@ async function downloads() {
     const card = downloadEmbed(t, s.meta, emoji, s.started)
     const { timestamp: _, ...rest } = card
     const sig = JSON.stringify(rest)
-    if (sig !== s.sig && s.id !== 'gone') due.push({ hash, card, sig, done: t.progress >= 1 })
+    const done = t.progress >= 1
+    if (done || (sig !== s.sig && s.id !== 'gone')) due.push({ hash, card, sig, done })
   }
-  // New cards first, then finished ones, then whichever has waited longest.
-  const rank = (d: (typeof due)[0]) => (!tracked[d.hash].id ? 0 : d.done ? 1 : 2)
+  // Finished ones first (their move to #downloaded is news), then new cards, then whichever has waited longest.
+  const rank = (d: (typeof due)[0]) => (d.done ? 0 : !tracked[d.hash].id ? 1 : 2)
   due.sort((a, b) => rank(a) - rank(b) || tracked[a.hash].edited - tracked[b.hash].edited)
   for (const d of due.slice(0, EDITS_PER_ROUND)) {
     const s = tracked[d.hash]
+    if (d.done) {
+      await post('downloaded', d.card)
+      if (s.id && s.id !== 'gone') await remove('downloads', s.id)
+      delete tracked[d.hash]
+      continue
+    }
     if (!s.id) s.id = await post('downloads', d.card)
     else if (!(await edit('downloads', s.id, d.card))) s.id = 'gone' // deleted by hand: leave it be
     Object.assign(s, { sig: d.sig, edited: now })
-    if (d.done) delete tracked[d.hash]
   }
   for (const [hash, s] of Object.entries(tracked)) {
     if (list.some((t) => t.hash.toLowerCase() === hash)) continue
-    if (s.id && s.id !== 'gone') await edit('downloads', s.id, removedEmbed(s.name, s.meta))
+    if (s.id && s.id !== 'gone') await remove('downloads', s.id) // removed from qBittorrent: its card goes
     delete tracked[hash]
   }
   if (JSON.stringify(tracked) !== saved) setSetting('bot:downloads', tracked)

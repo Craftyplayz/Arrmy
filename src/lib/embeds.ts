@@ -151,7 +151,3 @@ export function downloadEmbed(t: Torrent, meta: DownloadMeta | undefined, emoji:
     ],
   })
 }
-
-/** The card a download's message becomes when its torrent is deleted. */
-export const removedEmbed = (name: string, meta?: DownloadMeta) =>
-  embed({ colour: 'neutral', app: meta?.app, appUrl: meta?.appUrl, title: meta?.title ?? name, url: meta?.url, art: meta?.art, description: 'Removed from qBittorrent.', footer: meta ? name : undefined })

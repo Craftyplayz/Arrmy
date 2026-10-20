@@ -5,7 +5,8 @@ import type { Problem } from './problems'
 /** The bot's channels and their topics, created in this order under an Arrmy category. */
 export const CHANNELS = {
   requests: 'New Requests, edits and removals, refused Requests, and what became Available.',
-  downloads: 'One live message per download.',
+  downloads: "What's downloading now: one live card each, gone when it finishes.",
+  downloaded: 'Finished downloads, with how long each took.',
   problems: 'New Problems and automatic fixes. @mentions the Admin.',
   'admin-log': "Arrmy's settings and Admin actions, settings changed inside the apps, and who has access to Plex and Audiobookshelf.",
   system: 'Apps and the VPN going down or coming back, health warnings, disk space and backups.',

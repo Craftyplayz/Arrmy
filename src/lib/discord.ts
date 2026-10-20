@@ -59,10 +59,14 @@ async function setupChannels() {
     all.find((c) => c.type === 4 && c.name.toLowerCase() === 'arrmy') ??
     (await discord<DiscordChannel>(`/guilds/${guild()}/channels`, 'POST', { name: 'Arrmy', type: 4 }))
   const ids = {} as Record<Channel, string>
+  let created = false
   for (const [name, topic] of Object.entries(CHANNELS) as [Channel, string][]) {
     const found = all.find((c) => c.type === 0 && c.name === name && c.parent_id === category.id)
+    created ||= !found
     ids[name] = (found ?? (await discord<DiscordChannel>(`/guilds/${guild()}/channels`, 'POST', { name, type: 0, parent_id: category.id, topic }))).id
   }
+  // A channel made later (#downloaded) would sit at the bottom; put them all back in CHANNELS' order.
+  if (created) await discord(`/guilds/${guild()}/channels`, 'PATCH', (Object.keys(CHANNELS) as Channel[]).map((name, position) => ({ id: ids[name], position })))
   return ids
 }
 
@@ -117,6 +121,26 @@ export function edit(channel: Channel, id: string, embed: Embed) {
       if (e instanceof DiscordError && e.status === 404) return false
       throw e
     }
+  })
+}
+
+/** Deletes a message the bot posted. Already gone is fine. */
+export function remove(channel: Channel, id: string) {
+  return serial(async () => {
+    try {
+      await discord(`/channels/${await channelId(channel)}/messages/${id}`, 'DELETE')
+    } catch (e) {
+      if (!(e instanceof DiscordError && e.status === 404)) throw e
+    }
+  })
+}
+
+/** The bot's own recent messages in a channel (the last 100), newest first. */
+export function ownMessages(channel: Channel) {
+  return serial(async () => {
+    const me = await discord<{ id: string }>('/users/@me')
+    const list = await discord<{ id: string; author: { id: string }; embeds: Embed[] }[]>(`/channels/${await channelId(channel)}/messages?limit=100`)
+    return list.filter((m) => m.author.id === me.id)
   })
 }
 
