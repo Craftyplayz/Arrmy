@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { inflateSync } from 'node:zlib'
 import { allCells, cellName, drawCell, progressBar } from '../src/lib/barart.ts'
 import { upstreamUrl } from '../src/lib/abbrelay.ts'
-import { changes, compareVersions, duration, flatten, plexUsers } from '../src/lib/botrules.ts'
+import { changes, compareVersions, duration, flatten, plexUsers, releaseNotes } from '../src/lib/botrules.ts'
 import { COLOUR, distinctLinks, downloadEmbed, embed, speed } from '../src/lib/embeds.ts'
 
 const torrent = { hash: 'a', name: 'Dune.2021.1080p.BluRay', category: 'movies', state: 'downloading', added_on: 0, downloaded: 1, progress: 0.456, size: 4.2e9, dlspeed: 3_355_443, num_seeds: 1234, eta: 840, completion_on: -1 }
@@ -107,6 +107,16 @@ test('versions compare by their numbers, whatever the prefix', () => {
   assert.equal(compareVersions('release-5.2.4', 'v5.2.4'), 0)
   assert.equal(compareVersions('1.43.4.10903-e5521bd8c', '1.43.4.10903-0a1b2c3d4'), 0, 'build hash ignored')
   assert.equal(compareVersions('2.37.1', '2.38.0'), -1)
+})
+
+test('release notes: the first few changes, without markers, shas, links or translation noise', () => {
+  const radarr = `*To receive further updates, change the branch.*\n\n## Changes:\n\n* a96bf7c3ecb23cb76993770727285dc17a613fbc Multiple Translations updated by Weblate\n* 3fcf0db80f396059ffc1a4c513075a88a7816080 Don't skip health check\n* 92f24bc Fixed: Improve **logging** in [#12](https://x)\n* 223dc18 Fix modals on iOS\n* 7946e7b Fixed: Switch theme`
+  assert.equal(releaseNotes(radarr), "• Don't skip health check\n• Fixed: Improve logging in #12\n• Fix modals on iOS")
+  assert.equal(releaseNotes('Fri Oct 4th 2024 - sledgehammer999 - v5.0.1\n    - FEATURE: Add a thing\n    - BUGFIX: Fix a thing', 1), '• FEATURE: Add a thing')
+  assert.equal(releaseNotes('Test release: no more cards after a restart.'), 'Test release: no more cards after a restart.', 'no list: the first line')
+  assert.equal(releaseNotes("Merge branch 'fix' into 'master'\n\nFix profile save\n\nSee merge request LazyLibrarian/LazyLibrarian!1940"), 'Fix profile save')
+  assert.equal(releaseNotes(`- ${'x'.repeat(200)}`)?.length, 2 + 120, 'long lines are cut')
+  assert.equal(releaseNotes(''), undefined)
 })
 
 test("who Plex is shared with, from plex.tv's XML", () => {

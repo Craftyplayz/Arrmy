@@ -49,6 +49,7 @@ export async function downloadMeta(list: Torrent[]) {
     const known = library.find((b) => b.BookID === book)
     metas.set(hash, {
       app: 'LazyLibrarian',
+      appUrl: publicUrl('lazylibrarian'),
       title: requests[0]?.title ?? known?.BookName ?? book,
       url: mediaUrl('audiobook', book),
       art: requests[0]?.poster ?? coverUrl(known?.BookImg, book),

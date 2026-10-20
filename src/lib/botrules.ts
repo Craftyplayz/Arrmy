@@ -91,5 +91,25 @@ export function compareVersions(a: string, b: string) {
   return 0
 }
 
+/**
+ * A release's notes cut to their first few changes, one "• " line each: list items (- or *) and commit lines
+ * (sha message) lose their marker and sha. Notes without a list give their first line of plain text.
+ */
+export function releaseNotes(text: string, max = 3) {
+  const clean = (l: string, n: number) => {
+    const t = l.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/\*\*/g, '').trim()
+    return t.length > n ? `${t.slice(0, n - 1)}…` : t
+  }
+  const noise = (l: string) => /translat|weblate|^bump\b|^merge\b|^see merge request/i.test(l)
+  const lines = text.split('\n').map((l) => l.trim())
+  const items = lines
+    .filter((l) => /^([-*]|[0-9a-f]{7,40})\s/.test(l))
+    .map((l) => l.replace(/^[-*]\s+/, '').replace(/^[0-9a-f]{7,40}\s+/, ''))
+    .filter((l) => l && !noise(l))
+  if (items.length) return items.slice(0, max).map((l) => `• ${clean(l, 120)}`).join('\n')
+  const first = lines.find((l) => l && !l.startsWith('#') && !noise(l))
+  return first && clean(first, 300)
+}
+
 /** Markdown link that doesn't unfurl into a preview, or plain text when there's no address. */
 export const linked = (text: string, url?: string) => (url ? `[${text}](<${url}>)` : text)

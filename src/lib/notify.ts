@@ -13,7 +13,7 @@ export const titleOf = (r: Pick<RequestRow, 'title' | 'year'>) => `${r.title}${r
 function service(r: RequestItem) {
   if (r.media_type === 'movie') return { app: 'Radarr', appUrl: publicUrl('radarr', `/movie/${r.external_id}`) }
   if (r.media_type === 'tv') return { app: 'Sonarr', appUrl: publicUrl('sonarr', r.slug ? `/series/${r.slug}` : '') }
-  return { app: 'LazyLibrarian' }
+  return { app: 'LazyLibrarian', appUrl: publicUrl('lazylibrarian') }
 }
 
 /** A card in #requests about one Request: its poster, its page on the web, and what happened. */

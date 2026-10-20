@@ -14,7 +14,7 @@ const guild = () => process.env.DISCORD_GUILD_ID
 export const botEnabled = () => !!(token() && guild() && process.env.DISCORD_PUBLIC_KEY)
 
 /** A page of one of the apps at its public address, or undefined without PUBLIC_DOMAIN. */
-export const publicUrl = (app: 'arrmy' | 'radarr' | 'sonarr' | 'prowlarr' | 'qbit' | 'plex' | 'books', path = '') =>
+export const publicUrl = (app: 'arrmy' | 'radarr' | 'sonarr' | 'prowlarr' | 'qbit' | 'plex' | 'books' | 'lazylibrarian', path = '') =>
   process.env.PUBLIC_DOMAIN ? `https://${app}.${process.env.PUBLIC_DOMAIN}${path}` : undefined
 
 class DiscordError extends Error {

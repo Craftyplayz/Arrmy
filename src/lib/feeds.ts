@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { adminOverview } from './admin'
 import { arr } from './arr'
 import { abs, ABS_URL, ll } from './books'
-import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, size } from './botrules'
+import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, releaseNotes, size } from './botrules'
 import { COMMANDS } from './commands'
 import { getSetting, setSetting } from './db'
 import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncAvatar, syncBarEmoji } from './discord'
@@ -54,6 +54,7 @@ const APP_URLS: Record<string, string | undefined> = {
   qBittorrent: publicUrl('qbit'),
   Plex: publicUrl('plex', '/web'),
   Audiobookshelf: publicUrl('books'),
+  LazyLibrarian: publicUrl('lazylibrarian'),
 }
 const appCard = (name: string) => ({ app: name, appUrl: APP_URLS[name], art: ICONS[name] })
 
@@ -217,6 +218,7 @@ async function apps() {
       const s = (state[name] ??= { fails: 0, down: false })
       try {
         const now = await check()
+        if (s.version && now.version && s.version !== now.version) updated(name, s.version, now.version)
         if (s.down) announce('system', embed({ colour: 'ok', ...appCard(name), title: `${name} is back`, description: 'It answers again.' }))
         else if (s.started && now.started && s.started !== now.started)
           announce('system', embed({ colour: 'info', ...appCard(name), title: `${name} restarted`, description: 'It started again by itself or after an update.' }))
@@ -231,6 +233,14 @@ async function apps() {
     }),
   )
   setSetting('bot:apps', state) // /status reads it
+  // Containers come back over a couple of minutes after a redeploy: wait until all answer and none changed for 2,
+  // or 10 minutes at most (an app that stays down).
+  const u = getSetting<Updated>('bot:updated')
+  const now = Date.now()
+  if (u && ((Object.values(state).every((s) => !s.fails) && now - u.last >= 2 * 60_000) || now - u.first >= 10 * 60_000)) {
+    setSetting('bot:updated', undefined)
+    if (Object.keys(u.apps).length) await announceUpdates(u.apps)
+  }
 }
 
 async function vpn() {
@@ -504,12 +514,93 @@ async function arrmyChanges() {
     )
 }
 
-/** Tells #updates when the server starts running a new version of Arrmy (baked into the image at build). */
+/** Notes the server starting a new version of Arrmy (baked into the image at build), for the update card. */
 function arrmyRunning() {
   const version = process.env.ARRMY_VERSION
   const before = version && since('arrmyVersion', version)
-  if (before && before !== version)
-    announce('updates', embed({ colour: 'ok', app: 'Arrmy', title: `The server now runs Arrmy ${version}`, fields: [['Was', before]] }))
+  if (before && before !== version) updated('Arrmy', before, version)
+}
+
+// After a redeploy, one card in #updates with every app whose version changed: old → new, what's new, the changelog.
+type Updated = { first: number; last: number; apps: Record<string, [from: string, to: string]> }
+
+function updated(app: string, from: string, to: string) {
+  const now = Date.now()
+  const u = getSetting<Updated>('bot:updated') ?? { first: now, last: now, apps: {} }
+  const was = u.apps[app]?.[0] ?? from
+  if (was === to) delete u.apps[app]
+  else u.apps[app] = [was, to]
+  setSetting('bot:updated', { ...u, last: now })
+}
+
+/** Where each app's releases are: a version's page, its notes, and the changelog. */
+type Releases = { changelog: string; page: (v: string) => string | undefined; notes: (v: string) => Promise<string> }
+const onGitHub = (repo: string): Releases => {
+  const tag = (v: string) => `v${v.replace(/^v/, '')}`
+  return {
+    changelog: `https://github.com/${repo}/releases`,
+    page: (v) => `https://github.com/${repo}/releases/tag/${tag(v)}`,
+    notes: async (v) => (await github<{ body?: string }>(`/repos/${repo}/releases/tags/${tag(v)}`)).body ?? '',
+  }
+}
+const isCommit = (v: string) => /^[0-9a-f]{7,40}$/i.test(v)
+const RELEASE_PAGES: Record<string, Releases> = {
+  Arrmy: onGitHub(REPO),
+  Radarr: onGitHub('Radarr/Radarr'),
+  Sonarr: onGitHub('Sonarr/Sonarr'),
+  Prowlarr: onGitHub('Prowlarr/Prowlarr'),
+  Audiobookshelf: onGitHub('advplyr/audiobookshelf'),
+  FlareSolverr: onGitHub('FlareSolverr/FlareSolverr'),
+  qBittorrent: {
+    // Tags without GitHub releases; each tag's Changelog file starts with its own version.
+    changelog: 'https://www.qbittorrent.org/news',
+    page: (v) => `https://github.com/qbittorrent/qBittorrent/releases/tag/release-${v.replace(/^v/, '')}`,
+    notes: async (v) => {
+      const res = await fetch(`https://raw.githubusercontent.com/qbittorrent/qBittorrent/release-${v.replace(/^v/, '')}/Changelog`, { signal: AbortSignal.timeout(15_000) })
+      if (!res.ok) throw new Error(`qBittorrent Changelog → ${res.status}`)
+      return (await res.text()).split(/\n(?=\S)/)[0]
+    },
+  },
+  Plex: {
+    // One forum thread for every version; plex.tv only has notes for the newest.
+    changelog: 'https://forums.plex.tv/t/plex-media-server/30447',
+    page: () => 'https://forums.plex.tv/t/plex-media-server/30447',
+    notes: async (v) => {
+      const l = (await json<{ computer: { Linux: { version: string; items_added?: string; items_fixed?: string } } }>('https://plex.tv/api/downloads/5.json')).computer.Linux
+      return compareVersions(l.version, v) ? '' : `${l.items_added ?? ''}\n${l.items_fixed ?? ''}`.split('\n').map((x) => x && `- ${x}`).join('\n')
+    },
+  },
+  LazyLibrarian: {
+    // No releases: its version is a commit.
+    changelog: 'https://gitlab.com/LazyLibrarian/LazyLibrarian/-/commits/master',
+    page: (v) => (isCommit(v) ? `https://gitlab.com/LazyLibrarian/LazyLibrarian/-/commit/${v}` : undefined),
+    notes: async (v) => (isCommit(v) ? (await json<{ message: string }>(`https://gitlab.com/api/v4/projects/LazyLibrarian%2FLazyLibrarian/repository/commits/${v}`)).message : ''),
+  },
+}
+
+async function announceUpdates(apps: Updated['apps']) {
+  const shown = (v: string) => (isCommit(v) ? v.slice(0, 7) : v.replace(/^(v|release-)/, ''))
+  const entries = Object.entries(apps)
+  const parts = await Promise.all(
+    entries.map(async ([app, [from, to]]) => {
+      const r = RELEASE_PAGES[app]
+      const notes = r && releaseNotes(await r.notes(to).catch(() => ''), entries.length > 4 ? 1 : 3) // a card holds 4096 characters
+      return [`**${app}**  ${linked(shown(from), r?.page(from))} → ${linked(shown(to), r?.page(to))}`, notes, r && linked('Changelog', r.changelog)]
+        .filter(Boolean)
+        .join('\n')
+    }),
+  )
+  const arrmy = apps.Arrmy
+  const others = entries.length - (arrmy ? 1 : 0)
+  announce(
+    'updates',
+    embed({
+      colour: 'ok',
+      app: 'Arrmy',
+      title: arrmy ? `The server now runs Arrmy ${shown(arrmy[1])}` : others === 1 ? `${entries[0][0]} was updated` : `${others} apps were updated`,
+      description: [...parts, !others && 'No other app changed version.'].filter(Boolean).join('\n\n'),
+    }),
+  )
 }
 
 const latest = async (repo: string) => {
