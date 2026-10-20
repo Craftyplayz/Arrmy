@@ -4,6 +4,7 @@ import { applyLimits } from './limits'
 import { MULTI_AUDIO } from './releases'
 import { LAZYLIBRARIAN_URL, ll } from './books'
 import { relayAddress } from './abbrelay'
+import { qbit as qbitApi } from './qbit'
 import { hookToken, lazyLibrarianKey, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
@@ -72,6 +73,13 @@ export function startWiring() {
       // an hour after errors, e.g. a restart mid-search), so it's only marked done once the search has started.
       await ll('forceBookSearch', { type: 'AudioBook' })
       setSetting('wired:audiobookBay', host)
+    }],
+    // VueTorrent is put in /vuetorrent by the Docker mod in docker-compose.yml. Set once, so switching back is left alone.
+    ['qBittorrent: VueTorrent web UI', async () => {
+      if (getSetting<boolean>('wired:vuetorrent')) return
+      const json = JSON.stringify({ alternative_webui_enabled: true, alternative_webui_path: '/vuetorrent' })
+      await qbitApi('/app/setPreferences', new URLSearchParams({ json }))
+      setSetting('wired:vuetorrent', true)
     }],
     // Audiobook results under 50 MB are ebooks posted as audiobooks (a 2 MB "La Belle Sauvage" got grabbed three times).
     // Set once, like AudioBook Bay, so a different value chosen in LazyLibrarian later is left alone.

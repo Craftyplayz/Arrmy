@@ -102,6 +102,7 @@ services:
     environment:
       <<: *env
       WEBUI_PORT: 8080
+      DOCKER_MODS: ghcr.io/gabe565/linuxserver-mod-vuetorrent # VueTorrent in /vuetorrent, updated on each start; Arrmy turns it on
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/qbittorrent:/config
       - ${DATA_DIR:-/data}:/data
