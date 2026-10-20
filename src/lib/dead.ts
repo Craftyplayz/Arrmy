@@ -2,7 +2,7 @@
 // the same title, the last one is left alone and the Admin gets a Problem and a Discord ping instead.
 import { queueOf, retryRelease } from './arr'
 import { audiobookTorrents, dropAudiobookRelease, searchDroppedBooks } from './books'
-import { addDeadRelease, deadReleaseCount, isDeadRelease, pendingBookSearches, requestsFor, setSearchPending } from './db'
+import { addDeadRelease, addLog, deadReleaseCount, isDeadRelease, logItem, pendingBookSearches, requestsFor, setSearchPending } from './db'
 import { coverUrl } from './bookrules'
 import { announce } from './discord'
 import { embed } from './embeds'
@@ -13,7 +13,16 @@ import { torrents } from './qbit'
 const CATEGORIES = new Set(['movies', 'tv', 'books'])
 
 /** What each torrent hash is for, and how to swap it for another release. */
-type Target = { item: string; title: string; app: string; art?: string | null; book?: string; swap: () => Promise<unknown> }
+type Target = {
+  item: string
+  title: string
+  app: string
+  art?: string | null
+  book?: string
+  /** Its Request Log title (see logrules.ts), and the season for a show. */
+  log?: { item: string; seasons?: number[] }
+  swap: () => Promise<unknown>
+}
 
 async function targets(categories: Set<string>) {
   const [movies, tv, books] = await Promise.all([
@@ -31,6 +40,11 @@ async function targets(categories: Set<string>) {
         title: nameOf(r),
         app: service === 'radarr' ? 'Radarr' : 'Sonarr',
         art: posterIn(r.movie?.images ?? r.series?.images),
+        log: r.movie?.tmdbId
+          ? { item: logItem('movie', r.movie.tmdbId) }
+          : r.series?.tvdbId
+            ? { item: logItem('tv', r.series.tvdbId), seasons: r.seasonNumber === undefined ? undefined : [r.seasonNumber] }
+            : undefined,
         swap: () => retryRelease(service, g.map((x) => x.id)),
       })
     }
@@ -64,6 +78,7 @@ export async function checkDeadReleases(now = Date.now()) {
       // Swapped before it's recorded, so a swap that fails is tried again next minute.
       if (!last) await target.swap()
       addDeadRelease({ hash: t.hash, item: target.item, title: target.title, kept: last, searchPending: !last && !!target.book })
+      if (target.log && !last) addLog(target.log.item, 'dead', { downloadId: t.hash, reason: t.reason, seasons: target.log.seasons })
       // The last one becomes a Problem, which #problems announces with a ping (see feeds.ts).
       if (last) console.warn(`[dead] ${target.title}: ${t.reason}. ${strike} dead releases in a row, so it's a Problem now`)
       else {

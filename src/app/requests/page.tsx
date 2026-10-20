@@ -80,6 +80,9 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                 <span>Requested on</span>
                 <span>{when}</span>
               </div>
+              <Link className="btn small" href={`/requests/${r.id}`}>
+                Request Log
+              </Link>
               {r.media_type === 'tv' && <EpisodeFiles id={r.id} />}
               {details && <Manage r={r} details={details[i]} />}
             </Cover>

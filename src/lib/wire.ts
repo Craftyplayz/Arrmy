@@ -30,6 +30,12 @@ async function ensureProvider(
   await arr(svc, `/${resource}`, 'POST', { ...schema, ...extra, name, fields })
 }
 
+/** Switches on settings of a provider made by an older Arrmy, which ensureProvider leaves alone once it exists. */
+async function ensureFlags(svc: ServiceName, resource: string, name: string, flags: Record<string, boolean>) {
+  const p = (await arr<(Provider & { id: number } & Record<string, unknown>)[]>(svc, `/${resource}`)).find((x) => x.name === name)
+  if (p && Object.entries(flags).some(([k, v]) => p[k] !== v)) await arr(svc, `/${resource}/${p.id}`, 'PUT', { ...p, ...flags })
+}
+
 async function ensureTag(svc: ServiceName, label: string) {
   const tags = await arr<{ id: number; label: string }[]>(svc, '/tag')
   return (tags.find((t) => t.label === label) ?? (await arr<{ id: number }>(svc, '/tag', 'POST', { label }))).id
@@ -39,16 +45,18 @@ async function ensureTag(svc: ServiceName, label: string) {
 export function startWiring() {
   const qbit = { host: 'gluetun', port: 8080, username: 'admin', password: process.env.QBIT_PASSWORD }
   const webhook = { url: `http://arrmy:3000/api/hooks/arr?token=${hookToken(sessionSecret())}` }
-  const onImport = { onDownload: true, onUpgrade: true }
+  const events = { onGrab: true, onDownload: true, onUpgrade: true } // grabs feed the Request Log
   const app = (svc: 'radarr' | 'sonarr') => ({ prowlarrUrl: serviceUrl('prowlarr'), baseUrl: serviceUrl(svc), apiKey: serviceKey(svc) })
 
   let steps: [string, () => Promise<void>][] = [
     ['Radarr root folder', () => ensureRootFolder('radarr', MOVIES_ROOT)],
     ['Radarr → qBittorrent', () => ensureProvider('radarr', 'downloadclient', 'QBittorrent', 'qBittorrent', { ...qbit, movieCategory: 'movies' }, { enable: true })],
-    ['Radarr → Arrmy', () => ensureProvider('radarr', 'notification', 'Webhook', 'Arrmy', webhook, onImport)],
+    ['Radarr → Arrmy', () => ensureProvider('radarr', 'notification', 'Webhook', 'Arrmy', webhook, events)],
+    ['Radarr → Arrmy on grab', () => ensureFlags('radarr', 'notification', 'Arrmy', events)],
     ['Sonarr root folder', () => ensureRootFolder('sonarr', TV_ROOT)],
     ['Sonarr → qBittorrent', () => ensureProvider('sonarr', 'downloadclient', 'QBittorrent', 'qBittorrent', { ...qbit, tvCategory: 'tv' }, { enable: true })],
-    ['Sonarr → Arrmy', () => ensureProvider('sonarr', 'notification', 'Webhook', 'Arrmy', webhook, onImport)],
+    ['Sonarr → Arrmy', () => ensureProvider('sonarr', 'notification', 'Webhook', 'Arrmy', webhook, events)],
+    ['Sonarr → Arrmy on grab', () => ensureFlags('sonarr', 'notification', 'Arrmy', events)],
     ['Prowlarr → Radarr', () => ensureProvider('prowlarr', 'applications', 'Radarr', 'Radarr', app('radarr'), { syncLevel: 'fullSync' })],
     ['Prowlarr → Sonarr', () => ensureProvider('prowlarr', 'applications', 'Sonarr', 'Sonarr', app('sonarr'), { syncLevel: 'fullSync' })],
     ['Prowlarr → LazyLibrarian', () =>

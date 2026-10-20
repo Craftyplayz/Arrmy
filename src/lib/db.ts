@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite'
+import type { LogEvent, LogKind } from './logrules'
 
 export type MediaType = 'movie' | 'tv' | 'audiobook'
 export type User = { id: number; username: string; is_admin: number }
@@ -43,6 +44,15 @@ const DEAD_RELEASES = `
     at TEXT NOT NULL DEFAULT (datetime('now'))
   )`
 
+const REQUEST_LOG = `
+  CREATE TABLE IF NOT EXISTS request_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item TEXT NOT NULL,                    -- <media_type>:<external_id>, as in requests: movie:603, tv:81189, audiobook:OL893414W
+    kind TEXT NOT NULL,                    -- grabbed, dead, downloaded, imported or playable (see logrules.ts)
+    detail TEXT NOT NULL,                  -- JSON
+    at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`
+
 // Opened lazily so `next build` never touches /config.
 function db() {
   if (!conn) {
@@ -60,6 +70,7 @@ function db() {
         value TEXT NOT NULL                    -- JSON
       );
       ${DEAD_RELEASES};
+      ${REQUEST_LOG};
     `)
     // Before 1.1.0 media_type only allowed movie and tv. SQLite can't change a CHECK, so rebuild the table once.
     const sqlOf = (table: string) => (conn!.prepare('SELECT sql FROM sqlite_master WHERE name = ?').get(table) as { sql: string }).sql
@@ -187,3 +198,15 @@ export const pendingBookSearches = () => db().prepare('SELECT * FROM dead_releas
 
 export const setSearchPending = (hash: string, pending: boolean) =>
   db().prepare('UPDATE dead_releases SET search_pending = ? WHERE hash = ?').run(pending ? 1 : 0, hash)
+
+/** The Request Log's events for one title (see logrules.ts), oldest first. */
+export const logItem = (type: MediaType, externalId: number | string) => `${type}:${externalId}`
+
+export const addLog = (item: string, kind: LogKind, detail: object) =>
+  db().prepare('INSERT INTO request_log (item, kind, detail) VALUES (?, ?, ?)').run(item, kind, JSON.stringify(detail))
+
+export const logFor = (item: string) => db().prepare('SELECT kind, detail, at FROM request_log WHERE item = ? ORDER BY id').all(item) as LogEvent[]
+
+/** Recent events of one kind, for the watch that follows them up (see requestlog.ts). */
+export const recentLog = (kind: LogKind, days: number) =>
+  db().prepare(`SELECT item, kind, detail, at FROM request_log WHERE kind = ? AND at > datetime('now', ?) ORDER BY id`).all(kind, `-${days} days`) as (LogEvent & { item: string })[]

@@ -22,6 +22,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Remove | Cancels a Request if nothing has downloaded; otherwise deletes the download and the files, keeping whatever another Request still wants. | Fake. **Not yet live.** |
 | Discord message | Posts in #requests when a Request becomes Available (see Discord bot). | Fake. **Not yet live.** |
 | Size limits | The Admin sets a maximum per movie, per hour of episode and per show (Settings). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate. | Fake. **Not yet live:** no limits are set on the server. |
+| Request Log (stage 1) | Each Request's page (Requests → Request Log) lists every step with when it started and how long it took, a ticking timer on the step running now, and the total from Request to playable. Searching, then per release: Downloading (release, indexer, size and quality for the Admin; average speed, most seeders and peers), dead releases swapped, Importing (file, quality, resolution, codec, audio languages, subtitles), and Showing up in Plex until Plex lists it. Copy log copies it as text. The Admin can download each grabbed release's .torrent, saved when it was grabbed. Requesters see their own Request's steps without release names, indexers or errors. | Unit (the steps), Local (Radarr-shaped Grab and Download webhooks, the page as Admin and as another Requester). **Not yet live.** |
 | English-only audio | At the same quality, Radarr and Sonarr pick a release with only English audio over MULTi, Dual Audio or another language, so files are smaller. Untagged releases count as the original language, so foreign films and anime are left alone. | Unit, Live (the rule is in Radarr and Sonarr) |
 
 ### Audiobooks
@@ -108,6 +109,8 @@ Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since t
 ## Later
 
 ### Request Log
+
+Stage 1 is built (see Done → Movies and TV): the log from Radarr's and Sonarr's grab and import webhooks, qBittorrent and Plex. Still to come: Arrmy running the search itself (every release and why the others were rejected, indexer health), edits, removals and one-click fixes in the log, refused Requests, Discord on failures, and audiobooks.
 
 A full log for each Request, from the moment it's made to the moment it can be played in Plex or Audiobookshelf. Choices settled on 2026-10-20.
 
