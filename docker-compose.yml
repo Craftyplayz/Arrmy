@@ -148,6 +148,24 @@ services:
     ports:
       - ${SONARR_PORT:-7658}:8989
 
+  # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps
+  # listening progress and stats when the files move on the server. Pinned: upgrade deliberately.
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:2.21.0
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/audiobookshelf/config:/config
+      - ${CONFIG_DIR:-/opt/arrmy}/audiobookshelf/metadata:/metadata
+      - ${DATA_DIR:-/data}/media/audiobooks:/audiobooks
+      - ${DATA_DIR:-/data}/media/podcasts:/podcasts
+      - ${DATA_DIR:-/data}/media/books:/books
+    ports:
+      - ${ABS_PORT:-13378}:80
+    depends_on: *after-init
+
   # Copies every app's settings at start and nightly at 04:00 (UTC), keeping BACKUP_KEEP_DAYS days.
   # Plex's cache, artwork and logs are skipped: large, and Plex re-downloads them. Restore steps: README.
   # ./data is skipped too, for when DATA_DIR is CONFIG_DIR/data: that's the media, not settings.
@@ -164,7 +182,9 @@ services:
         name=/backups/arrmy-$$(date +%F-%H%M).tar.gz
         if tar -czf "$$name.part" -C /config --exclude='./data' \
             --exclude='*/Plex Media Server/Cache' --exclude='*/Plex Media Server/Media' \
-            --exclude='*/Plex Media Server/Metadata' --exclude='*/Plex Media Server/Logs' .; then
+            --exclude='*/Plex Media Server/Metadata' --exclude='*/Plex Media Server/Logs' \
+            --exclude='audiobookshelf/metadata/cache' --exclude='audiobookshelf/metadata/logs' \
+            --exclude='audiobookshelf/metadata/backups' --exclude='audiobookshelf/metadata/streams' .; then
           mv "$$name.part" "$$name" && echo "[backup] saved $$name ($$(du -h "$$name" | cut -f1))"
         else
           rm -f "$$name.part" && echo "[backup] FAILED, kept the older backups"

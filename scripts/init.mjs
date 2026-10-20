@@ -16,13 +16,13 @@ function own(path) {
 }
 
 // TRaSH-guide layout: downloads and media share one /data tree, so imports are instant hardlinks, not copies.
-for (const dir of ['torrents/movies', 'torrents/tv', 'media/movies', 'media/tv']) {
+for (const dir of ['torrents/movies', 'torrents/tv', 'media/movies', 'media/tv', 'media/audiobooks', 'media/podcasts', 'media/books']) {
   const [parent] = dir.split('/')
   mkdirSync(`${data}/${dir}`, { recursive: true })
   own(`${data}/${parent}`)
   own(`${data}/${dir}`)
 }
-for (const dir of ['arrmy', 'qbittorrent/qBittorrent']) {
+for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata']) {
   mkdirSync(`${config}/${dir}`, { recursive: true })
   own(`${config}/${dir}`)
 }
