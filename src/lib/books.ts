@@ -12,7 +12,7 @@ const ABS_URL = process.env.ABS_URL ?? 'http://audiobookshelf:80'
 const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
 
 /** A row of LazyLibrarian's wanted table (getSnatched, getHistory): one download of one book. */
-type Download = { BookID: string; AuxInfo?: string; DownloadID?: string }
+type Download = { BookID: string; AuxInfo?: string; DownloadID?: string; Status?: string }
 
 /**
  * Calls LazyLibrarian's API, giving up after `seconds` so a stuck call shows an error instead of hanging the page.
@@ -208,19 +208,27 @@ export async function dropAudiobookRelease(hash: string) {
 }
 
 /**
- * Searches for another release of each book whose dead one was dropped, once LazyLibrarian wants the book again.
+ * Searches for another release of each book whose dead one was dropped. LazyLibrarian only skips a release it has
+ * marked Failed (an Aborted one gets grabbed again), so this waits for that, giving up after 15 minutes.
  * Returns the hashes that are done waiting: searched, grabbed something else already, or no longer wanted.
  */
-export async function searchDroppedBooks(dropped: { hash: string; bookId: string }[]) {
-  const [books, downloads] = await Promise.all([ll<LLBook[]>('getAllBooks'), audiobookReleases('getSnatched')])
+export async function searchDroppedBooks(dropped: { hash: string; bookId: string; at: string }[]) {
+  const [books, history, downloads] = await Promise.all([
+    ll<LLBook[]>('getAllBooks'),
+    ll<Download[]>('getHistory'),
+    audiobookReleases('getSnatched'),
+  ])
   const status = (id: string) => {
     const b = books.find((x) => x.BookID === id)
     return b?.AudioStatus ?? b?.audiostatus
   }
   const grabbedOther = (d: (typeof dropped)[0]) => [...downloads].some(([hash, id]) => id === d.bookId && hash !== d.hash)
-  const waiting = dropped.filter((d) => status(d.bookId) === 'Snatched' && !grabbedOther(d))
-  if (waiting.length) await processNow() // moves the release on from Aborted to Failed
-  for (const d of dropped.filter((d) => status(d.bookId) === 'Wanted'))
+  const notFailed = (d: (typeof dropped)[0]) =>
+    history.some((h) => h.DownloadID?.toLowerCase() === d.hash && (h.Status === 'Snatched' || h.Status === 'Aborted'))
+  const minutes = (d: (typeof dropped)[0]) => (Date.now() - Date.parse(`${d.at.replace(' ', 'T')}Z`)) / 60_000
+  const waiting = dropped.filter((d) => !grabbedOther(d) && notFailed(d) && minutes(d) < 15)
+  if (waiting.length) await processNow() // each run moves the release on: Snatched → Aborted → Failed
+  for (const d of dropped.filter((d) => !waiting.includes(d) && !grabbedOther(d) && status(d.bookId) === 'Wanted'))
     await ll('searchBook', { id: d.bookId, type: 'AudioBook' })
   return dropped.filter((d) => !waiting.includes(d)).map((d) => d.hash)
 }

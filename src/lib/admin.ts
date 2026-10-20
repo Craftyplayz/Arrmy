@@ -32,7 +32,7 @@ export async function adminOverview() {
   ])
 
   // The last of STRIKES dead releases in a row (see dead.ts), while it's still in qBittorrent.
-  const dead = keptDeadReleases().filter((d) => live.has(d.hash.toUpperCase()))
+  const dead = [...new Map(keptDeadReleases().map((d) => [d.hash, d])).values()].filter((d) => live.has(d.hash.toUpperCase()))
   const deadProblem = (service: Service, g: QueueRecord[]): Problem | undefined =>
     dead.some((d) => d.hash === g[0].downloadId?.toLowerCase())
       ? { kind: 'Failed Download', service, title: nameOf(g[0]), detail: DEAD_DETAIL, fix: 'retry', ids: g.map((r) => r.id) }

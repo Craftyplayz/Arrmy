@@ -42,7 +42,8 @@ async function targets(categories: Set<string>) {
 
 export async function checkDeadReleases(now = Date.now()) {
   const dead = (await torrents()).flatMap((t) => {
-    const reason = CATEGORIES.has(t.category) && !isDeadRelease(t.hash.toLowerCase()) && deadReason(t, now)
+    // A dead release grabbed again (LazyLibrarian can) is a new grab, so it's handled, and counted, again.
+    const reason = CATEGORIES.has(t.category) && !isDeadRelease(t.hash.toLowerCase(), t.added_on) && deadReason(t, now)
     return reason ? [{ hash: t.hash.toLowerCase(), category: t.category, reason }] : []
   })
   if (dead.length) {
@@ -66,7 +67,7 @@ export async function checkDeadReleases(now = Date.now()) {
 
   const pending = pendingBookSearches()
   if (pending.length)
-    for (const hash of await searchDroppedBooks(pending.map((d) => ({ hash: d.hash, bookId: d.item.replace('book:', '') }))))
+    for (const hash of await searchDroppedBooks(pending.map((d) => ({ hash: d.hash, bookId: d.item.replace('book:', ''), at: d.at }))))
       setSearchPending(hash, false)
 }
 
