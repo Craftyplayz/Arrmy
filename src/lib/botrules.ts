@@ -27,6 +27,14 @@ export function duration(seconds: number) {
 export const size = (bytes: number) =>
   bytes >= 1e12 ? `${(bytes / 1e12).toFixed(2)} TB` : bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : bytes >= 1e6 ? `${Math.round(bytes / 1e6)} MB` : `${Math.ceil(bytes / 1e3)} KB`
 
+/** Who a Plex server is shared with, from plex.tv's /api/users. It only answers in XML: one <User …/> per person. */
+export function plexUsers(xml: string) {
+  const entities: Record<string, string> = { amp: '&', quot: '"', apos: "'", lt: '<', gt: '>' }
+  const attr = (tag: string, name: string) =>
+    tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1].replace(/&(amp|quot|apos|lt|gt|#39);/g, (_, e: string) => entities[e] ?? "'")
+  return [...xml.matchAll(/<User\b[^>]*>/g)].map(([tag]) => ({ name: attr(tag, 'title') || attr(tag, 'username') || 'Someone', avatar: attr(tag, 'thumb') || undefined }))
+}
+
 /** Identifies a Problem across checks; the title rather than ids, which change as episodes are found. */
 export const problemKey = (p: Problem) => `${p.service}:${p.kind}:${p.title}`
 

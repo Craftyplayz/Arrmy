@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { adminOverview } from './admin'
 import { arr } from './arr'
 import { abs, ABS_URL, ll } from './books'
-import { CATEGORY_APPS, changes, compareVersions, flatten, linked, problemKey, size } from './botrules'
+import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, size } from './botrules'
 import { COMMANDS } from './commands'
 import { getSetting, setSetting } from './db'
 import { announce, barEmoji, botEnabled, edit, post, publicUrl, registerCommands, syncBarEmoji } from './discord'
@@ -394,11 +394,12 @@ async function settingsChanges() {
 async function accessChanges() {
   const people: Record<string, { name: string; avatar?: string }[]> = {}
   const token = getSetting<string>('plexToken')
-  if (token)
-    people.Plex = (await plex<{ username?: string; title?: string; thumb?: string }[]>('https://plex.tv/api/v2/friends', token)).map((f) => ({
-      name: f.title || f.username || 'Someone',
-      avatar: f.thumb,
-    }))
+  if (token) {
+    // plex.tv retired /api/v2/friends (410 Gone) in 2026; /api/users still lists who the server is shared with.
+    const res = await fetch('https://plex.tv/api/users', { headers: { 'X-Plex-Token': token }, signal: AbortSignal.timeout(15_000) })
+    if (!res.ok) throw new Error(`plex.tv /api/users → ${res.status}`)
+    people.Plex = plexUsers(await res.text())
+  }
   if (process.env.ABS_API_KEY) people.Audiobookshelf = (await abs<{ users: { username: string }[] }>('/users')).users.map((u) => ({ name: u.username }))
   for (const [app, list] of Object.entries(people)) {
     const now = list.map((p) => p.name).sort()

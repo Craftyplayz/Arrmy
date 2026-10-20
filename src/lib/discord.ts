@@ -110,8 +110,8 @@ export function post(channel: Channel, embed: Embed, ping = false) {
 export function edit(channel: Channel, id: string, embed: Embed) {
   return serial(async () => {
     try {
-      // content '' also clears the text of a message from before the cards (1.1.0-rc.10)
-      await discord(`/channels/${await channelId(channel)}/messages/${id}`, 'PATCH', { content: '', embeds: [embed] })
+      // A message from before the cards (1.1.0-rc.10) had text and hid link previews, which hides cards too: clear both.
+      await discord(`/channels/${await channelId(channel)}/messages/${id}`, 'PATCH', { content: '', embeds: [embed], flags: 0 })
       return true
     } catch (e) {
       if (e instanceof DiscordError && e.status === 404) return false

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { inflateSync } from 'node:zlib'
 import { allCells, cellName, drawCell, progressBar } from '../src/lib/barart.ts'
-import { changes, compareVersions, duration, flatten } from '../src/lib/botrules.ts'
+import { changes, compareVersions, duration, flatten, plexUsers } from '../src/lib/botrules.ts'
 import { COLOUR, downloadEmbed, embed, removedEmbed } from '../src/lib/embeds.ts'
 
 const torrent = { hash: 'a', name: 'Dune.2021.1080p.BluRay', category: 'movies', state: 'downloading', added_on: 0, downloaded: 1, progress: 0.456, size: 4.2e9, dlspeed: 3_355_443, num_seeds: 1234, eta: 840 }
@@ -107,4 +107,12 @@ test('versions compare by their numbers, whatever the prefix', () => {
   assert.equal(compareVersions('release-5.2.4', 'v5.2.4'), 0)
   assert.equal(compareVersions('1.43.4.10903-e5521bd8c', '1.43.4.10903-0a1b2c3d4'), 0, 'build hash ignored')
   assert.equal(compareVersions('2.37.1', '2.38.0'), -1)
+})
+
+test("who Plex is shared with, from plex.tv's XML", () => {
+  const xml = '<?xml version="1.0"?><MediaContainer size="2"><User id="1" title="Mum &amp; Dad" username="mumdad" thumb="https://plex.tv/users/1/avatar?c=1" email="x"><Server id="9" /></User><User id="2" title="" username="sam" thumb=""/></MediaContainer>'
+  assert.deepEqual(plexUsers(xml), [
+    { name: 'Mum & Dad', avatar: 'https://plex.tv/users/1/avatar?c=1' },
+    { name: 'sam', avatar: undefined },
+  ])
 })
