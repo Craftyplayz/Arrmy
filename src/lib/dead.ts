@@ -1,7 +1,7 @@
 // Dead releases: a torrent that never starts is swapped for another release. After STRIKES dead releases in a row for
 // the same title, the last one is left alone and the Admin gets a Problem and a Discord ping instead.
 import { queueOf, retryRelease } from './arr'
-import { audiobookDownloads, dropAudiobookRelease, searchDroppedBooks } from './books'
+import { audiobookTorrents, dropAudiobookRelease, searchDroppedBooks } from './books'
 import { addDeadRelease, deadReleaseCount, isDeadRelease, pendingBookSearches, requestsFor, setSearchPending } from './db'
 import { pingAdmin } from './notify'
 import { byDownload, deadReason, nameOf, STRIKES } from './problems'
@@ -17,7 +17,7 @@ async function targets(categories: Set<string>) {
   const [movies, tv, books] = await Promise.all([
     categories.has('movies') ? queueOf('radarr') : [],
     categories.has('tv') ? queueOf('sonarr') : [],
-    categories.has('books') ? audiobookDownloads() : new Map<string, string>(),
+    categories.has('books') ? audiobookTorrents() : new Map<string, string>(),
   ])
   const found = new Map<string, Target>()
   for (const [service, records] of [['radarr', movies], ['sonarr', tv]] as const)

@@ -181,11 +181,17 @@ export async function removeAudiobook(r: RequestRow): Promise<string | undefined
   await abs(`/items/${item.id}?hard=1`, 'DELETE')
 }
 
-/** LazyLibrarian's audiobook downloads: BookID per torrent hash (lowercase). */
-export async function audiobookDownloads() {
-  const snatched = await ll<Download[]>('getSnatched')
-  return new Map(snatched.filter((s) => s.AuxInfo === 'AudioBook' && s.DownloadID).map((s) => [s.DownloadID!.toLowerCase(), s.BookID]))
+/** Audiobook releases LazyLibrarian sent to qBittorrent: BookID per torrent hash (lowercase). getSnatched = still downloading. */
+async function audiobookReleases(cmd: 'getSnatched' | 'getHistory') {
+  const rows = await ll<Download[]>(cmd)
+  return new Map(rows.filter((s) => s.AuxInfo === 'AudioBook' && s.DownloadID).map((s) => [s.DownloadID!.toLowerCase(), s.BookID]))
 }
+
+/**
+ * Every audiobook release LazyLibrarian sent to qBittorrent, including ones it has given up on: it can mark a release
+ * Failed and still leave the torrent there.
+ */
+export const audiobookTorrents = () => audiobookReleases('getHistory')
 
 // Runs LazyLibrarian's postprocessor now instead of at its next scheduled run. It can take a while when a finished
 // download is being copied, and the scheduled run does the same job anyway, so a timeout is fine.
@@ -206,7 +212,7 @@ export async function dropAudiobookRelease(hash: string) {
  * Returns the hashes that are done waiting: searched, grabbed something else already, or no longer wanted.
  */
 export async function searchDroppedBooks(dropped: { hash: string; bookId: string }[]) {
-  const [books, downloads] = await Promise.all([ll<LLBook[]>('getAllBooks'), audiobookDownloads()])
+  const [books, downloads] = await Promise.all([ll<LLBook[]>('getAllBooks'), audiobookReleases('getSnatched')])
   const status = (id: string) => {
     const b = books.find((x) => x.BookID === id)
     return b?.AudioStatus ?? b?.audiostatus
