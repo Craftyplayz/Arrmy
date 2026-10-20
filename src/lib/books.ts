@@ -1,6 +1,6 @@
 // Audiobook Requests: LazyLibrarian finds and downloads them (as Radarr does movies) and files them where
 // Audiobookshelf watches. Audiobookshelf, given an API key, says which books you already own and deletes removed ones.
-import { audiobookStatus, coverUrl, rankBooks, sameBook, yearOf, type LLBook } from './bookrules'
+import { audiobookStatus, coverUrl, fromOpenLibrary, rankBooks, sameBook, yearOf, type LLBook, type OpenLibraryDoc } from './bookrules'
 import { markAvailable, waitingOfType, type RequestRow } from './db'
 import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
@@ -9,15 +9,18 @@ import { lazyLibrarianKey, sessionSecret } from './token'
 
 export const LAZYLIBRARIAN_URL = process.env.LAZYLIBRARIAN_URL ?? 'http://lazylibrarian:5299'
 const ABS_URL = process.env.ABS_URL ?? 'http://audiobookshelf:80'
+const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
 
 /** A row of LazyLibrarian's wanted table (getSnatched, getHistory): one download of one book. */
 type Download = { BookID: string; AuxInfo?: string; DownloadID?: string }
-type Found = { bookid: string; bookname: string; authorname: string; bookimg?: string; bookdate?: string; highest_fuzz?: number }
 
-/** Calls LazyLibrarian's API. Some commands wrap their reply in {Success, Data}; failures can be a bare message. */
-async function ll<T>(cmd: string, params: Record<string, string> = {}): Promise<T> {
+/**
+ * Calls LazyLibrarian's API, giving up after `seconds` so a stuck call shows an error instead of hanging the page.
+ * Some commands wrap their reply in {Success, Data}; failures can be a bare message.
+ */
+async function ll<T>(cmd: string, params: Record<string, string> = {}, seconds = 20): Promise<T> {
   const query = new URLSearchParams({ apikey: lazyLibrarianKey(sessionSecret()), cmd, ...params })
-  const res = await fetch(`${LAZYLIBRARIAN_URL}/api?${query}`, { cache: 'no-store' })
+  const res = await fetch(`${LAZYLIBRARIAN_URL}/api?${query}`, { cache: 'no-store', signal: AbortSignal.timeout(seconds * 1000) })
   const text = await res.text()
   let body: unknown = text
   try {
@@ -36,7 +39,12 @@ async function ll<T>(cmd: string, params: Record<string, string> = {}): Promise<
 const absKey = () => process.env.ABS_API_KEY
 
 async function abs<T>(path: string, method = 'GET'): Promise<T> {
-  const res = await fetch(`${ABS_URL}/api${path}`, { method, headers: { Authorization: `Bearer ${absKey()}` }, cache: 'no-store' })
+  const res = await fetch(`${ABS_URL}/api${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${absKey()}` },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(20_000),
+  })
   if (!res.ok) throw new Error(`Audiobookshelf ${method} ${path.split('?')[0]} → ${res.status}`)
   const text = await res.text()
   return (text ? JSON.parse(text) : undefined) as T
@@ -94,17 +102,41 @@ export const audiobookStatuses = async (bookIds: string[]): Promise<(Status | nu
   return bookIds.map(status)
 }
 
-/** LazyLibrarian's search, best match first (see rankBooks). Books already in Audiobookshelf show as Available. */
+/**
+ * OpenLibrary's search, asked directly for its top 30: LazyLibrarian's findBook fetches every match (thousands for a
+ * popular title) and can take minutes. Same source, same order, same BookIDs, so Request still goes through
+ * LazyLibrarian.
+ */
+async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
+  const query = new URLSearchParams({ q: term, limit: '30', fields: 'key,title,author_name,cover_i,first_publish_year' })
+  const res = await fetch(`${OPENLIBRARY_URL}/search.json?${query}`, {
+    headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' }, // OpenLibrary asks apps to identify themselves
+    cache: 'no-store',
+    signal: AbortSignal.timeout(20_000),
+  })
+  if (!res.ok) throw new Error(`OpenLibrary search → ${res.status}`)
+  return (await res.json()).docs ?? []
+}
+
+/** Best match first (see rankBooks). Books already in Audiobookshelf show as Available. */
 export async function searchAudiobooks(term: string) {
-  const [found, status, library] = await Promise.all([ll<Found[]>('findBook', { name: term }), statusLookup(), owned(term)])
-  return rankBooks(found, term)
+  const [docs, status, library] = await Promise.all([
+    openLibrary(term),
+    // LazyLibrarian down: still show what OpenLibrary found, just without statuses.
+    statusLookup().catch((e) => {
+      console.warn(`[books] LazyLibrarian: ${(e as Error).message}`)
+      return () => null
+    }),
+    owned(term),
+  ])
+  return rankBooks(docs.map(fromOpenLibrary), term)
     .slice(0, 12)
     .map((b) => {
       const inLibrary = library.some((item) => sameBook(item, { title: b.bookname, author: b.authorname }))
       return {
         id: b.bookid,
         title: b.bookname,
-        year: yearOf(b.bookdate),
+        year: b.year,
         overview: `by ${b.authorname}`,
         poster: coverUrl(b.bookimg, b.bookid),
         seasons: [],
@@ -119,7 +151,7 @@ export async function addAudiobook(bookId: string) {
   const find = async () => (await ll<LLBook[]>('getAllBooks')).find((b) => b.BookID === bookId)
   let book = await find()
   if (!book) {
-    await ll('addBook', { id: bookId, wait: '1' })
+    await ll('addBook', { id: bookId, wait: '1' }, 60) // waits while LazyLibrarian looks the book up
     book = await find()
     if (!book) throw new Error(`LazyLibrarian couldn't add book ${bookId}`)
   }

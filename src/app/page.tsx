@@ -12,7 +12,7 @@ const TABS: [MediaType, string][] = [
   ['tv', 'TV Shows'],
   ['audiobook', 'Audiobooks'],
 ]
-const LABELS = { movie: ['Radarr', 'Search movies'], tv: ['Sonarr', 'Search TV shows'], audiobook: ['LazyLibrarian', 'Search audiobooks'] }
+const LABELS = { movie: ['Radarr', 'Search movies'], tv: ['Sonarr', 'Search TV shows'], audiobook: ['The book search', 'Search audiobooks'] }
 
 export default async function SearchPage({
   searchParams,

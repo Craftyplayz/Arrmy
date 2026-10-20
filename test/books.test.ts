@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { audiobookStatus, coverUrl, rankBooks, sameBook } from '../src/lib/bookrules.ts'
+import { audiobookStatus, coverUrl, fromOpenLibrary, rankBooks, sameBook } from '../src/lib/bookrules.ts'
 
 const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary', AuthorName: 'Andy Weir', ...over })
 
@@ -54,4 +54,17 @@ test("search ranking keeps OpenLibrary's order among same-titled books", () => {
     { bookname: 'Pride and Prejudice [adaptation]', authorname: 'Andrea Shell' },
   ]
   assert.deepEqual(rankBooks(found, 'pride and prejudice').map((b) => b.authorname), ['Jane Austen', 'Andrea Shell', 'Seth Grahame-Smith'])
+})
+
+test('OpenLibrary search results in LazyLibrarian terms', () => {
+  const doc = { key: '/works/OL66554W', title: 'Pride and Prejudice', author_name: ['Jane Austen', 'Someone'], cover_i: 14348537, first_publish_year: 1813 }
+  assert.deepEqual(fromOpenLibrary(doc), {
+    bookid: 'OL66554W',
+    bookname: 'Pride and Prejudice',
+    authorname: 'Jane Austen',
+    bookimg: 'https://covers.openlibrary.org/b/id/14348537-M.jpg',
+    year: 1813,
+  })
+  assert.equal(fromOpenLibrary({ key: '/works/OL1W', title: 'Untitled' }).authorname, 'Unknown author')
+  assert.equal(fromOpenLibrary({ key: '/works/OL1W', title: 'Untitled' }).bookimg, undefined)
 })
