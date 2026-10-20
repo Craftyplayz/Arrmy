@@ -47,11 +47,16 @@ const words = (s: string) =>
 // Study-guide spin-offs that OpenLibrary returns for popular titles; nobody wants them as audiobooks.
 const SPINOFF = /\b(summary|summaries|review|analysis|study guide|workbook|sparknotes|cliffs ?notes|trivia|quiz)\b/i
 
-/** Search results worth showing, best first: the exact title, then books with a real cover, then LazyLibrarian's score. */
-export function rankBooks<T extends { bookname: string; bookimg?: string | null; highest_fuzz?: number }>(found: T[], query: string) {
+/**
+ * Search results worth showing, best first. OpenLibrary's own order is the best signal (it puts Jane Austen's Pride
+ * and Prejudice above two thousand adaptations, which LazyLibrarian scores the same), so keep it: only drop spin-offs
+ * and move exact-title matches up, in their original order.
+ */
+export function rankBooks<T extends { bookname: string }>(found: T[], query: string) {
   const q = words(query)
-  const score = (b: T) => (words(b.bookname) === q ? 4 : 0) + (coverUrl(b.bookimg) ? 2 : 0) + (b.highest_fuzz ?? 0) / 100
-  return found.filter((b) => !SPINOFF.test(b.bookname)).sort((a, b) => score(b) - score(a))
+  const exact = (b: T) => words(b.bookname) === q
+  const kept = found.filter((b) => !SPINOFF.test(b.bookname))
+  return [...kept.filter(exact), ...kept.filter((b) => !exact(b))]
 }
 
 /**

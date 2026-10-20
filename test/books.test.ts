@@ -42,3 +42,13 @@ test('search ranking: the real book first, study-guide spin-offs gone', () => {
   ]
   assert.deepEqual(rankBooks(found, 'project hail mary').map((b) => b.bookname), ['Project Hail Mary', 'The Martian / Artemis / Project Hail Mary'])
 })
+
+test("search ranking keeps OpenLibrary's order among same-titled books", () => {
+  // "pride and prejudice": 2,245 results, all with covers and the same score; OpenLibrary lists Austen's first.
+  const found = [
+    { bookname: 'Pride and Prejudice and Zombies', authorname: 'Seth Grahame-Smith' },
+    { bookname: 'Pride and Prejudice', authorname: 'Jane Austen' },
+    { bookname: 'Pride and Prejudice [adaptation]', authorname: 'Andrea Shell' },
+  ]
+  assert.deepEqual(rankBooks(found, 'pride and prejudice').map((b) => b.authorname), ['Jane Austen', 'Andrea Shell', 'Seth Grahame-Smith'])
+})
