@@ -8,7 +8,7 @@ import type { Status } from './status'
 import { lazyLibrarianKey, sessionSecret } from './token'
 
 export const LAZYLIBRARIAN_URL = process.env.LAZYLIBRARIAN_URL ?? 'http://lazylibrarian:5299'
-const ABS_URL = process.env.ABS_URL ?? 'http://audiobookshelf:80'
+export const ABS_URL = process.env.ABS_URL ?? 'http://audiobookshelf:80'
 const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
 
 /** A row of LazyLibrarian's wanted table (getSnatched, getHistory): one download of one book. */
@@ -18,7 +18,7 @@ type Download = { BookID: string; AuxInfo?: string; DownloadID?: string; Status?
  * Calls LazyLibrarian's API, giving up after `seconds` so a stuck call shows an error instead of hanging the page.
  * Some commands wrap their reply in {Success, Data}; failures can be a bare message.
  */
-async function ll<T>(cmd: string, params: Record<string, string> = {}, seconds = 20): Promise<T> {
+export async function ll<T>(cmd: string, params: Record<string, string> = {}, seconds = 20): Promise<T> {
   const query = new URLSearchParams({ apikey: lazyLibrarianKey(sessionSecret()), cmd, ...params })
   const res = await fetch(`${LAZYLIBRARIAN_URL}/api?${query}`, { cache: 'no-store', signal: AbortSignal.timeout(seconds * 1000) })
   const text = await res.text()
@@ -29,7 +29,7 @@ async function ll<T>(cmd: string, params: Record<string, string> = {}, seconds =
   if (body && typeof body === 'object' && 'Success' in body) {
     const reply = body as { Success: boolean; Data?: T; Error?: { Message?: string } }
     if (!reply.Success) throw new Error(`LazyLibrarian ${cmd}: ${reply.Error?.Message ?? res.status}`)
-    return reply.Data as T
+    return (reply.Data ?? body) as T // getVersion answers at the top level
   }
   if (!res.ok || (typeof body === 'string' && /^(Missing|Invalid|No search|Unable|Source)/.test(body)))
     throw new Error(`LazyLibrarian ${cmd}: ${String(body).slice(0, 200)}`)
@@ -38,7 +38,7 @@ async function ll<T>(cmd: string, params: Record<string, string> = {}, seconds =
 
 const absKey = () => process.env.ABS_API_KEY
 
-async function abs<T>(path: string, method = 'GET'): Promise<T> {
+export async function abs<T>(path: string, method = 'GET'): Promise<T> {
   const res = await fetch(`${ABS_URL}/api${path}`, {
     method,
     headers: { Authorization: `Bearer ${absKey()}` },
@@ -61,7 +61,7 @@ type AbsMatch = {
 }
 
 /** Audiobookshelf books matching a search. [] without an API key, or if Audiobookshelf can't be reached. */
-async function owned(q: string): Promise<AbsItem[]> {
+export async function owned(q: string): Promise<AbsItem[]> {
   if (!absKey()) return []
   try {
     if (!libraryId) {
@@ -242,7 +242,7 @@ export function startAudiobookWatch() {
       for (const [i, r] of waiting.entries()) {
         if (statuses[i]?.label !== 'Available') continue
         markAvailable(r.id)
-        await tellDiscord(r).catch((e) => console.warn(`[discord] ${e.message}`))
+        tellDiscord(r)
       }
     } catch (e) {
       console.warn(`[books] ${(e as Error).message}`)

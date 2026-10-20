@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
-import { upsertUser } from '@/lib/db'
+import { setSetting, upsertUser } from '@/lib/db'
+import { announce } from '@/lib/discord'
 import { pinToken, plexAccount, wirePlex } from '@/lib/plex'
 import { PIN_COOKIE, startSession } from '@/lib/session'
 
@@ -17,7 +18,12 @@ export async function GET(request: Request) {
     if (!account.access) return go('/login?error=no-access')
 
     upsertUser({ id: account.id, username: account.username, isAdmin: account.access === 'admin' })
-    if (account.access === 'admin') wirePlex(token).catch((e) => console.warn(`[wire] Plex: ${e.message}`))
+    if (account.access === 'admin') {
+      wirePlex(token).catch((e) => console.warn(`[wire] Plex: ${e.message}`))
+      // Kept so the Discord bot can see who's watching (/status/sessions) and who the server is shared with.
+      setSetting('plexToken', token)
+    }
+    announce('activity', `🔑 **${account.username}** signed in to Arrmy${account.access === 'admin' ? ' (Admin)' : ''}.`)
     await startSession(account.id, request.headers.get('x-forwarded-proto')?.startsWith('https') ?? false)
     return go('/')
   } catch (e) {

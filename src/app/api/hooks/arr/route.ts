@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   for (const [i, r] of waiting.entries()) {
     if (details[i].status?.label !== 'Available') continue
     markAvailable(r.id)
-    await tellDiscord(r).catch((e) => console.warn(`[discord] ${e.message}`))
+    tellDiscord(r)
   }
   return new Response(null, { status: 204 })
 }

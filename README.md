@@ -53,6 +53,19 @@ If a port is already taken on your box, change it with the `*_PORT` settings in 
 
 Plex runs on Docker's bridge network. Set **Plex → Settings → Network → LAN Networks** to your home subnet (e.g. `192.168.1.0/24`); otherwise Plex treats devices at home as remote.
 
+## Discord
+
+The bot makes an **Arrmy** category in your server with seven channels: #requests, #downloads (a live message per download), #problems, #admin-log, #system, #updates and #activity. It only reads and reports, and @mentions you for Problems, app updates, an app or the VPN going down, low disk space and failed backups. It has no live connection to Discord, so nothing extra runs: Arrmy calls Discord's API, and Discord sends slash commands to Arrmy.
+
+1. [discord.com/developers/applications](https://discord.com/developers/applications) → **New Application**, name it Arrmy.
+2. **General Information**: copy the **Public Key** (`DISCORD_PUBLIC_KEY`). Set **Interactions Endpoint URL** to `https://arrmy.<your domain>/api/discord` (after step 5, since Discord checks it).
+3. **Bot** → **Reset Token**: copy it (`DISCORD_BOT_TOKEN`).
+4. **OAuth2 → URL Generator**: scopes `bot` and `applications.commands`; bot permissions **Manage Channels**, **View Channels**, **Send Messages**, **Embed Links**. Open the URL and add the bot to your server.
+5. In the stack: `DISCORD_BOT_TOKEN`, `DISCORD_PUBLIC_KEY`, `DISCORD_GUILD_ID` (right-click the server → Copy Server ID, with Developer Mode on), `DISCORD_ADMIN_ID` (right-click yourself → Copy User ID), `PUBLIC_DOMAIN` (e.g. `example.com`), and optionally `PORTAINER_STACK_URL`. Redeploy.
+6. Sign in to Arrmy once as the Admin, so the bot can see Plex sessions and who Plex is shared with.
+
+Slash commands (`/status`, `/queue`, `/requests`, `/problems`, `/search`) start Admin-only; **Server Settings → Integrations → Arrmy** opens them to others. If Cloudflare challenges Discord's requests, add a rule that skips the challenge for `/api/discord`.
+
 ## Develop
 
 ```sh

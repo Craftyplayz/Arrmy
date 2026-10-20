@@ -2,12 +2,12 @@ import { createHash } from 'node:crypto'
 import { MOVIES_ROOT, TV_ROOT } from './arr'
 import { sessionSecret } from './token'
 
-const PLEX_URL = process.env.PLEX_URL ?? 'http://plex:32400'
+export const PLEX_URL = process.env.PLEX_URL ?? 'http://plex:32400'
 
 // Stable per install, so plex.tv sees one "Arrmy" device rather than a new one per sign-in.
 const clientId = () => createHash('sha256').update(`arrmy-plex:${sessionSecret()}`).digest('hex').slice(0, 32)
 
-async function plex<T>(url: string, token?: string, method = 'GET'): Promise<T> {
+export async function plex<T>(url: string, token?: string, method = 'GET'): Promise<T> {
   const res = await fetch(url, {
     method,
     headers: {

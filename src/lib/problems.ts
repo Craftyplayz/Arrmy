@@ -16,7 +16,22 @@ export type Problem = {
 }
 
 /** A torrent as qBittorrent's /torrents/info lists it. */
-export type Torrent = { hash: string; name: string; category: string; state: string; added_on: number; downloaded: number }
+export type Torrent = {
+  hash: string
+  name: string
+  category: string
+  state: string
+  added_on: number
+  downloaded: number
+  /** 0 to 1. */
+  progress: number
+  size: number
+  /** Bytes per second. */
+  dlspeed: number
+  num_seeds: number
+  /** Seconds left; 8640000 means never. */
+  eta: number
+}
 
 /** Dead releases in a row for one title before Arrmy stops swapping them and makes it a Problem. */
 export const STRIKES = 3

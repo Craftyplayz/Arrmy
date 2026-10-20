@@ -149,6 +149,7 @@ function ProblemRow({ p }: { p: Problem }) {
           <input key={id} type="hidden" name="id" value={id} />
         ))}
         {p.hash && <input type="hidden" name="hash" value={p.hash} />}
+        <input type="hidden" name="title" value={p.title} />
         <SubmitButton className="btn small" pending="Working...">
           {p.fix === 'retry' ? 'Try another release' : 'Search again'}
         </SubmitButton>

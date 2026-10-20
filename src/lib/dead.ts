@@ -3,7 +3,7 @@
 import { queueOf, retryRelease } from './arr'
 import { audiobookTorrents, dropAudiobookRelease, searchDroppedBooks } from './books'
 import { addDeadRelease, deadReleaseCount, isDeadRelease, pendingBookSearches, requestsFor, setSearchPending } from './db'
-import { pingAdmin } from './notify'
+import { announce } from './discord'
 import { byDownload, deadReason, nameOf, STRIKES } from './problems'
 import { torrents } from './qbit'
 
@@ -56,12 +56,12 @@ export async function checkDeadReleases(now = Date.now()) {
       // Swapped before it's recorded, so a swap that fails is tried again next minute.
       if (!last) await target.swap()
       addDeadRelease({ hash: t.hash, item: target.item, title: target.title, kept: last, searchPending: !last && !!target.book })
-      if (last) {
-        console.warn(`[dead] ${target.title}: ${t.reason}. ${strike} dead releases in a row, so it's a Problem now`)
-        await pingAdmin(
-          `**${target.title}**: ${strike} releases in a row never started (${t.reason.toLowerCase()}). It's a Problem in Arrmy's Admin view now.`,
-        ).catch((e) => console.warn(`[discord] ${e.message}`))
-      } else console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${STRIKES})`)
+      // The last one becomes a Problem, which #problems announces with a ping (see feeds.ts).
+      if (last) console.warn(`[dead] ${target.title}: ${t.reason}. ${strike} dead releases in a row, so it's a Problem now`)
+      else {
+        console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${STRIKES})`)
+        announce('problems', `🔁 **${target.title}**: ${t.reason.toLowerCase()}, so Arrmy is trying another release (${strike} of ${STRIKES}).`)
+      }
     }
   }
 

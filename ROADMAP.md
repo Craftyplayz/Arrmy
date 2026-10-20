@@ -19,7 +19,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Status | Requested → Downloading (live %, read from qBittorrent every 5 seconds) → Available. | Unit, Fake, Live up to Downloading. **Not yet live:** Available (nothing has finished importing yet). |
 | Edit seasons | Add or remove seasons of a requested show. Removed seasons are deleted unless someone else requested them. | Fake. **Not yet live.** |
 | Remove | Cancels a Request if nothing has downloaded; otherwise deletes the download and the files, keeping whatever another Request still wants. | Fake. **Not yet live.** |
-| Discord message | Posts when a Request becomes Available. | Fake. **Not yet live:** `DISCORD_WEBHOOK_URL` is empty on the server. |
+| Discord message | Posts in #requests when a Request becomes Available (see Discord bot). | Fake. **Not yet live.** |
 | Size limits | The Admin sets a maximum per movie, per hour of episode and per show (Settings). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate. | Fake. **Not yet live:** no limits are set on the server. |
 | English-only audio | At the same quality, Radarr and Sonarr pick a release with only English audio over MULTi, Dual Audio or another language, so files are smaller. Untagged releases count as the original language, so foreign films and anime are left alone. | Unit, Live (the rule is in Radarr and Sonarr) |
 
@@ -58,6 +58,22 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Cloudflare Tunnel | Public addresses for Arrmy and the apps. | Live |
 | Media files on your PC | Through the server's own Samba share, so the stack doesn't run one. | Not part of Arrmy |
 
+### Discord bot
+
+A Discord app with no live connection: Arrmy calls Discord's API with the bot's token, and Discord sends slash commands to `https://arrmy.<domain>/api/discord`, checked against the app's public key. Read-only: an update is something you start in Portainer (ADR 0001). Setup in the README. Without the bot, `DISCORD_WEBHOOK_URL` still gets #requests and #problems.
+
+| Feature | What it does | Tested |
+|---|---|---|
+| Channels | An Arrmy category with #requests, #downloads, #problems, #admin-log, #system, #updates and #activity, made by the bot (again if one is deleted). Links go to each app's public address (`PUBLIC_DOMAIN`). | Fake |
+| #requests | New Requests, edits and removals (who did it, and whose Request it was), Requests refused for the Size Limit, and Available. | Messages: Fake. **Not yet run:** the calls from Arrmy's pages. |
+| #downloads | One message per download, edited every 30 seconds: progress bar, speed, time left, seeders, or why it's waiting. Then Done, or Removed. | Unit, Fake |
+| #problems | A new Problem once it has lasted 20 minutes (Arrmy fixes most stalled downloads within 15), or at once when Arrmy raised it after 3 dead releases. @mentions the Admin. Also each dead release Arrmy swaps. | Fake |
+| #admin-log | Size Limit changes and one-click fixes, with who. Settings changed inside Radarr, Sonarr, Prowlarr and qBittorrent, checked every 5 minutes, with passwords and keys hidden (not LazyLibrarian: its API reads one setting at a time). People given or losing access to Plex or Audiobookshelf. | Unit, Fake. **Not yet run:** the calls from Arrmy's pages. |
+| #system | An app down (two failed checks a minute apart), back or restarted. The VPN down, or its forwarded port changing. Health warnings from Radarr, Sonarr and Prowlarr (failing indexers). A disk under 10% free. Each nightly backup, or none for 26 hours. @mentions for down, disk and backup. | Fake |
+| #updates | Arrmy commits and releases, and when the server starts running a new one. New releases of Radarr, Sonarr, Prowlarr, qBittorrent, Audiobookshelf, FlareSolverr, gluetun, cloudflared and Plex, checked every 6 hours against what the server runs, with a link to Portainer. @mentions for app updates and full Arrmy releases. LazyLibrarian has no releases, only commits, so it isn't watched. | Unit (versions), Fake |
+| #activity | Sign-ins to Arrmy. Who started watching in Plex (needs the Admin to sign in once, which keeps their Plex token) or listening in Audiobookshelf, with the device. | Sessions: Fake. **Not yet run:** sign-ins. |
+| Slash commands | `/status`, `/queue`, `/requests [person]`, `/problems`, `/search`. Admin-only at first (Server Settings → Integrations opens them up); only whoever asked sees the answer. | Answers: Fake. Endpoint: Local (signatures, Discord's check, the answer sent afterwards). |
+
 ## Next: release v1.1.0
 
 Finish testing on the server, then publish v1.1.0.
@@ -75,7 +91,7 @@ Movies and TV:
 
 Everyone:
 
-6. A Discord message arrives (set `DISCORD_WEBHOOK_URL` first).
+6. Set up the Discord bot (README → Discord): the channels appear, a Request shows in #requests, and `/status` answers.
 7. A Requester signs in.
 8. A dead release is swapped by itself, and a third in a row becomes a Problem and @mentions you (set `DISCORD_ADMIN_ID` first).
 
@@ -140,36 +156,6 @@ How:
 - Indexer errors from Prowlarr's indexer status and search history.
 - "Every release was rejected, and why" needs Arrmy to run the search itself (see Request Log). Everything else works without it, so this doesn't have to wait for the Request Log.
 - Audiobooks too: LazyLibrarian's wanted list shows what it hasn't found, and qBittorrent's states work the same. This replaces the separate Audiobook Problems item.
-
-### Discord bot
-
-A bot that runs in the stack and posts everything that happens, each topic in its own channel. It's read-only: it never changes anything, and its update notices link to an Admin-only button in Arrmy instead. Every message links to the app it's about at its public address (`arrmy`, `radarr`, `sonarr`, `prowlarr`, `qbit`, `plex`, `books` `.craftyplayz.com`). Choices settled on 2026-10-20.
-
-Channels, in an Arrmy category the bot creates:
-
-- **#requests**: new Requests, edits and removals, with who did it; Requests refused for the Size Limit, with the estimate; Available.
-- **#downloads**: one live message per download, edited every 30 seconds or so with a progress bar, speed, seeders and time left, then marked done.
-- **#problems**: every new Problem (Failed Download, Failed Import, Missing, dead releases) and every auto-fix. The Request Log's Discord messages land here.
-- **#admin-log**: Arrmy's settings and Admin actions (what changed, who did it). Settings changed inside Radarr, Sonarr, Prowlarr, qBittorrent and LazyLibrarian, found by comparing them every few minutes, so without who. People given or losing access to Plex or Audiobookshelf.
-- **#system**: an app down or restarting, the VPN down or its forwarded port changing, an indexer failing, disk space low, the nightly backup (its size, or that it failed).
-- **#updates**: Arrmy commits on GitHub, new Arrmy releases, and when the server starts running one. New releases of every other app in the stack, from their GitHub release pages, with a link to an Admin-only **Update** button in Arrmy that pulls the new image and restarts that app through Portainer.
-- **#activity**: someone signs in to Arrmy, or starts watching in Plex or listening in Audiobookshelf (one message per session, with the device).
-
-It @mentions the Admin for: any new Problem, an app update, an app or the VPN going down, disk space low, a failed backup.
-
-Slash commands, answers only: `/status` (apps, VPN, disks), `/queue` (downloading now), `/requests [person]`, `/problems`, `/search` (is it in the library?).
-
-Not wanted: a daily or weekly digest, and messages to Requesters (they keep checking status in Arrmy).
-
-How:
-
-- A separate service in the stack, running from the Arrmy image, with a Discord bot token and server id in the stack's settings. It replaces `DISCORD_WEBHOOK_URL` once it runs.
-- Arrmy records an event for everything it does (Requests, edits, Admin actions, Problems, auto-fixes) in its database, and the bot posts them. Radarr and Sonarr events come from the webhook Arrmy already gets; download progress from the qBittorrent read Arrmy already does every 5 seconds.
-- App versions from each app's own API, compared with the latest release on its GitHub page every few hours. Arrmy commits from GitHub's API for the public repo.
-- Plex sessions from Plex's `/status/sessions`, Audiobookshelf's from its sessions API. Plex and Audiobookshelf users compared every few minutes.
-- Public addresses: one setting per app. LazyLibrarian has no public address yet, so it needs a tunnel route first (e.g. `lazylibrarian.craftyplayz.com`).
-
-To decide before building: the Update button means Arrmy holds a Portainer API token, so whoever is the Admin in Arrmy can redeploy apps. Where that token lives, and whether it's limited to the Arrmy stack. Also the disk-space threshold (10% free suggested).
 
 ### Series and Author Requests
 
