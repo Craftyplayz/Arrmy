@@ -3,7 +3,8 @@ import { getLimits } from './db'
 import { applyLimits } from './limits'
 import { MULTI_AUDIO } from './releases'
 import { LAZYLIBRARIAN_URL, ll } from './books'
-import { audiobookBayToken, hookToken, lazyLibrarianKey, sessionSecret } from './token'
+import { relayAddress } from './abbrelay'
+import { hookToken, lazyLibrarianKey, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
 
@@ -58,10 +59,10 @@ export function startWiring() {
       const tag = await ensureTag('prowlarr', 'flaresolverr')
       await ensureProvider('prowlarr', 'indexerproxy', 'FlareSolverr', 'FlareSolverr', { host: 'http://gluetun:8191/' }, { tags: [tag] })
     }],
-    // LazyLibrarian's AudioBook Bay search goes through Arrmy's relay (/api/abb), the main public source of audiobooks.
+    // LazyLibrarian's AudioBook Bay search goes through Arrmy's relay (abbrelay.ts), the main public source of audiobooks.
     // Set once: after that the address is ours, and switching AudioBook Bay off in LazyLibrarian is left alone.
     ['LazyLibrarian → AudioBook Bay', async () => {
-      const host = `http://arrmy:3000/api/abb/${audiobookBayToken(sessionSecret())}`
+      const host = relayAddress()
       if ((await ll<string>('readCFG', { name: 'ABB_HOST', group: 'ABB' })) === `[${host}]`) return
       await ll('writeCFG', { name: 'ABB_HOST', group: 'ABB', value: host })
       await ll('writeCFG', { name: 'ABB', group: 'ABB', value: '1' })

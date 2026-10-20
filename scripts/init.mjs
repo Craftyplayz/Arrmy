@@ -87,10 +87,10 @@ if (!existsSync(books)) {
     '[PostProcess]',
     'audiobook_dest_folder = $Author/$Title',
     '',
-    // AudioBook Bay through Arrmy's relay (src/app/api/abb), whose token is audiobookBayToken in src/lib/token.ts
+    // AudioBook Bay through Arrmy's relay (src/lib/abbrelay.ts relayAddress), with the key audiobookBayToken derives
     '[ABB]',
     'abb = 1',
-    `abb_host = http://arrmy:3000/api/abb/${createHmac('sha256', SESSION_SECRET).update('audiobookbay').digest('base64url')}`,
+    `abb_host = http://arrmy:3001/abb/${createHmac('sha256', SESSION_SECRET).update('audiobookbay').digest('base64url')}`,
   ]
   writeFileSync(books, `${lines.join('\n')}\n`)
   own(books)

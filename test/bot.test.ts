@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { inflateSync } from 'node:zlib'
 import { allCells, cellName, drawCell, progressBar } from '../src/lib/barart.ts'
+import { upstreamUrl } from '../src/lib/abbrelay.ts'
 import { changes, compareVersions, duration, flatten, plexUsers } from '../src/lib/botrules.ts'
 import { COLOUR, distinctLinks, downloadEmbed, embed, removedEmbed, speed } from '../src/lib/embeds.ts'
 
@@ -126,4 +127,15 @@ test("speeds under 1 MB/s are in KB/s", () => {
   assert.equal(speed(3_355_443), "3.2 MB/s")
   assert.equal(speed(46_080), "45 KB/s")
   assert.equal(speed(100), "1 KB/s")
+})
+
+test('the AudioBook Bay relay: only its own key, only page paths, and LazyLibrarian\'s double slash', () => {
+  const key = 'k3y'
+  assert.equal(upstreamUrl('/abb/k3y/?s=the+rose+field&cat=undefined%2Cundefined', key), 'https://audiobookbay.lu/?s=the+rose+field&cat=undefined%2Cundefined')
+  assert.equal(upstreamUrl('/abb/k3y/page/2/?s=dune', key), 'https://audiobookbay.lu/page/2/?s=dune')
+  assert.equal(upstreamUrl('/abb/k3y//abss/the-rose-field/', key), 'https://audiobookbay.lu/abss/the-rose-field/')
+  assert.equal(upstreamUrl('/abb/wrong/?s=x', key), 403)
+  assert.equal(upstreamUrl('/other/k3y/', key), 403)
+  assert.equal(upstreamUrl('/abb/k3y/..%2F..%2Fetc/', key), 400)
+  assert.equal(upstreamUrl('/abb/k3y/a/../b/', key), 'https://audiobookbay.lu/b/', 'URL parsing already resolves ..')
 })
