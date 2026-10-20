@@ -1,6 +1,7 @@
-import { arr, MOVIES_ROOT, serviceKey, serviceUrl, TV_ROOT, type ServiceName } from './arr'
+import { arr, MOVIES_ROOT, serviceKey, serviceUrl, setCustomFormat, TV_ROOT, type ServiceName } from './arr'
 import { getLimits } from './db'
 import { applyLimits } from './limits'
+import { MULTI_AUDIO } from './releases'
 import { hookToken, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
@@ -54,6 +55,15 @@ export function startWiring() {
     }],
     // Re-applied every start, so a rebuilt Radarr or Sonarr gets the Admin's Size Limits back.
     ['Size limits', () => applyLimits(getLimits())],
+    // At the same quality, a release with only English audio beats MULTi, Dual Audio or another language: less space.
+    // Untagged releases count as the title's original language, so foreign films and anime are left as they were.
+    ['English-only audio', async () => {
+      for (const svc of ['radarr', 'sonarr'] as const)
+        await setCustomFormat(svc, 'Arrmy English-only audio', 10, [
+          { implementation: 'LanguageSpecification', name: 'No language but English', negate: true, values: { value: 1, exceptLanguage: true } },
+          { implementation: 'ReleaseTitleSpecification', name: 'Not multi-audio', negate: true, values: { value: MULTI_AUDIO } },
+        ])
+    }],
   ]
 
   const run = async () => {

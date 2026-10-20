@@ -28,6 +28,38 @@ export async function arr<T = unknown>(name: ServiceName, path: string, method =
   return (text ? JSON.parse(text) : undefined) as T
 }
 
+type Field = { name: string; value?: unknown }
+type Condition = { implementation: string; name: string; negate?: boolean; values: Record<string, unknown> }
+
+/**
+ * Creates or updates the custom format `name` (a release must meet every condition) and gives it `score` in every
+ * quality profile. No conditions deletes it. Conditions come from the Service's own schema, like ensureProvider.
+ */
+export async function setCustomFormat(svc: 'radarr' | 'sonarr', name: string, score: number, conditions: Condition[]) {
+  const existing = (await arr<{ id: number; name: string }[]>(svc, '/customformat')).find((f) => f.name === name)
+  if (!conditions.length) {
+    if (existing) await arr(svc, `/customformat/${existing.id}`, 'DELETE')
+    return
+  }
+  const schema = await arr<{ implementation: string; fields: Field[] }[]>(svc, '/customformat/schema')
+  const specifications = conditions.map((c) => {
+    const spec = schema.find((s) => s.implementation === c.implementation)
+    if (!spec) throw new Error(`${svc}'s custom formats have no ${c.implementation} condition`)
+    const fields = spec.fields.map((f) => (f.name in c.values ? { ...f, value: c.values[f.name] } : f))
+    return { ...spec, name: c.name, negate: c.negate ?? false, required: true, fields }
+  })
+  const body = { name, includeCustomFormatWhenRenaming: false, specifications }
+  const format = existing
+    ? await arr<{ id: number }>(svc, `/customformat/${existing.id}`, 'PUT', { ...body, id: existing.id })
+    : await arr<{ id: number }>(svc, '/customformat', 'POST', body)
+
+  type Profile = { id: number; formatItems: { format: number; name: string; score: number }[] }
+  for (const profile of await arr<Profile[]>(svc, '/qualityprofile')) {
+    const formatItems = [...profile.formatItems.filter((i) => i.format !== format.id), { format: format.id, name, score }]
+    await arr(svc, `/qualityprofile/${profile.id}`, 'PUT', { ...profile, formatItems })
+  }
+}
+
 type Image = { coverType: string; remoteUrl?: string }
 export type Media = { title: string; year?: number; overview?: string; images?: Image[] }
 type LookupMovie = Media & { tmdbId: number }

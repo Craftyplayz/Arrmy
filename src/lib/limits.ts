@@ -1,38 +1,15 @@
 // Size Limits: applied to Radarr and Sonarr so oversized releases are never grabbed, plus the show check at request time.
-import { arr } from './arr'
+import { arr, setCustomFormat } from './arr'
 import { getLimits, getSetting, setSetting, type Limits } from './db'
 import { seasonLabel } from './status'
 
-const FORMAT = 'Arrmy size limit'
-type Field = { name: string; value?: unknown }
 type QualityDefinition = { id: number; minSize: number | null; maxSize: number | null; preferredSize: number | null }
 
 /** Movies: a custom format matching any release over the limit, scored so low that no quality profile accepts it. */
-async function applyMovieLimit(gb: number) {
-  const existing = (await arr<{ id: number; name: string }[]>('radarr', '/customformat')).find((f) => f.name === FORMAT)
-  if (!gb) {
-    if (existing) await arr('radarr', `/customformat/${existing.id}`, 'DELETE')
-    return
-  }
-  const schema = await arr<{ implementation: string; fields: Field[] }[]>('radarr', '/customformat/schema')
-  const spec = schema.find((s) => s.implementation === 'SizeSpecification')
-  if (!spec) throw new Error("Radarr's custom formats have no size condition")
-  const fields = spec.fields.map((f) => ({ ...f, value: f.name === 'min' ? gb : f.name === 'max' ? 100_000 : f.value }))
-  const body = {
-    name: FORMAT,
-    includeCustomFormatWhenRenaming: false,
-    specifications: [{ ...spec, name: 'Bigger than the limit', negate: false, required: true, fields }],
-  }
-  const format = existing
-    ? await arr<{ id: number }>('radarr', `/customformat/${existing.id}`, 'PUT', { ...body, id: existing.id })
-    : await arr<{ id: number }>('radarr', '/customformat', 'POST', body)
-
-  type Profile = { id: number; formatItems: { format: number; name: string; score: number }[] }
-  for (const profile of await arr<Profile[]>('radarr', '/qualityprofile')) {
-    const formatItems = [...profile.formatItems.filter((i) => i.format !== format.id), { format: format.id, name: FORMAT, score: -10_000 }]
-    await arr('radarr', `/qualityprofile/${profile.id}`, 'PUT', { ...profile, formatItems })
-  }
-}
+const applyMovieLimit = (gb: number) =>
+  setCustomFormat('radarr', 'Arrmy size limit', -10_000, gb
+    ? [{ implementation: 'SizeSpecification', name: 'Bigger than the limit', values: { min: gb, max: 100_000 } }]
+    : [])
 
 /**
  * Episodes: Sonarr's quality sizes are MB per minute and judge season packs per episode, so the limit is per hour of

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { movieStatus, seriesStatus, type Season } from '../src/lib/status.ts'
+import { MULTI_AUDIO } from '../src/lib/releases.ts'
 import { createToken, readToken } from '../src/lib/token.ts'
 
 const secret = 'a-test-secret-of-32-characters!!'
@@ -36,4 +37,12 @@ test('series status only counts the requested seasons', () => {
   assert.deepEqual(seriesStatus(series, []), { label: 'Partially available' }, 'defaults to monitored seasons, skips specials')
   assert.equal(seriesStatus(series, [], [9]), null, 'season not in Sonarr')
   assert.equal(seriesStatus(undefined, []), null)
+})
+
+test('multi-audio release titles', () => {
+  const multi = new RegExp(MULTI_AUDIO, 'i')
+  for (const title of ['Movie.2020.MULTi.1080p.BluRay.x264-GRP', 'Movie.2020.MULTi2.1080p', '[Group] Anime - 01 (1080p) [Dual Audio]', 'Show.S01.DUAL-AUDIO.1080p', 'Movie 2020 Multi Audio 1080p'])
+    assert.ok(multi.test(title), title)
+  for (const title of ['Show.S01E01.1080p.WEB-DL.DDP5.1.H.264-NTb', 'Show.S01E01.1080p.WEB.MULTi-SUBS', 'Movie.2020.MULTISUB.1080p', 'Multiverse.2022.1080p.WEB', 'Dual.2022.1080p.BluRay'])
+    assert.ok(!multi.test(title), title)
 })

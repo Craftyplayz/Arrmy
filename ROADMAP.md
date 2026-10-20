@@ -12,6 +12,7 @@
 - **Config backups.** Every app's settings are copied nightly and kept for a week (restore steps in the README).
 - **Size limits.** The Admin sets a maximum per movie, per hour of episode and per show (Settings). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate.
 - **Admin view.** One page with Problems (Missing, Failed Download, Failed Import) and one-click fixes, what's downloading, library and disk stats, and Requests by person.
+- **English-only audio.** At the same quality, Radarr and Sonarr pick a release with only English audio over MULTi, Dual Audio or another language, so files are smaller. Untagged releases count as the original language, so foreign films and anime are left alone. In Plex, each person still sets their own preferred audio language.
 
 ## Next
 
