@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation'
 import { adminOverview, liveDownloads, type LiveDownload, type Problem } from '@/lib/admin'
 import { requestDetails } from '@/lib/arr'
 import { listRequests } from '@/lib/db'
+import type { Stuck } from '@/lib/problems'
 import { requireUser } from '@/lib/session'
+import { stuckRequests } from '@/lib/stuck'
 import { fixProblem } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
 import { Downloads } from '../downloads'
@@ -23,8 +25,9 @@ export default async function AdminPage() {
 
   let overview: Awaited<ReturnType<typeof adminOverview>> | undefined
   let downloads: LiveDownload[] = []
+  let stuck: Awaited<ReturnType<typeof stuckRequests>> = { items: [], offline: false, indexerNote: undefined }
   try {
-    ;[overview, downloads] = await Promise.all([adminOverview(), liveDownloads().catch(() => [])])
+    ;[overview, downloads, stuck] = await Promise.all([adminOverview(), liveDownloads().catch(() => []), stuckRequests()])
   } catch (e) {
     console.error(e)
   }
@@ -47,15 +50,23 @@ export default async function AdminPage() {
   const ranked = [...people].sort((a, b) => b[1].bytes - a[1].bytes)
   const most = ranked[0]?.[1].bytes || 1
 
-  const { problems, speeds, library, disks } = overview
+  // Missing shows in Stuck, with why; Discord's #problems still gets it from adminOverview.
+  const problems = overview.problems.filter((p) => p.kind !== 'Missing')
+  const { speeds, library, disks } = overview
+  // A download that's already a Problem isn't listed again under Stuck.
+  const isProblem = (s: Stuck) => problems.some((p) => p.service === s.service && ((s.hash && p.hash === s.hash) || s.ids.some((id) => p.ids.includes(id))))
+  stuck.items = stuck.items.filter((s) => !isProblem(s))
   return (
     <>
       <Hero title="Admin" lede={LEDE} />
-      {downloads.length > 0 && <AutoRefresh seconds={30} />}
+      <AutoRefresh seconds={30} />
 
       <div className="ar-stats-row">
         <Stat href={problems.length > 0 ? '#problems' : undefined} value={num(problems.length)} label={problems.length === 1 ? 'Problem' : 'Problems'}>
           {problems.length === 0 && 'Nothing needs fixing'}
+        </Stat>
+        <Stat href={stuck.items.length > 0 ? '#stuck' : undefined} value={num(stuck.items.length)} label="Stuck">
+          {stuck.items.length === 0 ? 'Everything is moving' : 'Not downloading yet'}
         </Stat>
         <Stat href={downloads.length > 0 ? '#downloading' : undefined} value={num(downloads.length)} label="Downloading">
           {speeds && `Down ${speed(speeds.down)} · Up ${speed(speeds.up)}`}
@@ -77,7 +88,22 @@ export default async function AdminPage() {
           </h2>
           <div className="rows">
             {problems.map((p) => (
-              <ProblemRow key={`${p.service}-${p.kind}-${p.hash ?? p.ids.join('-')}`} p={p} />
+              <ProblemRow key={`${p.service}-${p.kind}-${p.hash ?? p.ids.join('-')}`} p={p} badge={p.kind} warn />
+            ))}
+          </div>
+        </>
+      )}
+
+      {(stuck.items.length > 0 || stuck.offline || stuck.indexerNote) && (
+        <>
+          <h2 className="ar-h" id="stuck">
+            Stuck <span className="n">{num(stuck.items.length)}</span>
+          </h2>
+          {stuck.offline && <p className="err">qBittorrent has no connection, so nothing can download. Check the VPN (gluetun) in Portainer.</p>}
+          {stuck.indexerNote && <p className="ar-sub">{stuck.indexerNote}</p>}
+          <div className="rows">
+            {stuck.items.map((s) => (
+              <ProblemRow key={`${s.service}-${s.hash ?? s.ids.join('-')}-${s.title}`} p={s} badge={s.reason} warn={WARN.has(s.reason)} />
             ))}
           </div>
         </>
@@ -120,25 +146,33 @@ export default async function AdminPage() {
   )
 }
 
-function ProblemRow({ p }: { p: Problem }) {
+const WARN = new Set(['Stalled', 'Fetching file list', 'Error', 'Nothing found'])
+
+/** A Problem or Stuck Request: its title, a badge, why, and its one-click fix if it has one. */
+function ProblemRow({ p, badge, warn }: { p: Problem | Stuck; badge: string; warn: boolean }) {
   return (
     <div className="rowi">
       <div className="grow">
-        <b>{p.title}</b> <span className={p.kind === 'Missing' ? 'badge' : 'badge r'}>{p.kind}</span>
-        <span className="ar-sub">{p.detail}</span>
+        <b>{p.title}</b> <span className={warn ? 'badge r' : 'badge'}>{badge}</span>
+        <span className="ar-sub">
+          {p.detail}
+          {'by' in p && p.by.length > 0 && ` · Requested by ${p.by.join(', ')}`}
+        </span>
       </div>
-      <form action={fixProblem}>
-        <input type="hidden" name="service" value={p.service} />
-        <input type="hidden" name="fix" value={p.fix} />
-        {p.ids.map((id) => (
-          <input key={id} type="hidden" name="id" value={id} />
-        ))}
-        {p.hash && <input type="hidden" name="hash" value={p.hash} />}
-        <input type="hidden" name="title" value={p.title} />
-        <SubmitButton className="btn small" pending="Working...">
-          {p.fix === 'retry' ? 'Try another release' : 'Search again'}
-        </SubmitButton>
-      </form>
+      {p.fix && (
+        <form action={fixProblem}>
+          <input type="hidden" name="service" value={p.service} />
+          <input type="hidden" name="fix" value={p.fix} />
+          {p.ids.map((id) => (
+            <input key={id} type="hidden" name="id" value={id} />
+          ))}
+          {p.hash && <input type="hidden" name="hash" value={p.hash} />}
+          <input type="hidden" name="title" value={p.title} />
+          <SubmitButton className="btn small" pending="Working...">
+            {p.fix === 'retry' ? 'Try another release' : 'Search again'}
+          </SubmitButton>
+        </form>
+      )}
     </div>
   )
 }

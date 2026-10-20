@@ -17,6 +17,7 @@ import {
   type MissingMovie,
   type Problem,
   type Service,
+  type Torrent,
 } from './problems'
 import { liveProgress, torrents, transferSpeeds } from './qbit'
 
@@ -101,16 +102,26 @@ export type LiveDownload = {
 const metas = new Map<string, DownloadMeta>()
 const asked = new Map<string, number>()
 
-/** Everything Radarr, Sonarr and LazyLibrarian are downloading, oldest first. */
-export async function liveDownloads(): Promise<LiveDownload[]> {
-  // completion_on: a finished torrent can read under 100% while qBittorrent rechecks it after a restart.
-  const list = (await torrents()).filter((t) => t.category in CATEGORY_APPS && t.progress < 1 && !(t.completion_on > 0))
+/** What each torrent is for (by lowercase hash), from the cache, asking about new ones. */
+export async function metaFor(list: Torrent[]) {
   const now = Date.now()
   const unknown = list.filter((t) => !metas.has(t.hash.toLowerCase()) && now - (asked.get(t.hash.toLowerCase()) ?? 0) > 30_000)
   if (unknown.length) {
     unknown.forEach((t) => asked.set(t.hash.toLowerCase(), now))
     for (const [hash, meta] of await downloadMeta(unknown).catch(() => new Map<string, DownloadMeta>())) metas.set(hash, meta)
   }
+  return metas
+}
+
+/** Torrents Radarr, Sonarr and LazyLibrarian are downloading. */
+export const unfinished = async () =>
+  // completion_on: a finished torrent can read under 100% while qBittorrent rechecks it after a restart.
+  (await torrents()).filter((t) => t.category in CATEGORY_APPS && t.progress < 1 && !(t.completion_on > 0))
+
+/** Everything Radarr, Sonarr and LazyLibrarian are downloading, oldest first. */
+export async function liveDownloads(): Promise<LiveDownload[]> {
+  const list = await unfinished()
+  await metaFor(list)
   return list
     .sort((a, b) => a.added_on - b.added_on)
     .map((t) => {

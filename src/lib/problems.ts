@@ -37,6 +37,8 @@ export type Torrent = {
   eta: number
   /** When it finished (Unix seconds), or -1. Kept across restarts, unlike progress while qBittorrent rechecks. */
   completion_on: number
+  /** When it last sent or received anything (Unix seconds). */
+  last_activity: number
 }
 
 /** Dead releases in a row for one title before Arrmy stops swapping them and makes it a Problem. */
@@ -67,13 +69,26 @@ export function stateLabel(state: string) {
 type Images = { coverType: string; remoteUrl?: string }[]
 export const posterIn = (images?: Images) => images?.find((i) => i.coverType === 'poster')?.remoteUrl
 
-export type MissingMovie = { id: number; title: string; year?: number; isAvailable: boolean; added: string; images?: Images }
+export type MissingMovie = {
+  id: number
+  tmdbId?: number
+  title: string
+  year?: number
+  isAvailable: boolean
+  added: string
+  images?: Images
+  lastSearchTime?: string
+  inCinemas?: string
+  digitalRelease?: string
+  physicalRelease?: string
+}
 export type MissingEpisode = {
   id: number
   seriesId: number
   seasonNumber: number
   airDateUtc?: string
-  series?: { title: string; added: string; images?: Images }
+  lastSearchTime?: string
+  series?: { title: string; tvdbId?: number; added: string; images?: Images }
 }
 
 const HOUR = 3_600_000
@@ -145,4 +160,77 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
     })
   }
   return problems
+}
+
+/** A Request that hasn't started downloading or has stopped, and why, for the Admin view's Stuck list. */
+export type Stuck = Omit<Problem, 'kind' | 'fix'> & { reason: string; fix?: Problem['fix']; by: string[] }
+
+/** "25 min ago", "3 h ago", "2 days ago". */
+export function ago(iso: string | number, now = Date.now()) {
+  const minutes = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60_000))
+  if (minutes < 60) return `${Math.max(1, minutes)} min ago`
+  if (minutes < 48 * 60) return `${Math.round(minutes / 60)} h ago`
+  return `${Math.round(minutes / 1440)} days ago`
+}
+
+/** "3 Dec", with the year when it isn't this one. */
+export function day(iso: string, now = Date.now()) {
+  const d = new Date(iso)
+  const year = d.getFullYear() === new Date(now).getFullYear() ? undefined : 'numeric'
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year })
+}
+
+/** A movie Radarr wants and isn't downloading. */
+export function movieStuck(m: MissingMovie, now = Date.now()): Stuck {
+  const base = { service: 'radarr' as const, title: `${m.title}${m.year ? ` (${m.year})` : ''}`, ids: [m.id], poster: posterIn(m.images), by: [] }
+  if (!m.isAvailable) {
+    const future = (d?: string) => (d && Date.parse(d) > now ? d : undefined)
+    const home = [future(m.digitalRelease), future(m.physicalRelease)].filter(Boolean).sort()[0]
+    const detail = home
+      ? `${home === m.digitalRelease ? 'Digital' : 'Disc'} release ${day(home, now)}`
+      : future(m.inCinemas)
+        ? `In cinemas ${day(m.inCinemas!, now)}`
+        : m.inCinemas
+          ? `In cinemas since ${day(m.inCinemas, now)}, no home release date yet`
+          : 'No release date yet'
+    return { ...base, reason: 'Not released yet', detail }
+  }
+  if (!m.lastSearchTime) return { ...base, reason: 'Searching', detail: `Not searched yet, added ${ago(m.added, now)}`, fix: 'search' }
+  if (now - Date.parse(m.added) < HOUR) return { ...base, reason: 'Searching', detail: `Searched ${ago(m.lastSearchTime, now)}` }
+  return { ...base, reason: 'Nothing found', detail: `No release found. Last searched ${ago(m.lastSearchTime, now)}`, fix: 'search' }
+}
+
+/** One season's aired episodes that Sonarr wants and isn't downloading. */
+export function seasonStuck(eps: MissingEpisode[], now = Date.now()): Stuck {
+  const e = eps[0]
+  const base = {
+    service: 'sonarr' as const,
+    title: `${e.series?.title ?? 'Show'} · Season ${e.seasonNumber}`,
+    ids: eps.map((x) => x.id),
+    poster: posterIn(e.series?.images),
+    by: [],
+  }
+  const count = `${eps.length} episode${eps.length > 1 ? 's' : ''}`
+  const searched = eps
+    .map((x) => x.lastSearchTime)
+    .filter((t): t is string => !!t)
+    .sort()
+    .at(-1)
+  // A day's grace after airing: new episodes usually take hours to be released.
+  const fresh = eps.every((x) => now - Date.parse(x.airDateUtc ?? '') < 24 * HOUR) || now - Date.parse(e.series?.added ?? '') < HOUR
+  if (fresh) return { ...base, reason: 'Searching', detail: `${count} aired recently; releases usually take a few hours` }
+  return { ...base, reason: 'Nothing found', detail: `${count} with no release found${searched ? `. Last searched ${ago(searched, now)}` : ''}`, fix: 'search' }
+}
+
+/** Why a torrent isn't downloading, or undefined while it is (or it's checking its files, which ends by itself). */
+export function torrentStuck(t: Torrent, now = Date.now()): { reason: string; detail: string } | undefined {
+  const done = `${Math.floor(t.progress * 100)}%`
+  const reason = stateLabel(t.state)
+  if (t.state === 'metaDL' || t.state === 'forcedMetaDL') return { reason, detail: `No file list yet, added ${ago(t.added_on * 1000, now)}` }
+  if (t.state === 'stalledDL')
+    return { reason, detail: `${done} done, ${t.last_activity > 0 ? `last moved ${ago(t.last_activity * 1000, now)}` : 'never moved'}, ${t.num_seeds} seeders` }
+  if (t.state === 'queuedDL') return { reason, detail: `Waiting behind other downloads at ${done}` }
+  if (t.state === 'stoppedDL' || t.state === 'pausedDL') return { reason, detail: `Paused at ${done}` }
+  if (t.state === 'error') return { reason, detail: 'qBittorrent reports an error. Its log in VueTorrent says why.' }
+  if (t.state === 'missingFiles') return { reason, detail: 'Its files are missing from the disk.' }
 }

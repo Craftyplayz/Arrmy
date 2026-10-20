@@ -43,6 +43,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Admin view | Problems (Missing, Failed Download, Failed Import) with one-click fixes: search again, or blocklist the release and try another. Also what's downloading, speeds, library counts, disk space and Requests by person. | Unit (the Problem rules), Fake, Live (the page). **Not yet live:** a real Problem and its fix. |
 | Settings | Size limits (see Movies and TV). | Fake |
 | Downloading | Every movie, show and audiobook downloading, read straight from qBittorrent every 3 seconds without reloading the page: poster, title, who asked, progress, speed, time left, seeders and peers, and the state in words (Downloading, Stalled, Fetching file list, Queued, Paused, Checking). | Unit (the states), Live (v1.1.0-rc.23: a movie with its poster, who asked, speed and time left) |
+| Stuck | Every Request that hasn't started downloading or has stopped, and why: Searching, Not released yet (with the cinema, digital or disc date), Nothing found (when it was last searched), or in qBittorrent but Stalled, Fetching file list, Queued, Paused or Error (how far it got, when it last moved, seeders). Audiobooks LazyLibrarian wants and hasn't found too. Once at the top: qBittorrent with no connection (the VPN), and indexers Prowlarr has switched off and until when. Stalled downloads keep "Try another release", Nothing found keeps "Search again". Missing moved here from Problems (Discord's #problems still gets it). | Unit (the rules), Local (the live server's apps, with a fake qBittorrent for stalled and queued torrents). **Not yet live.** **Later:** why every release was rejected (needs the Request Log), and each indexer's error text (Prowlarr's history doesn't keep it). |
 | Dead releases | A torrent with no file list 5 minutes after it was added, or nothing downloaded after 15, is swapped for another release: Radarr and Sonarr blocklist it and search again; for audiobooks Arrmy deletes it, waits for LazyLibrarian to mark it Failed, then searches again (about 2 minutes). LazyLibrarian sometimes grabs the same dead release again; that counts as another strike. After 3 dead releases in a row for the same title, the third is left alone, it shows as a Failed Download Problem, and Discord @mentions the Admin (`DISCORD_ADMIN_ID`). Torrents in other qBittorrent categories, and paused ones, are never touched. | Unit (the rule), Fake. **Not yet live.** |
 
 ### Stack and deployment
@@ -141,27 +142,6 @@ Audiobooks come second. LazyLibrarian has no webhook and doesn't share its candi
 How long counts as stalled and how many tries before a Problem were settled and built on 2026-10-20: see Dead releases under Done. The Request Log takes that over and logs each step.
 
 To decide: for TV, how Arrmy picks between a season pack and single episodes the way Sonarr does now.
-
-### Admin: what's stuck and why
-
-A list on the Admin page of every Request that hasn't started downloading or has stopped, saying where it stopped and why. Asked for on 2026-10-20.
-
-Where a Request can stop, and what the list says:
-
-- **Not searched yet, or still searching.** How long ago the search started.
-- **Not released yet.** The movie is only in cinemas, or the episode hasn't aired. Shows the release or air date.
-- **Nothing found.** No indexer had it, or every release was rejected, and why (over the Size Limit, wrong quality and so on).
-- **Indexer error.** Which indexer failed and its full error (blocked by Cloudflare, timed out, rate-limited, or disabled by Prowlarr until a set time).
-- **In qBittorrent but not downloading.** Fetching metadata, queued behind other downloads, stalled (how far it got, seeders seen, when it last moved), stopped, or in an error state. If qBittorrent has no connection at all (the VPN is down), that shows once at the top, not on every item.
-
-Each entry links to its Request Log and keeps the one-click fixes the Admin view already has (search again, or blocklist the release and grab another).
-
-How:
-
-- qBittorrent's torrent state (`metaDL`, `queuedDL`, `stalledDL`, `stoppedDL`, `error`) and last activity come from the read Arrmy already does every 5 seconds; its connection status from `/transfer/info`.
-- Indexer errors from Prowlarr's indexer status and search history.
-- "Every release was rejected, and why" needs Arrmy to run the search itself (see Request Log). Everything else works without it, so this doesn't have to wait for the Request Log.
-- Audiobooks too: LazyLibrarian's wanted list shows what it hasn't found, and qBittorrent's states work the same. This replaces the separate Audiobook Problems item.
 
 ### Series and Author Requests
 
