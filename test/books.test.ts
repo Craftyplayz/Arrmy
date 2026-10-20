@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { audiobookStatus, coverUrl, fromOpenLibrary, rankBooks, sameBook } from '../src/lib/bookrules.ts'
+import { audiobookStatus, coverUrl, fromOpenLibrary, rankBooks, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
 
 const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary', AuthorName: 'Andy Weir', ...over })
 
@@ -67,4 +67,14 @@ test('OpenLibrary search results in LazyLibrarian terms', () => {
   })
   assert.equal(fromOpenLibrary({ key: '/works/OL1W', title: 'Untitled' }).authorname, 'Unknown author')
   assert.equal(fromOpenLibrary({ key: '/works/OL1W', title: 'Untitled' }).bookimg, undefined)
+})
+
+test('a removed book LazyLibrarian wants again is unwanted, for a day, unless it was requested again', () => {
+  const now = 1_000_000_000
+  const book = (BookID: string, AudioStatus: string) => ({ BookID, BookName: 'x', AuthorName: 'y', AudioStatus })
+  const books = [book('A', 'Wanted'), book('B', 'Snatched'), book('C', 'Skipped'), book('D', 'Wanted'), book('E', 'Wanted')]
+  const removed = { A: now - 60_000, B: now - 60_000, C: now - 60_000, D: now - 2 * 86_400_000, E: now - 60_000 }
+  const { unwant, keep } = unwantAgain(removed, books, new Set(['E']), now)
+  assert.deepEqual(unwant, ['A', 'B'])
+  assert.deepEqual(Object.keys(keep), ['A', 'B', 'C'], 'D is a day old; E was requested again')
 })

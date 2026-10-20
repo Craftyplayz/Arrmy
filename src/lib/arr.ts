@@ -167,7 +167,12 @@ export async function requestDetails(requests: RequestRow[]): Promise<RequestDet
   return Promise.all(
     requests.map(async (r) => {
       if (r.media_type === 'audiobook')
-        return { status: bookStatuses[books.indexOf(String(r.external_id))] ?? null, seasons: [], bytes: 0 }
+        // Available in Arrmy but not in LazyLibrarian: Audiobookshelf already had it (see alreadyOwned in books.ts).
+        return {
+          status: r.status === 'available' ? { label: 'Available' } : (bookStatuses[books.indexOf(String(r.external_id))] ?? null),
+          seasons: [],
+          bytes: 0,
+        }
       if (r.media_type === 'movie') {
         const movie = await libraryMovie(Number(r.external_id))
         return { status: movieStatus(movie, movieQueue), seasons: [], bytes: movie?.sizeOnDisk ?? 0 }

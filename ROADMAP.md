@@ -34,6 +34,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Status | Requested → Downloading % → Available. Arrmy checks LazyLibrarian every 2 minutes. | Unit, Fake, Live |
 | Filing | Every 10 minutes LazyLibrarian copies finished downloads to `media/audiobooks/Author/Title` (the torrent keeps seeding). Audiobookshelf picks the book up, and Discord gets a message. | Fake, Live (Dune, 2026-10-20). **Not yet live:** the Discord message. |
 | Remove | Cancels the Request, or deletes the torrent. Once the book is in Audiobookshelf, deletes that copy too, but only one added after the Request was made, so books you already had are never touched. | Unit (the matching rule), Fake, Live during a download. **Not yet live:** after it's in Audiobookshelf. |
+| Already have it | A requested audiobook Audiobookshelf already has (a copy from before Arrmy) becomes Available, and LazyLibrarian stops looking for it, so it isn't downloaded twice. A removed one that LazyLibrarian grabs anyway (its search was still running) is stopped and its torrent deleted, for a day after the Remove. | Unit (the removed-book rule). **Not yet live.** |
 | Existing library | The Audiobookshelf already in use moved into the stack with all its books, users, progress and stats. | Live |
 
 ### Admin

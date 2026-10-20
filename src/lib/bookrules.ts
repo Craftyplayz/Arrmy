@@ -90,3 +90,24 @@ export function sameBook(item: { title: string; author?: string }, book: { title
   const surname = words(book.author).split(' ').pop()
   return !item.author || !surname || words(item.author).split(' ').includes(surname)
 }
+
+/** Books whose Request was removed, by BookID, with when (ms). Kept for a day: see unwantAgain. */
+export type Removed = Record<string, number>
+const DAY = 86_400_000
+
+/**
+ * Removed books LazyLibrarian wants again. Its search can still be running when a Request is removed, and grabbing a
+ * release afterwards sets the book back to Snatched (then Wanted when that release fails). Not if someone requested it
+ * again. Also returns the entries still worth keeping.
+ */
+export function unwantAgain(removed: Removed, books: LLBook[], requested: Set<string>, now = Date.now()) {
+  const keep: Removed = {}
+  const unwant: string[] = []
+  for (const [id, at] of Object.entries(removed)) {
+    if (requested.has(id) || now - at > DAY) continue
+    keep[id] = at
+    const status = books.find((b) => b.BookID === id)
+    if (['Wanted', 'Snatched'].includes(status?.AudioStatus ?? status?.audiostatus ?? '')) unwant.push(id)
+  }
+  return { unwant, keep }
+}

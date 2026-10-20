@@ -1,7 +1,18 @@
 // Audiobook Requests: LazyLibrarian finds and downloads them (as Radarr does movies) and files them where
 // Audiobookshelf watches. Audiobookshelf, given an API key, says which books you already own and deletes removed ones.
-import { audiobookStatus, coverUrl, fromOpenLibrary, rankBooks, sameBook, yearOf, type LLBook, type OpenLibraryDoc } from './bookrules'
-import { markAvailable, waitingOfType, type RequestRow } from './db'
+import {
+  audiobookStatus,
+  coverUrl,
+  fromOpenLibrary,
+  rankBooks,
+  sameBook,
+  unwantAgain,
+  yearOf,
+  type LLBook,
+  type OpenLibraryDoc,
+  type Removed,
+} from './bookrules'
+import { getSetting, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
@@ -170,8 +181,8 @@ export async function removeAudiobook(r: RequestRow): Promise<string | undefined
   const [books, history] = await Promise.all([ll<LLBook[]>('getAllBooks'), ll<Download[]>('getHistory')])
   const book = books.find((b) => b.BookID === bookId)
   await ll('unqueueBook', { id: bookId, type: 'AudioBook' })
-  const torrents = history.filter((h) => h.BookID === bookId && h.AuxInfo === 'AudioBook' && h.DownloadID).map((h) => h.DownloadID!)
-  await deleteTorrents([...new Set(torrents)])
+  setSetting('removedBooks', { ...getSetting<Removed>('removedBooks'), [bookId]: Date.now() }) // see unwantAgain
+  await deleteTorrents(torrentsOf(history, bookId))
 
   if (audiobookStatus(book)?.label !== 'Available') return // nothing was filed: just cancelled
   if (!absKey()) return `${r.title} is still in Audiobookshelf. Delete it there, or set ABS_API_KEY so Arrmy can.`
@@ -180,6 +191,10 @@ export async function removeAudiobook(r: RequestRow): Promise<string | undefined
   if (!item) return `Couldn't find the copy of ${r.title} that Arrmy downloaded in Audiobookshelf, so nothing was deleted there.`
   await abs(`/items/${item.id}?hard=1`, 'DELETE')
 }
+
+const torrentsOf = (history: Download[], bookId: string) => [
+  ...new Set(history.filter((h) => h.BookID === bookId && h.AuxInfo === 'AudioBook' && h.DownloadID).map((h) => h.DownloadID!)),
+]
 
 /** Audiobook releases LazyLibrarian sent to qBittorrent: BookID per torrent hash (lowercase). getSnatched = still downloading. */
 async function audiobookReleases(cmd: 'getSnatched' | 'getHistory') {
@@ -233,17 +248,47 @@ export async function searchDroppedBooks(dropped: { hash: string; bookId: string
   return dropped.filter((d) => !waiting.includes(d)).map((d) => d.hash)
 }
 
+/**
+ * A requested book Audiobookshelf already has (a copy from before Arrmy) is Available as it is: LazyLibrarian stops
+ * looking for it, so it isn't downloaded twice. Only while LazyLibrarian is still searching, not once it's downloading.
+ */
+async function alreadyOwned(r: RequestRow, book: LLBook | undefined) {
+  if ((book?.AudioStatus ?? book?.audiostatus) !== 'Wanted') return false
+  if (!(await owned(r.title)).some((i) => sameBook(i, { title: r.title, author: book!.AuthorName }))) return false
+  await ll('unqueueBook', { id: book!.BookID, type: 'AudioBook' })
+  return true
+}
+
+/** Stops LazyLibrarian wanting removed books it picked up again (see unwantAgain), and deletes what it grabbed. */
+async function keepRemoved(books: LLBook[]) {
+  const removed = getSetting<Removed>('removedBooks') ?? {}
+  if (!Object.keys(removed).length) return
+  const requested = new Set(waitingOfType('audiobook').map((r) => String(r.external_id)))
+  const { unwant, keep } = unwantAgain(removed, books, requested)
+  if (unwant.length) {
+    const history = await ll<Download[]>('getHistory')
+    for (const id of unwant) {
+      await ll('unqueueBook', { id, type: 'AudioBook' })
+      await deleteTorrents(torrentsOf(history, id))
+      console.log(`[books] ${id} was removed but LazyLibrarian wanted it again: stopped`)
+    }
+  }
+  if (Object.keys(keep).length !== Object.keys(removed).length) setSetting('removedBooks', keep)
+}
+
 /** LazyLibrarian has no webhook, so audiobook Requests are checked every 2 minutes for becoming Available. */
 export function startAudiobookWatch() {
   setInterval(async () => {
     try {
       const waiting = waitingOfType('audiobook')
+      const books = await ll<LLBook[]>('getAllBooks')
       const statuses = await audiobookStatuses(waiting.map((r) => String(r.external_id)))
       for (const [i, r] of waiting.entries()) {
-        if (statuses[i]?.label !== 'Available') continue
+        if (statuses[i]?.label !== 'Available' && !(await alreadyOwned(r, books.find((b) => b.BookID === String(r.external_id))))) continue
         markAvailable(r.id)
         tellDiscord(r)
       }
+      await keepRemoved(books)
     } catch (e) {
       console.warn(`[books] ${(e as Error).message}`)
     }
