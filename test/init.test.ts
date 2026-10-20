@@ -22,7 +22,7 @@ test('init gives LazyLibrarian the API key Arrmy derives, and never overwrites i
     assert.match(ini, new RegExp(`^api_key = ${lazyLibrarianKey('a-test-secret-of-32-characters!!')}$`, 'm'))
     const relay = `abb_host = http://arrmy:3001/abb/${audiobookBayToken('a-test-secret-of-32-characters!!')}`
     assert.ok(ini.split('\n').includes(relay), 'AudioBook Bay through the relay, with the token Arrmy checks')
-    for (const line of ['api_enabled = 1', 'ol_api = 1', 'audio_dir = /data/media/audiobooks', 'qbittorrent_host = gluetun', 'keep_seeding = 1'])
+    for (const line of ['api_enabled = 1', 'ol_api = 1', 'audio_dir = /data/media/audiobooks', 'qbittorrent_host = gluetun', 'keep_seeding = 1', 'reject_minaudio = 50'])
       assert.match(ini, new RegExp(`^${line}$`, 'm'), line)
     assert.doesNotMatch(ini, /= True$/m, 'LazyLibrarian reads True as off')
 

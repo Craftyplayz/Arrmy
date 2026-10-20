@@ -73,6 +73,13 @@ export function startWiring() {
       await ll('forceBookSearch', { type: 'AudioBook' })
       setSetting('wired:audiobookBay', host)
     }],
+    // Audiobook results under 50 MB are ebooks posted as audiobooks (a 2 MB "La Belle Sauvage" got grabbed three times).
+    // Set once, like AudioBook Bay, so a different value chosen in LazyLibrarian later is left alone.
+    ['LazyLibrarian: audiobooks under 50 MB skipped', async () => {
+      if (getSetting<boolean>('wired:audiobookMinSize')) return
+      await ll('writeCFG', { name: 'REJECT_MINAUDIO', group: 'Magazines', value: '50' })
+      setSetting('wired:audiobookMinSize', true)
+    }],
     // Re-applied every start, so a rebuilt Radarr or Sonarr gets the Admin's Size Limits back.
     ['Size limits', () => applyLimits(getLimits())],
     // At the same quality, a release with only English audio beats MULTi, Dual Audio or another language: less space.

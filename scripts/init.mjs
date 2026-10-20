@@ -87,6 +87,10 @@ if (!existsSync(books)) {
     '[PostProcess]',
     'audiobook_dest_folder = $Author/$Title',
     '',
+    // Audiobook results under 50 MB are skipped: they're ebooks posted as audiobooks. LazyLibrarian files the setting here.
+    '[MAGAZINES]',
+    'reject_minaudio = 50',
+    '',
     // AudioBook Bay through Arrmy's relay (src/lib/abbrelay.ts relayAddress), with the key audiobookBayToken derives
     '[ABB]',
     'abb = 1',
