@@ -1,9 +1,11 @@
-# Builds the Arrmy image on every push to main, so Portainer (or `docker compose pull`) can download it.
+# Builds the Arrmy image so Portainer (or `docker compose pull`) can download it:
+# every push to main → arrmy:latest, and every release tag vX.Y.Z → arrmy:X.Y.Z.
 name: image
 
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -21,9 +23,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/craftyplayz/arrmy
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
       - uses: docker/build-push-action@v7
         with:
           push: true
-          tags: ghcr.io/craftyplayz/arrmy:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

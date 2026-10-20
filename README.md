@@ -24,6 +24,8 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 **Updating:** open the stack and click **Pull and redeploy**, with **Re-pull image** turned on.
 
+**Releases:** `refs/heads/main` always runs the newest build. To run a fixed, tested version instead, set the stack's **Repository reference** to a release tag, e.g. `refs/tags/v1.0.0`. A release's stack file names its own Arrmy image (`arrmy:1.0.0`), so nothing else needs changing. Releases are listed at <https://github.com/Craftyplayz/Arrmy/releases>.
+
 **Backups:** the `backup` container saves every app's settings to `BACKUP_DIR` when it starts and nightly at 04:00 (UTC), keeping `BACKUP_KEEP_DAYS` days. To restore:
 
 1. Stop the stack in Portainer.
