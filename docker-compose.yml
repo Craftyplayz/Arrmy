@@ -50,6 +50,7 @@ services:
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
       - ${BACKUP_DIR:-/opt/arrmy-backups}:/backups:ro # so the Discord bot can report the nightly backup
+      - ${DATA_DIR:-/data}:/data # Audiobook Editions: hard-linked from torrents/ into media/audiobooks/
     ports:
       - ${ARRMY_PORT:-7654}:3000 # only the port on the box changes; inside Docker it's always 3000
     depends_on: *after-init

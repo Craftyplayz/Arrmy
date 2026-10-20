@@ -94,7 +94,7 @@ export default async function SearchPage({
                   {r.status && <Badge status={r.status} />}
                 </div>
                 {r.overview && <p>{r.overview}</p>}
-                {type === 'tv' ? <TvAction r={r} q={q} /> : <RequestButton r={r} action={type === 'movie' ? requestMovie : requestAudiobook} />}
+                {type === 'tv' ? <TvAction r={r} q={q} /> : type === 'audiobook' ? <AudiobookAction r={r} /> : <RequestButton r={r} action={requestMovie} />}
               </Cover>
             ))}
           </ul>
@@ -104,7 +104,26 @@ export default async function SearchPage({
   )
 }
 
-/** Movies and audiobooks: one thing to request, so a Request button until it's requested. */
+/** Audiobooks: the book, or one Edition of it (a narrator, or Full Cast), also once the book itself is requested. */
+function AudiobookAction({ r }: { r: SearchResult }) {
+  return (
+    <form action={requestAudiobook} className="form">
+      <input type="hidden" name="id" value={r.id} />
+      <label>
+        Edition{r.status ? '' : ' (optional)'}
+        <input className="field" name="edition" maxLength={40} placeholder="Stephen Fry, Full Cast" required={!!r.status} />
+        <small>A narrator, or Full Cast for a dramatised one.</small>
+      </label>
+      <div className="actions">
+        <SubmitButton className="btn primary" pending="Requesting...">
+          {r.status ? 'Request this edition' : 'Request'}
+        </SubmitButton>
+      </div>
+    </form>
+  )
+}
+
+/** Movies: one thing to request, so a Request button until it's requested. */
 function RequestButton({ r, action }: { r: SearchResult; action: (form: FormData) => Promise<void> }) {
   if (r.status) return null
   return (

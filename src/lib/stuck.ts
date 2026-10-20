@@ -1,9 +1,10 @@
 // The Admin view's Stuck list: every Request that hasn't started downloading or has stopped, and why.
 import { metaFor, unfinished } from './admin'
 import { arr, queueOf } from './arr'
-import type { LLBook } from './bookrules'
+import { editionOf, type LLBook } from './bookrules'
 import { ll } from './books'
-import { requestsFor } from './db'
+import { requestsFor, waitingOfType } from './db'
+import { editionStatuses } from './editions'
 import { byDownload, day, movieStuck, seasonStuck, torrentStuck, type MissingEpisode, type MissingMovie, type Stuck } from './problems'
 import { qbit } from './qbit'
 
@@ -62,7 +63,7 @@ export async function stuckRequests() {
     const swap = ['stalledDL', 'metaDL', 'forcedMetaDL', 'error'].includes(t.state) && (q || book)
     items.push({
       ...why,
-      service: q?.service ?? (book ? 'lazylibrarian' : t.category === 'tv' ? 'sonarr' : 'radarr'),
+      service: q?.service ?? (t.category === 'tv' ? 'sonarr' : t.category === 'movies' ? 'radarr' : 'lazylibrarian'),
       title: meta?.title ?? t.name,
       ids: q?.ids ?? [],
       hash: book ? hash : undefined,
@@ -72,13 +73,15 @@ export async function stuckRequests() {
     })
   }
 
-  // Wanted, and nothing in the queue yet.
+  // Wanted, and nothing in the queue yet. Just after a restart Radarr and Sonarr report an empty queue for about a minute
+  // while qBittorrent is still downloading for them; their wanted lists would then all read "Searching", so they wait.
+  const settling = (queue: unknown[], category: string) => !queue.length && list.some((t) => t.category === category)
   const downloadingMovies = new Set(movieQueue.map((q) => q.movieId))
-  for (const m of movies.records.filter((m) => !downloadingMovies.has(m.id)))
+  for (const m of settling(movieQueue, 'movies') ? [] : movies.records.filter((m) => !downloadingMovies.has(m.id)))
     items.push({ ...movieStuck(m, now), by: m.tmdbId ? requestsFor('movie', m.tmdbId).map((r) => r.username) : [] })
   const downloadingEpisodes = new Set(tvQueue.map((q) => q.episodeId))
   const seasons = new Map<string, MissingEpisode[]>()
-  for (const e of episodes.records.filter((e) => !downloadingEpisodes.has(e.id))) {
+  for (const e of settling(tvQueue, 'tv') ? [] : episodes.records.filter((e) => !downloadingEpisodes.has(e.id))) {
     const key = `${e.seriesId}:${e.seasonNumber}`
     seasons.set(key, [...(seasons.get(key) ?? []), e])
   }
@@ -99,6 +102,23 @@ export async function stuckRequests() {
       title: requests[0]?.title ?? b.BookName,
       ids: [],
       poster: requests[0]?.poster ?? b.BookImg,
+      by: requests.map((r) => r.username),
+    })
+  }
+
+  // Editions Arrmy is looking for itself (editions.ts).
+  const editions = [...new Set(waitingOfType('audiobook').map((r) => String(r.external_id)))].filter((id) => editionOf(id))
+  const editionStatus = await tryRead(editionStatuses(editions), [])
+  for (const [i, id] of editions.entries()) {
+    if (editionStatus[i]?.label !== 'Requested') continue
+    const requests = requestsFor('audiobook', id)
+    items.push({
+      reason: 'Nothing found',
+      detail: `No release of this edition found yet, searched every 6 hours. Requested ${day(`${requests[0].created_at.replace(' ', 'T')}Z`, now)}`,
+      service: 'lazylibrarian',
+      title: requests[0].title,
+      ids: [],
+      poster: requests[0].poster,
       by: requests.map((r) => r.username),
     })
   }

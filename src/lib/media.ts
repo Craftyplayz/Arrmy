@@ -4,6 +4,7 @@ import { arr, posterOf, queueOf, type Media } from './arr'
 import { coverUrl, fromOpenLibrary, type LLBook } from './bookrules'
 import { audiobookTorrents, ll, openLibrary } from './books'
 import { requestsFor } from './db'
+import { EDITIONS_CATEGORY, editionForTags } from './editions'
 import { publicUrl } from './discord'
 import { mediaUrl, type DownloadMeta } from './embeds'
 import type { Torrent } from './problems'
@@ -53,6 +54,17 @@ export async function downloadMeta(list: Torrent[]) {
       title: requests[0]?.title ?? known?.BookName ?? book,
       url: mediaUrl('audiobook', book),
       art: requests[0]?.poster ?? coverUrl(known?.BookImg, book),
+      by: requests.map((x) => x.username),
+    })
+  }
+  for (const t of list.filter((t) => t.category === EDITIONS_CATEGORY)) {
+    const id = editionForTags(t.tags)
+    const requests = id ? requestsFor('audiobook', id) : []
+    metas.set(t.hash.toLowerCase(), {
+      app: 'Arrmy',
+      title: requests[0]?.title ?? t.name,
+      url: id ? mediaUrl('audiobook', id) : undefined,
+      art: requests[0]?.poster,
       by: requests.map((x) => x.username),
     })
   }

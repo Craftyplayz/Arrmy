@@ -33,7 +33,7 @@ test('queue states become the right Problem, with every queue id of the download
 test('dead releases: no file list after 5 minutes, or nothing downloaded after 15', () => {
   const now = Date.now()
   const torrent = (state: string, minutes: number, downloaded = 0) => ({
-    hash: 'a', name: 'x', category: 'movies', state, downloaded, added_on: (now - minutes * 60_000) / 1000,
+    hash: 'a', name: 'x', category: 'movies', tags: '', save_path: '/data/torrents', state, downloaded, added_on: (now - minutes * 60_000) / 1000,
     progress: 0, size: 1, dlspeed: 0, num_seeds: 0, num_leechs: 0, eta: 8_640_000, completion_on: -1, last_activity: 0,
   })
   assert.equal(deadReason(torrent('metaDL', 4), now), undefined, 'still fetching its file list')
@@ -118,7 +118,7 @@ test('Stuck: why a torrent isn’t downloading', () => {
   const t = (over: object) => ({
     hash: 'a',
     name: 'x',
-    category: 'movies',
+    category: 'movies', tags: '', save_path: '/data/torrents',
     state: 'downloading',
     added_on: now / 1000 - 600,
     downloaded: 0,

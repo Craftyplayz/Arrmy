@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { audiobookStatus, coverUrl, fromOpenLibrary, rankBooks, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
+import { audiobookStatus, bestEdition, cleanEdition, coverUrl, editionId, editionOf, fromOpenLibrary, isEdition, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
 
 const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary', AuthorName: 'Andy Weir', ...over })
 
@@ -77,4 +77,36 @@ test('a removed book LazyLibrarian wants again is unwanted, for a day, unless it
   const { unwant, keep } = unwantAgain(removed, books, new Set(['E']), now)
   assert.deepEqual(unwant, ['A', 'B'])
   assert.deepEqual(Object.keys(keep), ['A', 'B', 'C'], 'D is a day old; E was requested again')
+})
+
+test('Editions: release names from the live Prowlarr, matched to one book and one edition', () => {
+  const pos = "Harry Potter and the Philosopher's Stone"
+  assert.ok(isEdition('Harry Potter and the Philosopher s Stone Full Cast Edition Audiobook 2025 Stereo mp3', pos, 'Full Cast'))
+  assert.ok(isEdition('Harry Potter and the Philosophers Stone (Dramatised)', "Harry Potter and the Philosophers Stone", 'Full-Cast'), 'Dramatised counts as Full Cast')
+  assert.ok(!isEdition('Harry Potter Full-Cast Audio Editions Audiobooks', pos, 'Full Cast'), 'a pack of the series lacks the title')
+  assert.ok(!isEdition('Harry Potter and the Chamber of Secrets Full Cast Edition', pos, 'Full Cast'), 'another book')
+  assert.ok(isEdition('Harry Potter and the Philosopher s Stone; Read by Stephen Fry [MP3]', pos, 'Stephen Fry'))
+  assert.ok(!isEdition('Harry Potter and the Philosopher s Stone - Jim Dale', pos, 'Stephen Fry'), 'another narrator')
+  assert.ok(!isEdition('Harry Potter and the Philosopher s Stone Full Cast', pos, 'Stephen Fry'))
+})
+
+test('Editions: the best release has the most seeders and is big enough to be audio', () => {
+  const r = (title: string, seeders: number, size = 700e6) => ({ title, seeders, size, protocol: 'torrent', magnetUrl: 'magnet:?' })
+  const releases = [
+    r('Dune Frank Herbert Full Cast', 5),
+    r('Dune Frank Herbert Full Cast m4b', 40),
+    r('Dune Frank Herbert Full Cast epub', 900, 2e6),
+    r('Dune Frank Herbert Full Cast dead', 0),
+  ]
+  assert.equal(bestEdition(releases, 'Dune', 'Full Cast')?.title, 'Dune Frank Herbert Full Cast m4b')
+  assert.equal(bestEdition(releases, 'Dune', 'Scott Brick'), undefined)
+})
+
+test('Editions: ids and folder names', () => {
+  assert.deepEqual(editionOf(editionId('OL82563W', 'Stephen Fry')), { bookId: 'OL82563W', edition: 'Stephen Fry' })
+  assert.equal(editionOf('OL82563W'), undefined)
+  assert.equal(cleanEdition(' Full~Cast / ../x '), 'Full Cast .. x')
+  assert.equal(cleanEdition('   '), '')
+  assert.equal(safeName('../..'), 'Unknown')
+  assert.equal(safeName('Dune: Part One'), 'Dune Part One')
 })

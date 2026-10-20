@@ -3,6 +3,7 @@
 import {
   audiobookStatus,
   coverUrl,
+  editionOf,
   fromOpenLibrary,
   rankBooks,
   sameBook,
@@ -13,6 +14,7 @@ import {
   type Removed,
 } from './bookrules'
 import { getSetting, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
+import { watchEditions } from './editions'
 import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
@@ -62,28 +64,41 @@ export async function abs<T>(path: string, method = 'GET'): Promise<T> {
 }
 
 let libraryId: string | undefined
-type AbsItem = { id: string; addedAt: number; title: string; author?: string }
+/** `path` is as Audiobookshelf sees it: /audiobooks/Author/Title. */
+type AbsItem = { id: string; addedAt: number; title: string; author?: string; path: string }
 type AbsMatch = {
   libraryItem: {
     id: string
     addedAt: number
+    path: string
     media?: { metadata?: { title?: string; authorName?: string; authors?: { name: string }[] } }
   }
+}
+
+/** The Audiobookshelf library that holds media/audiobooks. */
+async function absLibrary() {
+  if (!libraryId) {
+    const { libraries } = await abs<{ libraries: { id: string; folders: { fullPath: string }[] }[] }>('/libraries')
+    libraryId = libraries.find((l) => l.folders.some((f) => f.fullPath === '/audiobooks'))?.id
+    if (!libraryId) throw new Error('no library uses /audiobooks')
+  }
+  return libraryId
+}
+
+/** Has Audiobookshelf look for new books now instead of at its next folder check. Without an API key it waits for that. */
+export async function scanLibrary() {
+  if (absKey()) await abs(`/libraries/${await absLibrary()}/scan`, 'POST').catch((e) => console.warn(`[books] ${(e as Error).message}`))
 }
 
 /** Audiobookshelf books matching a search. [] without an API key, or if Audiobookshelf can't be reached. */
 export async function owned(q: string): Promise<AbsItem[]> {
   if (!absKey()) return []
   try {
-    if (!libraryId) {
-      const { libraries } = await abs<{ libraries: { id: string; folders: { fullPath: string }[] }[] }>('/libraries')
-      libraryId = libraries.find((l) => l.folders.some((f) => f.fullPath === '/audiobooks'))?.id
-      if (!libraryId) throw new Error('no library uses /audiobooks')
-    }
-    const found = await abs<{ book?: AbsMatch[] }>(`/libraries/${libraryId}/search?${new URLSearchParams({ q, limit: '25' })}`)
+    const found = await abs<{ book?: AbsMatch[] }>(`/libraries/${await absLibrary()}/search?${new URLSearchParams({ q, limit: '25' })}`)
     return (found.book ?? []).map(({ libraryItem: i }) => ({
       id: i.id,
       addedAt: i.addedAt,
+      path: i.path,
       title: i.media?.metadata?.title ?? '',
       author: i.media?.metadata?.authorName ?? i.media?.metadata?.authors?.map((a) => a.name).join(', '),
     }))
@@ -280,7 +295,9 @@ async function keepRemoved(books: LLBook[]) {
 export function startAudiobookWatch() {
   setInterval(async () => {
     try {
-      const waiting = waitingOfType('audiobook')
+      const all = waitingOfType('audiobook')
+      await watchEditions(all.filter((r) => editionOf(r.external_id))).catch((e) => console.warn(`[editions] ${(e as Error).message}`))
+      const waiting = all.filter((r) => !editionOf(r.external_id))
       const books = await ll<LLBook[]>('getAllBooks')
       const statuses = await audiobookStatuses(waiting.map((r) => String(r.external_id)))
       for (const [i, r] of waiting.entries()) {

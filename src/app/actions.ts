@@ -4,7 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, retryRelease, type Media } from '@/lib/arr'
+import { cleanEdition, editionId, editionOf } from '@/lib/bookrules'
 import { addAudiobook, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
+import { addEdition, removeEdition } from '@/lib/editions'
 import {
   addRequest,
   deleteRequest,
@@ -135,7 +137,9 @@ export async function removeRequest(form: FormData) {
   const { user, request } = await ownRequest(form)
   const others = otherRequests(request)
   let note: string | undefined
-  if (request.media_type === 'audiobook') {
+  if (editionOf(request.external_id)) {
+    if (!others.length) await removeEdition(String(request.external_id))
+  } else if (request.media_type === 'audiobook') {
     if (!others.length) note = await removeAudiobook(request)
   } else if (request.media_type === 'movie') {
     if (!others.length) await removeMovie(Number(request.external_id))
@@ -156,14 +160,19 @@ const bookId = (value: FormDataEntryValue | null) => {
   return id
 }
 
+/** The book, or with an Edition (a narrator, or Full Cast) that edition, which Arrmy finds itself (see editions.ts). */
 export async function requestAudiobook(form: FormData) {
   const user = await requireUser()
-  const id = bookId(form.get('id'))
-  const book = await addAudiobook(id)
+  const edition = cleanEdition(String(form.get('edition') ?? ''))
+  const book = bookId(form.get('id'))
+  if (edition && !/^OL\d+W$/.test(book)) throw new Error('Editions need an OpenLibrary book')
+  const id = edition ? editionId(book, edition) : book
+  const found = edition ? { year: undefined, ...(await addEdition(id)) } : await addAudiobook(id)
+  const title = edition ? `${found.title} (${edition})` : found.title
   if (!hasRequest(user.id, 'audiobook', id)) {
-    addRequest({ userId: user.id, type: 'audiobook', externalId: id, title: book.title, year: book.year, poster: book.poster })
-    const item = { media_type: 'audiobook' as const, external_id: id, title: book.title, year: book.year ?? null, poster: book.poster ?? null }
-    tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Author', book.author]])
+    addRequest({ userId: user.id, type: 'audiobook', externalId: id, title, year: found.year, poster: found.poster })
+    const item = { media_type: 'audiobook' as const, external_id: id, title, year: found.year ?? null, poster: found.poster ?? null }
+    tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Author', found.author]])
   }
   revalidatePath('/')
 }

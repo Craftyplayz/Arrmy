@@ -16,7 +16,7 @@ export const CHANNELS = {
 export type Channel = keyof typeof CHANNELS
 
 /** The qBittorrent categories Radarr, Sonarr and LazyLibrarian file their torrents under, and which app each is. */
-export const CATEGORY_APPS: Record<string, string> = { movies: 'Radarr', tv: 'Sonarr', books: 'LazyLibrarian' }
+export const CATEGORY_APPS: Record<string, string> = { movies: 'Radarr', tv: 'Sonarr', books: 'LazyLibrarian', editions: 'Arrmy' }
 
 export function duration(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0 || seconds >= 8_640_000) return 'unknown'

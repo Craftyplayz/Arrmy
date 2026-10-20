@@ -22,6 +22,10 @@ export type Torrent = {
   hash: string
   name: string
   category: string
+  /** "a, b" */
+  tags: string
+  /** Where its files are: each file's name (with the torrent's own folder) goes after this. */
+  save_path: string
   state: string
   added_on: number
   downloaded: number

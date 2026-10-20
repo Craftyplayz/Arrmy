@@ -1,4 +1,6 @@
+import { editionOf } from './bookrules'
 import { audiobookStatuses, searchAudiobooks } from './books'
+import { editionStatuses } from './editions'
 import { seasonsOf, type MediaType, type RequestRow } from './db'
 import { deleteTorrents, liveProgress } from './qbit'
 import { movieStatus, seriesStatus, type Movie, type QueueItem, type Season, type Series, type Status } from './status'
@@ -162,10 +164,23 @@ export type RequestDetails = { status: Status | null; seasons: number[]; bytes: 
  */
 export async function requestDetails(requests: RequestRow[]): Promise<RequestDetails[]> {
   if (!requests.length) return []
-  const books = requests.filter((r) => r.media_type === 'audiobook').map((r) => String(r.external_id))
-  const [movieQueue, tvQueue, bookStatuses] = await Promise.all([queueOf('radarr'), queueOf('sonarr'), audiobookStatuses(books)])
+  const ids = (edition: boolean) =>
+    requests.filter((r) => r.media_type === 'audiobook' && !!editionOf(r.external_id) === edition).map((r) => String(r.external_id))
+  const [books, editions] = [ids(false), ids(true)]
+  const [movieQueue, tvQueue, bookStatuses, editionStatus] = await Promise.all([
+    queueOf('radarr'),
+    queueOf('sonarr'),
+    audiobookStatuses(books),
+    editionStatuses(editions).catch(() => []), // qBittorrent down: no status, the rest still shows
+  ])
   return Promise.all(
     requests.map(async (r) => {
+      if (editionOf(r.external_id))
+        return {
+          status: r.status === 'available' ? { label: 'Available' } : (editionStatus[editions.indexOf(String(r.external_id))] ?? null),
+          seasons: [],
+          bytes: 0,
+        }
       if (r.media_type === 'audiobook')
         // Available in Arrmy but not in LazyLibrarian: Audiobookshelf already had it (see alreadyOwned in books.ts).
         return {

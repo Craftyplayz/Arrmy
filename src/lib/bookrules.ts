@@ -91,6 +91,61 @@ export function sameBook(item: { title: string; author?: string }, book: { title
   return !item.author || !surname || words(item.author).split(' ').includes(surname)
 }
 
+/**
+ * An Edition Request (one narrator's reading, or the Full Cast) has the id `<BookID>~<edition>`. Arrmy finds those
+ * itself (editions.ts): LazyLibrarian knows no narrators and keeps one audiobook per book.
+ */
+export const editionId = (bookId: string, edition: string) => `${bookId}~${edition}`
+export function editionOf(id: number | string) {
+  const [bookId, edition] = String(id).split('~')
+  return edition ? { bookId, edition } : undefined
+}
+
+/** A file or folder name: no path separators or characters Windows refuses, never "." or "..". */
+export const safeName = (s: string) =>
+  s
+    .replace(/[\\/:*?"<>|~]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[.\s]+/, '')
+    .trim() || 'Unknown'
+
+/** What someone typed as the edition, safe in an id and a folder name. '' = no edition. */
+export const cleanEdition = (s: string) => (s.trim() ? safeName(s).slice(0, 40) : '')
+
+const padded = (s: string) =>
+  ` ${s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()} `
+const FULL_CAST = / (full cast|dramati[sz]ed|dramati[sz]ation) /
+
+/**
+ * Whether a release is this edition of this book: its name has every word of the title (bar "and", "the" and the like)
+ * and of the edition. "Full Cast" also matches Dramatised. Packs of a whole series fail on purpose: they lack the title.
+ * shortcut: a title inside a longer one matches too ("Dune" in "Dune Messiah"); check the year or author if that bites.
+ */
+export function isEdition(release: string, title: string, edition: string) {
+  const name = padded(release)
+  const has = (w: string) => name.includes(` ${w} `)
+  const titleWords = words(title)
+    .split(' ')
+    .filter((w) => w.length > 1 && !['and', 'the', 'of', 'an'].includes(w))
+  if (!titleWords.every(has)) return false
+  const e = padded(edition)
+  return FULL_CAST.test(e) ? FULL_CAST.test(name) : e.trim().split(' ').every(has)
+}
+
+/** A search result from Prowlarr. */
+export type Release = { title: string; size: number; seeders?: number; protocol: string; downloadUrl?: string; magnetUrl?: string }
+
+/** The edition's best release: the most seeders, at least 50 MB like LazyLibrarian's (smaller ones are ebooks). */
+export const bestEdition = (releases: Release[], title: string, edition: string) =>
+  releases
+    .filter((r) => r.protocol === 'torrent' && r.size >= 50e6 && (r.seeders ?? 0) > 0 && (r.magnetUrl || r.downloadUrl) && isEdition(r.title, title, edition))
+    .sort((a, b) => (b.seeders ?? 0) - (a.seeders ?? 0))[0]
+
 /** Books whose Request was removed, by BookID, with when (ms). Kept for a day: see unwantAgain. */
 export type Removed = Record<string, number>
 const DAY = 86_400_000

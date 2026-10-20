@@ -15,7 +15,7 @@ async function login() {
   if (!sid) throw new Error(`qBittorrent login → ${res.status}`)
 }
 
-export async function qbit(path: string, body?: URLSearchParams, retry = true): Promise<Response> {
+export async function qbit(path: string, body?: URLSearchParams | FormData, retry = true): Promise<Response> {
   if (!sid) await login()
   const res = await fetch(`${QBIT_URL}/api/v2${path}`, {
     method: body ? 'POST' : 'GET',

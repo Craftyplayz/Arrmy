@@ -45,7 +45,8 @@ export const ICONS: Record<string, string> = {
 export function mediaUrl(type: 'movie' | 'tv' | 'audiobook', id: number | string) {
   if (type === 'movie') return `https://www.themoviedb.org/movie/${id}`
   if (type === 'tv') return `https://thetvdb.com/dereferrer/series/${id}`
-  return /^OL\d+W$/.test(String(id)) ? `https://openlibrary.org/works/${id}` : undefined
+  const book = String(id).split('~')[0] // an Edition's id is <BookID>~<edition>
+  return /^OL\d+W$/.test(book) ? `https://openlibrary.org/works/${book}` : undefined
 }
 
 /** A capital first and a full stop last, as DESIGN.md wants for sentences. */

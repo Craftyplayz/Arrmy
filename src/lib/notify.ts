@@ -1,4 +1,5 @@
 // Request events as cards in #requests (embeds.ts has the look).
+import { editionOf } from './bookrules'
 import type { RequestRow } from './db'
 import { announce, publicUrl } from './discord'
 import { COLOUR, embed, mediaUrl } from './embeds'
@@ -13,6 +14,7 @@ export const titleOf = (r: Pick<RequestRow, 'title' | 'year'>) => `${r.title}${r
 function service(r: RequestItem) {
   if (r.media_type === 'movie') return { app: 'Radarr', appUrl: publicUrl('radarr', `/movie/${r.external_id}`) }
   if (r.media_type === 'tv') return { app: 'Sonarr', appUrl: publicUrl('sonarr', r.slug ? `/series/${r.slug}` : '') }
+  if (editionOf(r.external_id)) return { app: 'Arrmy', appUrl: publicUrl('arrmy', '/requests') } // see editions.ts
   return { app: 'LazyLibrarian', appUrl: publicUrl('lazylibrarian') }
 }
 
