@@ -7,8 +7,9 @@ import { editSeasons, removeRequest } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
 import { Badge, Card } from '../ui'
 
-export default async function RequestsPage() {
+export default async function RequestsPage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
   const user = await requireUser()
+  const { notice } = await searchParams
   const requests = listRequests(user.is_admin ? undefined : user.id)
   let details: RequestDetails[] | undefined
   try {
@@ -21,6 +22,7 @@ export default async function RequestsPage() {
     <>
       <h1>{user.is_admin ? 'All Requests' : 'Your Requests'}</h1>
       {details?.some((d) => d.status && d.status.label !== 'Available') && <AutoRefresh seconds={5} />}
+      {notice && <p className="error">{notice}</p>}
       {!details && <p className="error">Radarr or Sonarr isn't responding, so live status is missing.</p>}
       {requests.length === 0 && (
         <p className="muted">

@@ -41,6 +41,10 @@ function db() {
         status TEXT NOT NULL DEFAULT 'requested' CHECK (status IN ('requested', 'available')),
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL                    -- JSON
+      );
     `)
   }
   return conn
@@ -103,7 +107,29 @@ export function setSeasons(id: number, seasons: number[], reopen: boolean) {
     .run(JSON.stringify(seasons), id)
 }
 
-export const waitingRequests =(type: MediaType, externalId: number) =>
+/** Every Request for a title, from anyone. */
+export const requestsFor = (type: MediaType, externalId: number) =>
+  db().prepare(`${SELECT} WHERE media_type = ? AND external_id = ?`).all(type, externalId) as RequestRow[]
+
+export function getSetting<T>(key: string): T | undefined {
+  const row = db().prepare('SELECT value FROM settings WHERE key = ?').get(key) as { value: string } | undefined
+  return row && JSON.parse(row.value)
+}
+
+/** undefined deletes the setting. */
+export function setSetting(key: string, value: unknown) {
+  if (value === undefined) db().prepare('DELETE FROM settings WHERE key = ?').run(key)
+  else
+    db()
+      .prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+      .run(key, JSON.stringify(value))
+}
+
+/** The Admin's Size Limits in GB; 0 = no limit. episodeGb is per hour of episode. */
+export type Limits = { movieGb: number; episodeGb: number; showGb: number }
+export const getLimits = (): Limits => ({ movieGb: 0, episodeGb: 0, showGb: 0, ...getSetting<Limits>('limits') })
+
+export const waitingRequests = (type: MediaType, externalId: number) =>
   db()
     .prepare(`${SELECT} WHERE media_type = ? AND external_id = ? AND status = 'requested'`)
     .all(type, externalId) as RequestRow[]

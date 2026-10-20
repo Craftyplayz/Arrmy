@@ -73,6 +73,14 @@ button.danger { background: var(--error); color: #fff; }
 summary { cursor: pointer; font-weight: 600; }
 .seasons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-top: 8px; }
 
+.limits { display: grid; gap: 4px; max-width: 520px; }
+.limits label { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 600; }
+.limits label span { width: 72px; }
+.limits input { width: 110px; font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); }
+.limits p { margin: 0; }
+.limits button { justify-self: start; margin-top: 16px; }
+
 .muted { color: var(--muted); }
+.ok { color: var(--ok); }
 .error { color: var(--error); }
 .center { max-width: 380px; margin: 14vh auto 0; text-align: center; }

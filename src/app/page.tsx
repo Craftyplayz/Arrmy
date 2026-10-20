@@ -12,7 +12,11 @@ const TABS: [MediaType, string][] = [
   ['tv', 'TV Shows'],
 ]
 
-export default async function SearchPage({ searchParams }: { searchParams: Promise<{ type?: string; q?: string }> }) {
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; q?: string; notice?: string }>
+}) {
   await requireUser()
   const params = await searchParams
   const type: MediaType = params.type === 'tv' ? 'tv' : 'movie'
@@ -51,13 +55,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <button>Search</button>
       </Form>
       {error && <p className="error">{error}</p>}
+      {params.notice && <p className="error">{params.notice}</p>}
       {results?.some((r) => r.status?.label === 'Downloading') && <AutoRefresh seconds={5} />}
       {results?.length === 0 && <p className="muted">Nothing found for “{q}”.</p>}
       <ul className="results">
         {results?.map((r) => (
           <Card key={r.id} title={r.title} year={r.year} poster={r.poster}>
             <p className="overview">{r.overview}</p>
-            {type === 'movie' ? <MovieAction r={r} /> : <TvAction r={r} />}
+            {type === 'movie' ? <MovieAction r={r} /> : <TvAction r={r} q={q} />}
           </Card>
         ))}
       </ul>
@@ -75,7 +80,8 @@ function MovieAction({ r }: { r: SearchResult }) {
   )
 }
 
-function TvAction({ r }: { r: SearchResult }) {
+/** `q` rides along so a refused Request comes back to the same search. */
+function TvAction({ r, q }: { r: SearchResult; q: string }) {
   const unrequested = r.seasons.filter((n) => !r.requestedSeasons.includes(n))
   return (
     <>
@@ -85,6 +91,7 @@ function TvAction({ r }: { r: SearchResult }) {
           <summary>{r.status ? 'Request more seasons' : 'Choose seasons'}</summary>
           <form action={requestTv} className="seasons">
             <input type="hidden" name="id" value={r.id} />
+            <input type="hidden" name="q" value={q} />
             {r.seasons.map((n) => {
               const requested = r.requestedSeasons.includes(n)
               return (

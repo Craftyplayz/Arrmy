@@ -40,6 +40,10 @@ _Avoid_: done, complete, ready
 A Movie or TV Show that is Japanese animation. Not a Media Type of its own: it is requested as a Movie or TV Show and filled by anime-specific Services.
 _Avoid_: Anime as a Media Type
 
+**Size Limit**:
+The Admin's maximum size for a movie, for an hour of episode, and for a whole show. Bigger movies and episodes are never downloaded; a TV Request that could go over the show limit is refused.
+_Avoid_: quota, cap
+
 ### Stack
 
 **Stack**:

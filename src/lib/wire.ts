@@ -1,4 +1,6 @@
 import { arr, MOVIES_ROOT, serviceKey, serviceUrl, TV_ROOT, type ServiceName } from './arr'
+import { getLimits } from './db'
+import { applyLimits } from './limits'
 import { hookToken, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
@@ -50,6 +52,8 @@ export function startWiring() {
       const tag = await ensureTag('prowlarr', 'flaresolverr')
       await ensureProvider('prowlarr', 'indexerproxy', 'FlareSolverr', 'FlareSolverr', { host: 'http://gluetun:8191/' }, { tags: [tag] })
     }],
+    // Re-applied every start, so a rebuilt Radarr or Sonarr gets the Admin's Size Limits back.
+    ['Size limits', () => applyLimits(getLimits())],
   ]
 
   const run = async () => {

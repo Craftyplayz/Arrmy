@@ -4,7 +4,19 @@ import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { addMovie, addSeries, posterOf, removeMovie, removeSeasons } from '@/lib/arr'
-import { addRequest, deleteRequest, getRequest, hasRequest, otherRequests, seasonsOf, setSeasons } from '@/lib/db'
+import {
+  addRequest,
+  deleteRequest,
+  getRequest,
+  hasRequest,
+  otherRequests,
+  requestsFor,
+  seasonsOf,
+  setSeasons,
+  setSetting,
+  type Limits,
+} from '@/lib/db'
+import { applyLimits, showLimitProblem } from '@/lib/limits'
 import { createPin } from '@/lib/plex'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
 
@@ -12,6 +24,22 @@ const positiveInt = (value: FormDataEntryValue | null) => {
   const n = Number(value)
   if (!Number.isInteger(n) || n <= 0) throw new Error(`Not a valid id: ${value}`)
   return n
+}
+
+const union = (...lists: number[][]) => [...new Set(lists.flat())].sort((a, b) => a - b)
+
+export async function saveLimits(form: FormData) {
+  const user = await requireUser()
+  if (!user.is_admin) throw new Error('Only the Admin can change Size Limits')
+  const gb = (key: keyof Limits) => {
+    const n = Number(form.get(key) || 0)
+    if (!Number.isFinite(n) || n < 0 || n > 10_000) throw new Error(`Not a size in GB: ${form.get(key)}`)
+    return n
+  }
+  const limits = { movieGb: gb('movieGb'), episodeGb: gb('episodeGb'), showGb: gb('showGb') }
+  await applyLimits(limits) // before saving, so a failure leaves the old limits in place everywhere
+  setSetting('limits', limits)
+  redirect('/settings?saved=1')
 }
 
 export async function signIn() {
@@ -68,7 +96,11 @@ export async function editSeasons(form: FormData) {
 
   const added = after.filter((n) => !before.includes(n))
   const removed = before.filter((n) => !after.includes(n))
-  if (added.length) await addSeries(request.external_id, added)
+  if (added.length) {
+    const problem = await showLimitProblem(request.external_id, union(otherRequests(request).flatMap(seasonsOf), after))
+    if (problem) redirect(`/requests?notice=${encodeURIComponent(problem)}`)
+    await addSeries(request.external_id, added)
+  }
   if (removed.length) {
     const wanted = new Set(otherRequests(request).flatMap(seasonsOf))
     await removeSeasons(request.external_id, removed.filter((n) => !wanted.has(n)))
@@ -82,6 +114,8 @@ export async function requestTv(form: FormData) {
   const tvdbId = positiveInt(form.get('id'))
   const seasons = form.getAll('season').map(positiveInt)
   if (!seasons.length) return
+  const problem = await showLimitProblem(tvdbId, union(requestsFor('tv', tvdbId).flatMap(seasonsOf), seasons))
+  if (problem) redirect(`/?type=tv&q=${encodeURIComponent(String(form.get('q') ?? ''))}&notice=${encodeURIComponent(problem)}`)
   const show = await addSeries(tvdbId, seasons)
   addRequest({ userId: user.id, type: 'tv', externalId: tvdbId, title: show.title, year: show.year, poster: posterOf(show), seasons })
   revalidatePath('/')
