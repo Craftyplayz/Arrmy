@@ -77,6 +77,9 @@ async function downloads() {
     const hash = t.hash.toLowerCase()
     if (!tracked[hash] && t.progress >= 1) continue // finished before the bot saw it: no card
     const s = (tracked[hash] ??= { id: '', sig: '', edited: 0, started: now, name: t.name })
+    s.name ??= t.name // tracked by 1.1.0-rc.10, before cards
+    s.started ??= now
+    s.edited ??= 0
     if (metas.has(hash)) s.meta = metas.get(hash)
     else if (unknown.includes(t)) s.tried = now
     const card = downloadEmbed(t, s.meta, emoji, s.started)
