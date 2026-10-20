@@ -148,6 +148,22 @@ services:
     ports:
       - ${SONARR_PORT:-7658}:8989
 
+  # Read-only network share of the media: \\<box>\media on Windows. Windows only talks SMB on port 445.
+  samba:
+    image: dockurr/samba:latest
+    restart: unless-stopped
+    environment:
+      NAME: media
+      USER: ${SMB_USER:-crafty}
+      PASS: ${SMB_PASSWORD:?set SMB_PASSWORD for the media share}
+      UID: ${PUID}
+      GID: ${PGID}
+      RW: "false"
+    volumes:
+      - ${DATA_DIR:-/data}/media:/shared:ro
+    ports:
+      - 445:445
+
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped

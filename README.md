@@ -37,6 +37,8 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 If a port is already taken on your box, change it with the `*_PORT` settings in [.env.example](.env.example).
 
+**Media on your PC:** in File Explorer, open `\\<box>\media` and sign in with `SMB_USER` / `SMB_PASSWORD`. The share is read-only.
+
 Plex runs on Docker's bridge network. Set **Plex → Settings → Network → LAN Networks** to your home subnet (e.g. `192.168.1.0/24`); otherwise Plex treats devices at home as remote.
 
 ## Develop
