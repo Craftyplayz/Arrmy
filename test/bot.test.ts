@@ -6,7 +6,7 @@ import { upstreamUrl } from '../src/lib/abbrelay.ts'
 import { changes, compareVersions, duration, flatten, plexUsers, releaseNotes } from '../src/lib/botrules.ts'
 import { COLOUR, distinctLinks, downloadEmbed, embed, speed } from '../src/lib/embeds.ts'
 
-const torrent = { hash: 'a', name: 'Dune.2021.1080p.BluRay', category: 'movies', state: 'downloading', added_on: 0, downloaded: 1, progress: 0.456, size: 4.2e9, dlspeed: 3_355_443, num_seeds: 1234, eta: 840, completion_on: -1 }
+const torrent = { hash: 'a', name: 'Dune.2021.1080p.BluRay', category: 'movies', state: 'downloading', added_on: 0, downloaded: 1, progress: 0.456, size: 4.2e9, dlspeed: 3_355_443, num_seeds: 1234, num_leechs: 5, eta: 840, completion_on: -1 }
 const meta = { app: 'Radarr', appUrl: 'https://radarr.example.com/movie/438631', title: 'Dune (2021)', url: 'https://www.themoviedb.org/movie/438631', art: 'https://image.tmdb.org/p.jpg', by: ['Sam', 'Mum'] }
 
 test('download cards: art, the media page, the bar, then speed, time left, seeders and who asked', () => {

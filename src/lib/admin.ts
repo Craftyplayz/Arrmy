@@ -1,7 +1,10 @@
 // The Admin view: Problems with one-click fixes, what's downloading, and library and disk stats.
 import { arr, queueOf, type QueueRecord } from './arr'
 import { coverUrl } from './bookrules'
+import { CATEGORY_APPS, duration, size } from './botrules'
 import { keptDeadReleases, requestsFor } from './db'
+import { speed, type DownloadMeta } from './embeds'
+import { downloadMeta } from './media'
 import {
   byDownload,
   DEAD_DETAIL,
@@ -9,13 +12,13 @@ import {
   nameOf,
   posterIn,
   queueProblem,
-  type Download,
+  stateLabel,
   type MissingEpisode,
   type MissingMovie,
   type Problem,
   type Service,
 } from './problems'
-import { liveProgress, transferSpeeds } from './qbit'
+import { liveProgress, torrents, transferSpeeds } from './qbit'
 
 export type { Problem } from './problems'
 
@@ -54,16 +57,12 @@ export async function adminOverview() {
       }),
     ...missingProblems(missingMovies.records, missingEpisodes.records, movieQueue, tvQueue),
   ]
-  const downloads: Download[] = groups
-    .filter((d) => !d.problem)
-    .map(({ g }) => ({ title: nameOf(g[0]), size: g[0].size, sizeleft: g[0].sizeleft }))
 
   const sum = <T>(list: T[], pick: (x: T) => number) => list.reduce((n, x) => n + pick(x), 0)
   const inLibrary = movies.filter((m) => m.hasFile)
   const shows = series.filter((s) => (s.statistics?.episodeFileCount ?? 0) > 0)
   return {
     problems,
-    downloads,
     speeds,
     library: {
       movies: inLibrary.length,
@@ -77,4 +76,59 @@ export async function adminOverview() {
       settings: disks.find((d) => d.path === '/config'),
     },
   }
+}
+
+/** A download in the Admin view, read live from qBittorrent and ready to show. */
+export type LiveDownload = {
+  hash: string
+  title: string
+  /** The release name, when the title came from Radarr, Sonarr or LazyLibrarian. */
+  release?: string
+  poster?: string | null
+  by: string[]
+  percent: number
+  /** "1.2 GB of 4.5 GB" */
+  done: string
+  state: string
+  speed?: string
+  eta?: string
+  seeds: number
+  peers: number
+}
+
+// What each torrent is for, kept for as long as Arrmy runs; one not known yet is asked about at most every 30 seconds,
+// so polling every few seconds doesn't ask Radarr, Sonarr and LazyLibrarian each time.
+const metas = new Map<string, DownloadMeta>()
+const asked = new Map<string, number>()
+
+/** Everything Radarr, Sonarr and LazyLibrarian are downloading, oldest first. */
+export async function liveDownloads(): Promise<LiveDownload[]> {
+  // completion_on: a finished torrent can read under 100% while qBittorrent rechecks it after a restart.
+  const list = (await torrents()).filter((t) => t.category in CATEGORY_APPS && t.progress < 1 && !(t.completion_on > 0))
+  const now = Date.now()
+  const unknown = list.filter((t) => !metas.has(t.hash.toLowerCase()) && now - (asked.get(t.hash.toLowerCase()) ?? 0) > 30_000)
+  if (unknown.length) {
+    unknown.forEach((t) => asked.set(t.hash.toLowerCase(), now))
+    for (const [hash, meta] of await downloadMeta(unknown).catch(() => new Map<string, DownloadMeta>())) metas.set(hash, meta)
+  }
+  return list
+    .sort((a, b) => a.added_on - b.added_on)
+    .map((t) => {
+      const meta = metas.get(t.hash.toLowerCase())
+      const moving = t.dlspeed > 0
+      return {
+        hash: t.hash.toLowerCase(),
+        title: meta?.title ?? t.name,
+        release: meta ? t.name : undefined,
+        poster: meta?.art,
+        by: meta?.by ?? [],
+        percent: Math.floor(t.progress * 100),
+        done: `${size(t.size * t.progress)} of ${size(t.size)}`,
+        state: stateLabel(t.state),
+        speed: moving ? speed(t.dlspeed) : undefined,
+        eta: moving && t.eta < 8_640_000 ? duration(t.eta) : undefined, // 8640000 is qBittorrent's "never"
+        seeds: t.num_seeds,
+        peers: t.num_leechs,
+      }
+    })
 }

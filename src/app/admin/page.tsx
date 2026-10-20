@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { adminOverview, type Problem } from '@/lib/admin'
+import { adminOverview, liveDownloads, type LiveDownload, type Problem } from '@/lib/admin'
 import { requestDetails } from '@/lib/arr'
 import { listRequests } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { fixProblem } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
+import { Downloads } from '../downloads'
 import { SubmitButton } from '../submit-button'
 import { Hero, num, Ring } from '../ui'
 
@@ -21,8 +22,9 @@ export default async function AdminPage() {
   if (!user.is_admin) redirect('/')
 
   let overview: Awaited<ReturnType<typeof adminOverview>> | undefined
+  let downloads: LiveDownload[] = []
   try {
-    overview = await adminOverview()
+    ;[overview, downloads] = await Promise.all([adminOverview(), liveDownloads().catch(() => [])])
   } catch (e) {
     console.error(e)
   }
@@ -45,11 +47,11 @@ export default async function AdminPage() {
   const ranked = [...people].sort((a, b) => b[1].bytes - a[1].bytes)
   const most = ranked[0]?.[1].bytes || 1
 
-  const { problems, downloads, speeds, library, disks } = overview
+  const { problems, speeds, library, disks } = overview
   return (
     <>
       <Hero title="Admin" lede={LEDE} />
-      {downloads.length > 0 && <AutoRefresh seconds={5} />}
+      {downloads.length > 0 && <AutoRefresh seconds={30} />}
 
       <div className="ar-stats-row">
         <Stat href={problems.length > 0 ? '#problems' : undefined} value={num(problems.length)} label={problems.length === 1 ? 'Problem' : 'Problems'}>
@@ -86,24 +88,7 @@ export default async function AdminPage() {
           <h2 className="ar-h" id="downloading">
             Downloading <span className="n">{num(downloads.length)}</span>
           </h2>
-          <div className="rows">
-            {downloads.map((d, i) => {
-              const percent = d.size ? Math.round(((d.size - d.sizeleft) / d.size) * 100) : 0
-              return (
-                <div className="rowi" key={i}>
-                  <div className="grow">
-                    <span className="ar-name">{d.title}</span>
-                    <div className="progress" role="progressbar" aria-label={`${d.title} progress`} aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
-                      <i style={{ width: `${percent}%` }} />
-                    </div>
-                  </div>
-                  <small>
-                    {percent}% of {size(d.size)}
-                  </small>
-                </div>
-              )
-            })}
-          </div>
+          <Downloads initial={downloads} />
         </>
       )}
 

@@ -42,6 +42,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 |---|---|---|
 | Admin view | Problems (Missing, Failed Download, Failed Import) with one-click fixes: search again, or blocklist the release and try another. Also what's downloading, speeds, library counts, disk space and Requests by person. | Unit (the Problem rules), Fake, Live (the page). **Not yet live:** a real Problem and its fix. |
 | Settings | Size limits (see Movies and TV). | Fake |
+| Downloading | Every movie, show and audiobook downloading, read straight from qBittorrent every 3 seconds without reloading the page: poster, title, who asked, progress, speed, time left, seeders and peers, and the state in words (Downloading, Stalled, Fetching file list, Queued, Paused, Checking). | Unit (the states), Local (the live server's torrents through a fake qBittorrent that makes them look mid-download). **Not yet live.** |
 | Dead releases | A torrent with no file list 5 minutes after it was added, or nothing downloaded after 15, is swapped for another release: Radarr and Sonarr blocklist it and search again; for audiobooks Arrmy deletes it, waits for LazyLibrarian to mark it Failed, then searches again (about 2 minutes). LazyLibrarian sometimes grabs the same dead release again; that counts as another strike. After 3 dead releases in a row for the same title, the third is left alone, it shows as a Failed Download Problem, and Discord @mentions the Admin (`DISCORD_ADMIN_ID`). Torrents in other qBittorrent categories, and paused ones, are never touched. | Unit (the rule), Fake. **Not yet live.** |
 
 ### Stack and deployment
@@ -103,24 +104,6 @@ Everyone:
 Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since the stack's Samba was dropped, and can be deleted.
 
 ## Later
-
-### Downloads overhaul
-
-The Admin page's Downloading list, rebuilt on live numbers from qBittorrent. Asked for on 2026-10-20.
-
-Today each row is the title, a bar and "x% of size", taken from Radarr's and Sonarr's queue, which lags behind qBittorrent; only the total speeds come from qBittorrent itself.
-
-What each row shows:
-
-- The title (movie, show and season, or book) with its poster, and who requested it.
-- Live progress, download speed and time left (ETA), read straight from qBittorrent and updated every few seconds without reloading the page.
-- Seeders and peers, and the state in words: Downloading, Stalled, Fetching file list, Queued, Paused, Checking.
-- Audiobooks too, not just movies and TV.
-
-How:
-
-- qBittorrent's `/torrents/info` (`dlspeed`, `eta`, `progress`, `num_seeds`, `state`), which Arrmy already reads every 5 seconds for Discord's #downloads cards. Torrents are matched to Requests by their hash (Radarr's and Sonarr's `downloadId`, LazyLibrarian's snatched list).
-- The page polls a small JSON route instead of reloading the whole page, so the bars move smoothly.
 
 ### Request Log
 

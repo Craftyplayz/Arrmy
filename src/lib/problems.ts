@@ -31,6 +31,8 @@ export type Torrent = {
   /** Bytes per second. */
   dlspeed: number
   num_seeds: number
+  /** Peers that are still downloading. */
+  num_leechs: number
   /** Seconds left; 8640000 means never. */
   eta: number
   /** When it finished (Unix seconds), or -1. Kept across restarts, unlike progress while qBittorrent rechecks. */
@@ -51,7 +53,16 @@ export function deadReason(t: Torrent, now = Date.now()) {
   if (['stalledDL', 'downloading', 'forcedDL'].includes(t.state) && t.downloaded === 0 && minutes > 15)
     return 'Nothing downloaded after 15 minutes'
 }
-export type Download = { title: string; size: number; sizeleft: number }
+/** A torrent's state in a word or two, for the Admin view's Downloading list. */
+export function stateLabel(state: string) {
+  if (state === 'metaDL' || state === 'forcedMetaDL') return 'Fetching file list'
+  if (state === 'stalledDL') return 'Stalled'
+  if (state === 'queuedDL') return 'Queued'
+  if (state === 'stoppedDL' || state === 'pausedDL') return 'Paused'
+  if (state.startsWith('checking') || state === 'moving') return 'Checking'
+  if (state === 'error' || state === 'missingFiles') return 'Error'
+  return 'Downloading'
+}
 
 type Images = { coverType: string; remoteUrl?: string }[]
 export const posterIn = (images?: Images) => images?.find((i) => i.coverType === 'poster')?.remoteUrl
