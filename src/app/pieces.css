@@ -1,0 +1,100 @@
+/* Arrmy pieces: the Steam pieces from the Crafty Playz site's games-steam.css, renamed steam- to ar- (see DESIGN.md).
+   The layout wraps every page in <main class="page ar">. */
+
+/* the hidden attribute loses to flex/grid display */
+.ar [hidden] { display: none !important; }
+/* card-links: .page a would paint all their text link-blue */
+.ar :is(a.ar-stat, button.ar-cap) { color: var(--text); text-decoration: none; }
+
+.ar-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 28px 0 12px; font-size: 20px; }
+.ar-h .n { color: var(--muted); font-size: 14px; font-weight: 400; }
+.ar-more { margin-left: auto; font-size: 14px; font-weight: 400; }
+
+/* ---------- hero (art-led pages) ---------- */
+.ar-hero { position: relative; isolation: isolate; overflow: hidden; margin-bottom: 20px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.ar-hero-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.ar-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(0 0 0 / .85), rgb(0 0 0 / .4) 65%, rgb(0 0 0 / .2)), linear-gradient(0deg, rgb(0 0 0 / .6), transparent 50%); }
+.ar-hero-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; min-height: clamp(150px, 20vw, 240px); padding: clamp(24px, 5vw, 48px) 20px 16px; }
+.ar-hero-body .grow { flex: 1 1 280px; min-width: 0; }
+/* Arrmy: a hero without art has nothing to show, so it shrinks to its text */
+.ar-hero:not(:has(> .ar-hero-bg)) .ar-hero-body { min-height: 0; padding-top: 20px; }
+.ar-hero .page-title { margin: 0; text-shadow: 0 2px 12px rgb(0 0 0 / .6); overflow-wrap: anywhere; }
+.ar-hero .page-lede { max-width: 62ch; margin: 6px 0 0; color: var(--text); opacity: .85; }
+
+.ar-tabs { display: flex; gap: 4px; padding: 0 12px; overflow-x: auto; background: rgb(0 0 0 / .45); border-top: 1px solid rgb(255 255 255 / .08); scrollbar-width: none; }
+.ar .ar-tabs a { padding: 12px 12px 10px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: color var(--fast), border-color var(--fast); }
+.ar .ar-tabs a:hover { color: var(--text); }
+.ar .ar-tabs a[aria-current] { border-color: var(--accent); color: var(--text); }
+
+/* ---------- headline numbers ---------- */
+.ar-stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px; margin-bottom: 20px; }
+.ar-stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); color: var(--text); text-decoration: none; transition: border-color var(--fast), transform var(--fast); }
+a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
+.ar-stat > b { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.15; }
+.ar-stat > span { color: var(--muted); font-size: 13px; }
+.ar-stat > small, .ar-stat > span > small { color: var(--accent); font-size: 12px; }
+.ar-stat-ring { flex-direction: row; align-items: center; gap: 12px; }
+.ar-stat-ring .ar-ring { --size: 56px; }
+.ar-stat-ring .ar-ring b { font-size: 15px; }
+.ar-stat-ring > span > small { display: block; }
+/* a disk under 10% free */
+.ar-stat.warn { background: var(--danger-bg); border-color: var(--danger-line); }
+.ar-stat.warn small { color: var(--text); }
+
+/* completion ring; --p is 0-100 */
+.ar-ring { --size: 40px; display: inline-grid; flex: none; place-items: center; width: var(--size); height: var(--size); border-radius: 50%; background: radial-gradient(closest-side, var(--sunken) 74%, transparent 76%), conic-gradient(var(--accent) calc(var(--p) * 1%), rgb(255 255 255 / .15) 0); }
+.ar-ring b { color: var(--text); font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ar-ring small { font-size: 9px; }
+
+/* ---------- posters ---------- */
+.ar-caps { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 28vw, 168px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.ar-cap { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; margin: 0; padding: 0; overflow: hidden; background: var(--card2); border: 0; border-radius: var(--radius); box-shadow: 0 2px 6px rgb(0 0 0 / .4); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: transform var(--base) ease-out, box-shadow var(--base) ease-out; }
+.ar-cap img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform var(--base) ease-out; }
+.ar-cap:hover, .ar-cap:focus-visible { box-shadow: var(--lift), 0 0 0 2px var(--accent); transform: translateY(-3px); }
+.ar-cap:hover img { transform: scale(1.03); }
+.ar-cap .ar-ring { position: absolute; top: 8px; right: 8px; --size: 38px; box-shadow: 0 2px 6px rgb(0 0 0 / .5); }
+/* status label on the art: a badge, which is opaque, so it reads over any picture */
+.ar-cap .badge { position: absolute; top: 8px; left: 8px; margin: 0; }
+.ar-cap-info { position: absolute; right: -1px; bottom: -1px; left: -1px; display: flex; flex-direction: column; padding: 32px 10px 8px; background: linear-gradient(transparent, rgb(0 0 0 / .92)); }
+.ar-cap-info b { overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.ar-cap-info small { overflow: hidden; color: var(--text); font-size: 12px; opacity: .75; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- ranked list (no art column) ---------- */
+.ar-ranks { display: grid; gap: 6px; }
+.ar-rank { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 10px 6px 6px; background: var(--card2); border-radius: var(--radius); }
+.ar-rank-n { color: var(--muted); font-size: 13px; font-weight: 700; text-align: center; }
+.ar-rank b { display: block; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.ar-rank-bar { display: block; height: 6px; margin-top: 6px; overflow: hidden; background: rgb(255 255 255 / .06); border-radius: 999px; }
+.ar-rank-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); border-radius: 999px; }
+.ar-rank-val { font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
+.ar-rank-val small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+
+/* ---------- toolbar ---------- */
+.ar-bar .field { flex: 1 1 200px; }
+
+/* ---------- Arrmy only ---------- */
+/* drawers open as native popovers, so they need no client JS; the UA popover styles are undone here */
+.drawer[popover] { inset: 0 0 0 auto; height: auto; margin: 0; border-width: 0 0 0 1px; transition: transform var(--base) ease-out, display var(--base) allow-discrete, overlay var(--base) allow-discrete; }
+.drawer:popover-open { transform: none; }
+@starting-style { .drawer:popover-open { transform: translateX(105%); } }
+.drawer::backdrop { background: rgb(0 0 0 / .5); }
+.drawer h2 { margin: 0 40px 4px 0; font-size: 20px; line-height: 1.2; }
+.drawer section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.drawer summary { color: var(--muted); font-size: 14px; cursor: pointer; }
+.drawer details[open] > summary { margin-bottom: 8px; }
+
+/* season checkboxes in columns */
+.ar-seasons { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0 12px; }
+
+/* a two-word badge ("Failed Import") stays on one line */
+.ar .badge { white-space: nowrap; }
+
+/* inside a .rowi: a long name that ellipses, and a second line */
+.ar-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ar-sub { display: block; color: var(--muted); font-size: 13px; }
+.rowi .progress { margin-top: 6px; }
+
+/* sign in and error pages */
+.ar-center { max-width: 420px; margin: 28px auto 0; text-align: center; }
+.ar-center .page-lede { margin-bottom: 16px; }
+.ar-center .err { text-align: left; }

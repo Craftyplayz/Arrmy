@@ -1,7 +1,11 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getLimits } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { saveLimits } from '../actions'
+import { SubmitButton } from '../submit-button'
+
+export const metadata: Metadata = { title: 'Settings' }
 
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const user = await requireUser()
@@ -11,31 +15,37 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <h1>Size limits</h1>
-      <p className="muted">They apply to everyone's Requests. Leave a box empty for no limit.</p>
-      {saved && <p className="ok">Saved, and applied to Radarr and Sonarr.</p>}
-      <form action={saveLimits} className="limits">
-        <label>
-          <span>Movie</span>
-          <input name="movieGb" type="number" min="0" max="10000" step="0.1" defaultValue={limits.movieGb || ''} /> GB
-        </label>
-        <p className="muted">The biggest movie file Radarr may download.</p>
-        <label>
-          <span>Episode</span>
-          <input name="episodeGb" type="number" min="0" max="10000" step="0.1" defaultValue={limits.episodeGb || ''} /> GB per
-          hour
-        </label>
-        <p className="muted">For a 1-hour episode; a 30-minute episode gets half. Season packs are judged per episode.</p>
-        <label>
-          <span>Show</span>
-          <input name="showGb" type="number" min="0" max="10000" step="1" defaultValue={limits.showGb || ''} /> GB
-        </label>
-        <p className="muted">
-          A TV Request is refused if all its seasons, every episode at the episode limit, could add up to more than this.
-          Needs an episode limit.
-        </p>
-        <button>Save</button>
-      </form>
+      <h1 className="page-title">Settings</h1>
+      <p className="page-lede">Size Limits apply to everyone's Requests. Leave a box empty for no limit.</p>
+      <section className="card form-card">
+        <h2>Size Limits</h2>
+        <form action={saveLimits} className="form">
+          {saved && <p className="ok">Saved, and applied to Radarr and Sonarr.</p>}
+          <label>
+            Movie, in GB (optional)
+            <input className="field" name="movieGb" type="number" inputMode="decimal" min="0" max="10000" step="0.1" defaultValue={limits.movieGb || ''} />
+            <small>The biggest movie file Radarr may download.</small>
+          </label>
+          <label>
+            Episode, in GB per hour (optional)
+            <input className="field" name="episodeGb" type="number" inputMode="decimal" min="0" max="10000" step="0.1" defaultValue={limits.episodeGb || ''} />
+            <small>For a 1-hour episode; a 30-minute episode gets half. Season packs are judged per episode.</small>
+          </label>
+          <label>
+            Show, in GB (optional)
+            <input className="field" name="showGb" type="number" inputMode="numeric" min="0" max="10000" step="1" defaultValue={limits.showGb || ''} />
+            <small>
+              A TV Request is refused if all its seasons, every episode at the episode limit, could add up to more than this. Needs an
+              episode limit.
+            </small>
+          </label>
+          <div className="actions">
+            <SubmitButton className="btn primary" pending="Saving...">
+              Save limits
+            </SubmitButton>
+          </div>
+        </form>
+      </section>
     </>
   )
 }

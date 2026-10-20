@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { adminOverview, type Problem } from '@/lib/admin'
 import { requestDetails } from '@/lib/arr'
@@ -5,9 +6,15 @@ import { listRequests } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { fixProblem } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
+import { SubmitButton } from '../submit-button'
+import { Hero, num, Ring } from '../ui'
+
+export const metadata: Metadata = { title: 'Admin' }
 
 const size = (bytes: number) => (bytes >= 1e12 ? `${(bytes / 1e12).toFixed(2)} TB` : `${(bytes / 1e9).toFixed(1)} GB`)
 const speed = (bytesPerSecond: number) => `${(bytesPerSecond / 1048576).toFixed(1)} MB/s`
+
+const LEDE = "What needs fixing, what's downloading and how full the disks are."
 
 export default async function AdminPage() {
   const user = await requireUser()
@@ -22,8 +29,8 @@ export default async function AdminPage() {
   if (!overview) {
     return (
       <>
-        <h1>Admin</h1>
-        <p className="error">Radarr or Sonarr isn't responding. Check their containers in Portainer.</p>
+        <Hero title="Admin" lede={LEDE} />
+        <p className="err">Radarr or Sonarr isn't responding. Check their containers in Portainer.</p>
       </>
     )
   }
@@ -35,79 +42,94 @@ export default async function AdminPage() {
     const p = people.get(r.username) ?? { count: 0, bytes: 0 }
     people.set(r.username, { count: p.count + 1, bytes: p.bytes + (details?.[i].bytes ?? 0) })
   })
+  const ranked = [...people].sort((a, b) => b[1].bytes - a[1].bytes)
+  const most = ranked[0]?.[1].bytes || 1
 
   const { problems, downloads, speeds, library, disks } = overview
   return (
     <>
-      <h1>Admin</h1>
+      <Hero title="Admin" lede={LEDE} />
       {downloads.length > 0 && <AutoRefresh seconds={5} />}
 
-      <h2>Problems{problems.length > 0 && ` (${problems.length})`}</h2>
-      {problems.length === 0 ? (
-        <p className="muted">Nothing needs fixing.</p>
-      ) : (
-        <ul className="results">
-          {problems.map((p) => (
-            <ProblemRow key={`${p.service}-${p.kind}-${p.ids.join('-')}`} p={p} />
-          ))}
-        </ul>
-      )}
-
-      <h2>Downloading</h2>
-      {downloads.length === 0 ? (
-        <p className="muted">Nothing downloading.</p>
-      ) : (
-        <ul className="downloads">
-          {downloads.map((d, i) => {
-            const percent = d.size ? Math.round(((d.size - d.sizeleft) / d.size) * 100) : 0
-            return (
-              <li key={i}>
-                <span>{d.title}</span>
-                <progress max={100} value={percent} aria-label={`${d.title} progress`} />
-                <span className="muted">
-                  {percent}% of {size(d.size)}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-      {speeds && (
-        <p className="muted">
-          Down {speed(speeds.down)} · Up {speed(speeds.up)}
-        </p>
-      )}
-
-      <h2>Library</h2>
-      <div className="tiles">
-        <Tile label="Movies" value={String(library.movies)} sub={size(library.movieBytes)} />
-        <Tile label="Shows" value={String(library.shows)} sub={`${library.episodes} episodes · ${size(library.showBytes)}`} />
-        {disks.media && <DiskTile label="Media disk" disk={disks.media} />}
-        {disks.settings && <DiskTile label="Settings disk" disk={disks.settings} />}
+      <div className="ar-stats-row">
+        <Stat href={problems.length > 0 ? '#problems' : undefined} value={num(problems.length)} label={problems.length === 1 ? 'Problem' : 'Problems'}>
+          {problems.length === 0 && 'Nothing needs fixing'}
+        </Stat>
+        <Stat href={downloads.length > 0 ? '#downloading' : undefined} value={num(downloads.length)} label="Downloading">
+          {speeds && `Down ${speed(speeds.down)} · Up ${speed(speeds.up)}`}
+        </Stat>
+        <Stat value={num(library.movies)} label="Movies">
+          {size(library.movieBytes)}
+        </Stat>
+        <Stat value={num(library.shows)} label="Shows">
+          {`${num(library.episodes)} episodes · ${size(library.showBytes)}`}
+        </Stat>
+        {disks.media && <DiskStat label="Media disk" disk={disks.media} />}
+        {disks.settings && <DiskStat label="Settings disk" disk={disks.settings} />}
       </div>
 
-      <h2>Requests by person</h2>
-      {people.size === 0 ? (
-        <p className="muted">No Requests yet.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Person</th>
-              <th>Requests</th>
-              <th>Space used</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...people].sort((a, b) => b[1].bytes - a[1].bytes).map(([name, p]) => (
-              <tr key={name}>
-                <td>{name}</td>
-                <td>{p.count}</td>
-                <td>{size(p.bytes)}</td>
-              </tr>
+      {problems.length > 0 && (
+        <>
+          <h2 className="ar-h" id="problems">
+            Problems <span className="n">{num(problems.length)}</span>
+          </h2>
+          <div className="rows">
+            {problems.map((p) => (
+              <ProblemRow key={`${p.service}-${p.kind}-${p.ids.join('-')}`} p={p} />
             ))}
-          </tbody>
-        </table>
+          </div>
+        </>
+      )}
+
+      {downloads.length > 0 && (
+        <>
+          <h2 className="ar-h" id="downloading">
+            Downloading <span className="n">{num(downloads.length)}</span>
+          </h2>
+          <div className="rows">
+            {downloads.map((d, i) => {
+              const percent = d.size ? Math.round(((d.size - d.sizeleft) / d.size) * 100) : 0
+              return (
+                <div className="rowi" key={i}>
+                  <div className="grow">
+                    <span className="ar-name">{d.title}</span>
+                    <div className="progress" role="progressbar" aria-label={`${d.title} progress`} aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+                      <i style={{ width: `${percent}%` }} />
+                    </div>
+                  </div>
+                  <small>
+                    {percent}% of {size(d.size)}
+                  </small>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {ranked.length > 0 && (
+        <>
+          <h2 className="ar-h">Requests by person</h2>
+          <div className="ar-ranks">
+            {ranked.map(([name, p], i) => (
+              <div className="ar-rank" key={name}>
+                <span className="ar-rank-n">{i + 1}</span>
+                <span className="grow">
+                  <b>{name}</b>
+                  <span className="ar-rank-bar">
+                    <i style={{ width: `${Math.round((p.bytes / most) * 100)}%` }} />
+                  </span>
+                </span>
+                <span className="ar-rank-val">
+                  {size(p.bytes)}
+                  <small>
+                    {num(p.count)} {p.count === 1 ? 'Request' : 'Requests'}
+                  </small>
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </>
   )
@@ -115,43 +137,54 @@ export default async function AdminPage() {
 
 function ProblemRow({ p }: { p: Problem }) {
   return (
-    <li className="card">
-      <div className="info">
-        <h3>
-          {p.title} <span className={p.kind === 'Missing' ? 'badge' : 'badge bad'}>{p.kind}</span>
-        </h3>
-        <p className="muted">{p.detail}</p>
-        <form action={fixProblem}>
-          <input type="hidden" name="service" value={p.service} />
-          <input type="hidden" name="fix" value={p.fix} />
-          {p.ids.map((id) => (
-            <input key={id} type="hidden" name="id" value={id} />
-          ))}
-          <button>{p.fix === 'retry' ? 'Try another release' : 'Search again'}</button>
-        </form>
+    <div className="rowi">
+      <div className="grow">
+        <b>{p.title}</b> <span className={p.kind === 'Missing' ? 'badge' : 'badge r'}>{p.kind}</span>
+        <span className="ar-sub">{p.detail}</span>
       </div>
-    </li>
-  )
-}
-
-function Tile({ label, value, sub, warn }: { label: string; value: string; sub: string; warn?: boolean }) {
-  return (
-    <div className={warn ? 'tile warn' : 'tile'}>
-      <span className="muted">{label}</span>
-      <strong>{value}</strong>
-      <span className="muted">{sub}</span>
+      <form action={fixProblem}>
+        <input type="hidden" name="service" value={p.service} />
+        <input type="hidden" name="fix" value={p.fix} />
+        {p.ids.map((id) => (
+          <input key={id} type="hidden" name="id" value={id} />
+        ))}
+        <SubmitButton className="btn small" pending="Working...">
+          {p.fix === 'retry' ? 'Try another release' : 'Search again'}
+        </SubmitButton>
+      </form>
     </div>
   )
 }
 
+/** A headline number; a link to its section when it has one. */
+function Stat({ href, value, label, children }: { href?: string; value: string; label: string; children?: React.ReactNode }) {
+  const body = (
+    <>
+      <b>{value}</b>
+      <span>{label}</span>
+      {children && <small>{children}</small>}
+    </>
+  )
+  return href ? (
+    <a className="ar-stat" href={href}>
+      {body}
+    </a>
+  ) : (
+    <div className="ar-stat">{body}</div>
+  )
+}
+
 /** Turns red under 10% free. */
-function DiskTile({ label, disk }: { label: string; disk: { freeSpace: number; totalSpace: number } }) {
+function DiskStat({ label, disk }: { label: string; disk: { freeSpace: number; totalSpace: number } }) {
+  const used = disk.totalSpace ? Math.round(((disk.totalSpace - disk.freeSpace) / disk.totalSpace) * 100) : 0
+  const low = disk.freeSpace < disk.totalSpace * 0.1
   return (
-    <Tile
-      label={label}
-      value={`${size(disk.freeSpace)} free`}
-      sub={`of ${size(disk.totalSpace)}`}
-      warn={disk.freeSpace < disk.totalSpace * 0.1}
-    />
+    <div className={low ? 'ar-stat ar-stat-ring warn' : 'ar-stat ar-stat-ring'}>
+      <Ring p={used} label={`${label} ${used}% used`} />
+      <span>
+        {label}
+        <small>{low ? `Only ${size(disk.freeSpace)} free` : `${size(disk.freeSpace)} free of ${size(disk.totalSpace)}`}</small>
+      </span>
+    </div>
   )
 }
