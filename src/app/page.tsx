@@ -4,6 +4,7 @@ import { search, type SearchResult } from '@/lib/arr'
 import type { MediaType } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { requestMovie, requestTv } from './actions'
+import { AutoRefresh } from './auto-refresh'
 import { Badge, Card } from './ui'
 
 const TABS: [MediaType, string][] = [
@@ -50,6 +51,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <button>Search</button>
       </Form>
       {error && <p className="error">{error}</p>}
+      {results?.some((r) => r.status?.label === 'Downloading') && <AutoRefresh seconds={5} />}
       {results?.length === 0 && <p className="muted">Nothing found for “{q}”.</p>}
       <ul className="results">
         {results?.map((r) => (

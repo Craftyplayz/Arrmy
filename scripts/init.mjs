@@ -39,6 +39,7 @@ if (!existsSync(conf)) {
     '[BitTorrent]',
     'Session\\DefaultSavePath=/data/torrents',
     'Session\\DisableAutoTMMByDefault=false',
+    'Session\\QueueingSystemEnabled=false', // seed and download everything at once, not a few at a time
     '',
     '[Preferences]',
     'WebUI\\Port=8080',

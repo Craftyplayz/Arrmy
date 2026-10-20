@@ -1,4 +1,5 @@
 import type { MediaType, RequestRow } from './db'
+import { liveProgress } from './qbit'
 import { movieStatus, seriesStatus, type Movie, type QueueItem, type Season, type Series, type Status } from './status'
 
 export const MOVIES_ROOT = '/data/media/movies'
@@ -49,8 +50,13 @@ export const posterOf = (media: Media) => media.images?.find((i) => i.coverType 
 
 const libraryMovie = async (tmdbId: number) => (await arr<LibraryMovie[]>('radarr', `/movie?tmdbId=${tmdbId}`))[0]
 const librarySeries = async (tvdbId: number) => (await arr<LibrarySeries[]>('sonarr', `/series?tvdbId=${tvdbId}`))[0]
-const queueOf = async (name: 'radarr' | 'sonarr') =>
-  (await arr<{ records: QueueItem[] }>(name, '/queue?pageSize=1000')).records
+async function queueOf(name: 'radarr' | 'sonarr'): Promise<QueueItem[]> {
+  const [queue, live] = await Promise.all([
+    arr<{ records: (QueueItem & { downloadId?: string })[] }>(name, '/queue?pageSize=1000'),
+    liveProgress().catch(() => new Map()), // qBittorrent unreachable: fall back to the Service's minute-old numbers
+  ])
+  return queue.records.map((r) => ({ ...r, ...live.get(r.downloadId?.toUpperCase() ?? '') }))
+}
 const seasonNumbers = (seasons: Season[], only = (_: Season) => true) =>
   seasons.filter((s) => s.seasonNumber > 0 && only(s)).map((s) => s.seasonNumber)
 

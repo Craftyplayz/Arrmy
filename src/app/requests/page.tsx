@@ -3,6 +3,7 @@ import { requestStatuses } from '@/lib/arr'
 import { listRequests } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { seasonLabel, type Status } from '@/lib/status'
+import { AutoRefresh } from '../auto-refresh'
 import { Badge, Card } from '../ui'
 
 export default async function RequestsPage() {
@@ -18,6 +19,7 @@ export default async function RequestsPage() {
   return (
     <>
       <h1>{user.is_admin ? 'All Requests' : 'Your Requests'}</h1>
+      {statuses?.some((s) => s && s.label !== 'Available') && <AutoRefresh seconds={5} />}
       {!statuses && <p className="error">Radarr or Sonarr isn't responding, so live status is missing.</p>}
       {requests.length === 0 && (
         <p className="muted">
