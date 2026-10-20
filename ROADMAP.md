@@ -29,6 +29,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 |---|---|---|
 | Search | The Audiobooks tab searches OpenLibrary directly, in about a second. With an Audiobookshelf API key, books already in Audiobookshelf show as Available. | Unit, Fake, Live |
 | Request | LazyLibrarian adds the book, searches the indexers through Prowlarr and sends the best release to qBittorrent. | Fake, Live |
+| AudioBook Bay | LazyLibrarian also searches AudioBook Bay, the main public source of audiobooks, which the general indexers mostly lack. The site answers 404 to LazyLibrarian's user agent, so its searches go through Arrmy (`/api/abb`, with a key in the address), which fetches the same pages as a browser. The Wiring points LazyLibrarian there once and searches again for every wanted audiobook. | Local (the relay, against a fake site). **Not yet live.** |
 | Status | Requested → Downloading % → Available. Arrmy checks LazyLibrarian every 2 minutes. | Unit, Fake, Live |
 | Filing | Every 10 minutes LazyLibrarian copies finished downloads to `media/audiobooks/Author/Title` (the torrent keeps seeding). Audiobookshelf picks the book up, and Discord gets a message. | Fake, Live (Dune, 2026-10-20). **Not yet live:** the Discord message. |
 | Remove | Cancels the Request, or deletes the torrent. Once the book is in Audiobookshelf, deletes that copy too, but only one added after the Request was made, so books you already had are never touched. | Unit (the matching rule), Fake, Live during a download. **Not yet live:** after it's in Audiobookshelf. |

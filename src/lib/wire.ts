@@ -2,8 +2,8 @@ import { arr, MOVIES_ROOT, serviceKey, serviceUrl, setCustomFormat, TV_ROOT, typ
 import { getLimits } from './db'
 import { applyLimits } from './limits'
 import { MULTI_AUDIO } from './releases'
-import { LAZYLIBRARIAN_URL } from './books'
-import { hookToken, lazyLibrarianKey, sessionSecret } from './token'
+import { LAZYLIBRARIAN_URL, ll } from './books'
+import { audiobookBayToken, hookToken, lazyLibrarianKey, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
 
@@ -57,6 +57,15 @@ export function startWiring() {
     ['Prowlarr → FlareSolverr', async () => {
       const tag = await ensureTag('prowlarr', 'flaresolverr')
       await ensureProvider('prowlarr', 'indexerproxy', 'FlareSolverr', 'FlareSolverr', { host: 'http://gluetun:8191/' }, { tags: [tag] })
+    }],
+    // LazyLibrarian's AudioBook Bay search goes through Arrmy's relay (/api/abb), the main public source of audiobooks.
+    // Set once: after that the address is ours, and switching AudioBook Bay off in LazyLibrarian is left alone.
+    ['LazyLibrarian → AudioBook Bay', async () => {
+      const host = `http://arrmy:3000/api/abb/${audiobookBayToken(sessionSecret())}`
+      if ((await ll<string>('readCFG', { name: 'ABB_HOST', group: 'ABB' })) === `[${host}]`) return
+      await ll('writeCFG', { name: 'ABB_HOST', group: 'ABB', value: host })
+      await ll('writeCFG', { name: 'ABB', group: 'ABB', value: '1' })
+      await ll('forceBookSearch', { type: 'AudioBook' }) // look again for every wanted audiobook
     }],
     // Re-applied every start, so a rebuilt Radarr or Sonarr gets the Admin's Size Limits back.
     ['Size limits', () => applyLimits(getLimits())],

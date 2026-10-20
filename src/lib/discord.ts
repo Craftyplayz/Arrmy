@@ -4,7 +4,7 @@
 import { allCells } from './barart'
 import { CHANNELS, type Channel } from './botrules'
 import { getSetting, setSetting } from './db'
-import type { Embed } from './embeds'
+import { distinctLinks, type Embed } from './embeds'
 
 const API = 'https://discord.com/api/v10'
 
@@ -87,7 +87,7 @@ function message(embeds: Embed | Embed[], ping = false) {
   const admin = ping ? process.env.DISCORD_ADMIN_ID : undefined
   return {
     ...(admin && { content: `<@${admin}>` }),
-    embeds: [embeds].flat().slice(0, 10),
+    embeds: distinctLinks([embeds].flat().slice(0, 10)),
     allowed_mentions: { parse: [], users: admin ? [admin] : [] },
   }
 }

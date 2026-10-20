@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import { inflateSync } from 'node:zlib'
 import { allCells, cellName, drawCell, progressBar } from '../src/lib/barart.ts'
 import { changes, compareVersions, duration, flatten, plexUsers } from '../src/lib/botrules.ts'
-import { COLOUR, downloadEmbed, embed, removedEmbed } from '../src/lib/embeds.ts'
+import { COLOUR, distinctLinks, downloadEmbed, embed, removedEmbed, speed } from '../src/lib/embeds.ts'
 
 const torrent = { hash: 'a', name: 'Dune.2021.1080p.BluRay', category: 'movies', state: 'downloading', added_on: 0, downloaded: 1, progress: 0.456, size: 4.2e9, dlspeed: 3_355_443, num_seeds: 1234, eta: 840 }
 const meta = { app: 'Radarr', appUrl: 'https://radarr.example.com/movie/438631', title: 'Dune (2021)', url: 'https://www.themoviedb.org/movie/438631', art: 'https://image.tmdb.org/p.jpg', by: ['Sam', 'Mum'] }
@@ -115,4 +115,15 @@ test("who Plex is shared with, from plex.tv's XML", () => {
     { name: 'Mum & Dad', avatar: 'https://plex.tv/users/1/avatar?c=1' },
     { name: 'sam', avatar: undefined },
   ])
+})
+
+test("cards in one message never share a link, so Discord keeps them apart", () => {
+  const cards = [{ url: "https://thetvdb.com/x" }, { url: "https://thetvdb.com/x" }, { url: "https://a.example/admin#problems" }, { url: "https://a.example/admin#problems" }, {}]
+  assert.deepEqual(distinctLinks(cards).map((c) => c.url), ["https://thetvdb.com/x", "https://thetvdb.com/x#2", "https://a.example/admin#problems", "https://a.example/admin#problems-2", undefined])
+})
+
+test("speeds under 1 MB/s are in KB/s", () => {
+  assert.equal(speed(3_355_443), "3.2 MB/s")
+  assert.equal(speed(46_080), "45 KB/s")
+  assert.equal(speed(100), "1 KB/s")
 })

@@ -102,6 +102,24 @@ const WAITING: Record<string, string> = {
   missingFiles: 'Its files are missing.',
 }
 
+/** "3.2 MB/s", or "45 KB/s" under 1 MB/s rather than "0.0 MB/s". */
+export const speed = (bytesPerSecond: number) =>
+  bytesPerSecond >= 1_048_576 ? `${(bytesPerSecond / 1_048_576).toFixed(1)} MB/s` : `${Math.max(1, Math.round(bytesPerSecond / 1024))} KB/s`
+
+/**
+ * Discord merges cards in one message that link to the same page (it's how image galleries work), so a repeated link
+ * gets #2, #3… added: the 8 seasons of a show in /queue stay 8 cards.
+ */
+export function distinctLinks(cards: Embed[]) {
+  const seen = new Map<string, number>()
+  return cards.map((card) => {
+    if (!card.url) return card
+    const n = (seen.get(card.url) ?? 0) + 1
+    seen.set(card.url, n)
+    return n === 1 ? card : { ...card, url: `${card.url}${card.url.includes('#') ? '-' : '#'}${n}` }
+  })
+}
+
 const percent = (fraction: number) => `${(Math.floor(fraction * 1000) / 10).toFixed(1)}%`
 
 /** A download's live card in #downloads: the bar, then speed, time left and seeders; Done when it finishes. */
@@ -126,7 +144,7 @@ export function downloadEmbed(t: Torrent, meta: DownloadMeta | undefined, emoji:
     description: `${progressBar(t.progress, emoji)}  **${percent(t.progress)}**${moving ? '' : `\n${WAITING[t.state] ?? 'Waiting.'}`}`,
     fields: [
       ['Downloaded', `${size(t.size * t.progress)} of ${size(t.size)}`],
-      ['Speed', moving && `${(t.dlspeed / 1_048_576).toFixed(1)} MB/s`],
+      ['Speed', moving && speed(t.dlspeed)],
       ['Time left', moving && duration(t.eta)],
       ['Seeders', t.num_seeds.toLocaleString('en-GB')],
       ['Requested by', meta?.by.length ? people(meta.by) : undefined],

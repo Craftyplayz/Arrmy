@@ -30,5 +30,8 @@ export function readToken(secret: string, token: string | undefined, now = Date.
 /** Shared secret the Services put in their webhook URL so only they can call Arrmy's hook. */
 export const hookToken = (secret: string) => sign(secret, 'hook')
 
+/** Shared secret in the AudioBook Bay relay's address (see /api/abb), so only LazyLibrarian can use it. scripts/init.mjs derives the same. */
+export const audiobookBayToken = (secret: string) => sign(secret, 'audiobookbay')
+
 /** LazyLibrarian's API key, derived so nobody has to set one. scripts/init.mjs writes the same value into its config. */
 export const lazyLibrarianKey = (secret: string) => createHmac('sha256', secret).update('lazylibrarian').digest('hex').slice(0, 32)
