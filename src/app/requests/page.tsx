@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requestDetails, type RequestDetails } from '@/lib/arr'
+import { betterPoster } from '@/lib/books'
 import { listRequests, seasonsOf } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
@@ -13,6 +14,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
   const user = await requireUser()
   const { notice } = await searchParams
   const requests = listRequests(user.is_admin ? undefined : user.id)
+  const posters = await Promise.all(requests.map(betterPoster))
   let details: RequestDetails[] | undefined
   try {
     details = await requestDetails(requests)
@@ -43,7 +45,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
             href={`/requests/${r.id}`}
             title={r.title}
             sub={[r.year, r.seasons ? seasonLabel(seasonsOf(r)) : '', user.is_admin && r.username].filter(Boolean).join(' · ')}
-            poster={r.poster}
+            poster={posters[i]}
             status={details?.[i].status}
             eager={i < 6}
           />

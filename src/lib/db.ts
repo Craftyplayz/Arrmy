@@ -112,6 +112,9 @@ export function addRequest(r: {
     .run(r.userId, r.type, r.externalId, r.title, r.year ?? null, r.poster ?? null, r.seasons ? JSON.stringify(r.seasons) : null)
 }
 
+export const setPoster = (type: MediaType, externalId: number | string, poster: string) =>
+  db().prepare('UPDATE requests SET poster = ? WHERE media_type = ? AND external_id = ?').run(poster, type, externalId)
+
 export const hasRequest = (userId: number, type: MediaType, externalId: number | string) =>
   !!db().prepare('SELECT 1 FROM requests WHERE user_id = ? AND media_type = ? AND external_id = ?').get(userId, type, externalId)
 

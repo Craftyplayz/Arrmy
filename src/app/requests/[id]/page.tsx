@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs'
 import { Fragment } from 'react'
 import { lookupTitle, requestDetails } from '@/lib/arr'
 import { editionOf } from '@/lib/bookrules'
+import { betterPoster } from '@/lib/books'
 import { getRequest, logFor, logItem, seasonsOf, type RequestRow } from '@/lib/db'
 import { buildSteps, logText, releaseText, stats, took, utc, type Grabbed } from '@/lib/logrules'
 import { torrentFile } from '@/lib/requestlog'
@@ -48,7 +49,8 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
     </a>
   )
 
-  const [info, [details]] = await Promise.all([
+  const [poster, info, [details]] = await Promise.all([
+    betterPoster(request),
     lookupTitle(request.media_type, request.external_id),
     requestDetails([request]).catch((e) => {
       console.error(e)
@@ -79,7 +81,7 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
       {running && <AutoRefresh seconds={15} />}
       <div className="ar-request">
         <aside className="ar-title">
-          {request.poster && <img className="ar-title-poster" src={request.poster} alt="" width={300} height={450} />}
+          {poster && <img className="ar-title-poster" src={poster} alt="" width={300} height={450} />}
           {info?.overview && <p>{info.overview}</p>}
           {info && info.facts.length > 0 && (
             <div className="kv">

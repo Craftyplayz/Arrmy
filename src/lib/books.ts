@@ -13,7 +13,7 @@ import {
   type OpenLibraryDoc,
   type Removed,
 } from './bookrules'
-import { addLog, getSetting, logItem, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
+import { addLog, getSetting, setPoster, logItem, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { watchEditions } from './editions'
 import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
@@ -147,24 +147,54 @@ export async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
 }
 
 /** A book's description, author and rating from OpenLibrary (BookIDs are its work ids); undefined if it can't be reached. */
-export async function lookupBook(bookId: string, edition?: string) {
-  if (!/^OL\d+W$/.test(bookId)) return
-  const get = async <T>(path: string) => {
-    const res = await fetch(`${OPENLIBRARY_URL}${path}`, {
-      headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(10_000),
-    })
-    if (!res.ok) throw new Error(`OpenLibrary ${path} → ${res.status}`)
-    return (await res.json()) as T
-  }
-  const [work, ratings] = await Promise.all([
-    get<OpenLibraryWork & { authors?: { author?: { key?: string } }[] }>(`/works/${bookId}.json`),
-    get<{ summary?: { average?: number } }>(`/works/${bookId}/ratings.json`).catch(() => undefined),
-  ])
+const olGet = async <T>(path: string) => {
+  const res = await fetch(`${OPENLIBRARY_URL}${path}`, {
+    headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (!res.ok) throw new Error(`OpenLibrary ${path} → ${res.status}`)
+  return (await res.json()) as T
+}
+type OpenLibraryWorkRecord = OpenLibraryWork & { authors?: { author?: { key?: string } }[] }
+const authorOf = async (work: OpenLibraryWorkRecord) => {
   const key = work.authors?.[0]?.author?.key
-  const author = key ? (await get<{ name?: string }>(`${key}.json`).catch(() => undefined))?.name : undefined
-  return bookInfo(bookId, work, author, ratings?.summary?.average, edition)
+  return key ? (await olGet<{ name?: string }>(`${key}.json`).catch(() => undefined))?.name : undefined
+}
+
+export async function lookupBook(bookId: string, edition?: string) {
+  if (!/^OLd+W$/.test(bookId)) return
+  const [work, ratings] = await Promise.all([
+    olGet<OpenLibraryWorkRecord>(`/works/${bookId}.json`),
+    olGet<{ summary?: { average?: number } }>(`/works/${bookId}/ratings.json`).catch(() => undefined),
+  ])
+  return bookInfo(bookId, work, await authorOf(work), ratings?.summary?.average, edition)
+}
+
+const triedCovers = new Set<string>() // shortcut: forgotten on restart, which is when a book without a cover gets another go
+
+/**
+ * A Request saved with OpenLibrary's cover link (its cover server often fails, and Requests made before Arrmy looked
+ * elsewhere only have that) gets a cover from findCover instead, kept for good. A book with none is tried once per start.
+ */
+export async function betterPoster(r: RequestRow) {
+  const bookId = editionOf(r.external_id)?.bookId ?? String(r.external_id)
+  if (r.media_type !== 'audiobook' || (r.poster && !r.poster.includes('covers.openlibrary.org')) || triedCovers.has(bookId)) return r.poster
+  triedCovers.add(bookId)
+  try {
+    const [work, editions] = await Promise.all([
+      olGet<OpenLibraryWorkRecord>(`/works/${bookId}.json`),
+      olGet<{ entries?: { isbn_13?: string[] }[] }>(`/works/${bookId}/editions.json?limit=10`).catch(() => undefined),
+    ])
+    const isbns = editions?.entries?.flatMap((e) => e.isbn_13 ?? []) ?? []
+    const cover = await findCover({ title: r.title, author: (await authorOf(work)) ?? '' }, isbns)
+    if (!cover) return r.poster
+    setPoster(r.media_type, r.external_id, cover)
+    return cover
+  } catch (e) {
+    console.warn(`[books] cover for ${bookId}: ${(e as Error).message}`)
+    return r.poster
+  }
 }
 
 /** Best match first (see rankBooks). Books already in Audiobookshelf show as Available. */
