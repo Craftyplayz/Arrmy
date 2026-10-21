@@ -19,6 +19,7 @@ const NAV: [href: string, label: string, adminOnly: boolean][] = [
   ['/requests', 'Requests', false],
   ['/admin', 'Admin', true],
   ['/settings', 'Settings', true],
+  ['/layouts', 'Layouts', true],
 ]
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,98 @@
+/* The /layouts mockups. Everything is under .mk so none of it leaks into the real pages. */
+
+.mk-jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; }
+.mk-jump a { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--link); text-decoration: none; font-size: 14px; }
+.mk-jump a:hover { background: var(--card2); }
+.mk-section { margin: 0 0 40px; scroll-margin-top: 16px; }
+.mk-section h2 { margin: 0 0 4px; color: var(--text); font-size: 20px; }
+.mk-how { margin: 0 0 12px; max-width: 70ch; color: var(--muted); }
+.mk-frame { overflow-x: auto; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--sunken); }
+
+/* shared bits */
+.mk { box-sizing: border-box; min-width: 720px; height: 460px; overflow: hidden; color: var(--text); font: 13px/1.35 var(--font); }
+.mk *, .mk *::before, .mk *::after { box-sizing: border-box; }
+.mk small { display: block; color: var(--muted); font-size: 11px; }
+.mk h3, .mk h4, .mk p { margin: 0; }
+.mk-poster { aspect-ratio: 2 / 3; border-radius: 4px; }
+.mk-btn { display: inline-block; padding: 6px 12px; border-radius: 6px; background: var(--btn); color: #fff; font-weight: 600; font-size: 12px; }
+.mk-field { padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--sunken); color: var(--muted); }
+.mk-bar { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.mk-bar i { display: block; height: 100%; background: var(--accent); }
+.mk-st { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 11px; font-weight: 600; border: 1px solid; }
+.mk-st-available { background: var(--ok-bg); border-color: var(--ok-line); }
+.mk-st-downloading { background: var(--info-bg); border-color: var(--info-line); }
+.mk-st-importing { background: var(--gold-bg); border-color: var(--gold-line); }
+.mk-st-requested { background: var(--card2); border-color: var(--line-strong); }
+
+/* A. Streaming */
+.mk-a { background: #141414; }
+.mk-a-top { display: flex; gap: 18px; align-items: center; padding: 12px 24px; color: var(--muted); }
+.mk-a-top b { color: var(--accent); font-size: 18px; }
+.mk-a-search { margin-left: auto; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; }
+.mk-a-hero { display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; height: 170px; padding: 20px 24px; }
+.mk-a-hero h3 { font-size: 26px; }
+.mk-a-hero small { color: #ddd; text-transform: uppercase; letter-spacing: .08em; }
+.mk-a-hero .mk-btn { align-self: flex-start; margin-top: 6px; }
+.mk-a-row { padding: 12px 24px 0; }
+.mk-a-row h4 { margin-bottom: 6px; font-size: 14px; }
+.mk-a-strip { display: flex; gap: 10px; }
+.mk-a-card { position: relative; flex: none; width: 82px; }
+.mk-a-card .mk-st { position: absolute; left: 4px; bottom: 4px; font-size: 9px; }
+
+/* B. Sidebar dashboard */
+.mk-b { display: flex; background: var(--bg); }
+.mk-b aside { display: flex; flex-direction: column; gap: 2px; width: 160px; padding: 16px 10px; background: #1a1a1a; border-right: 1px solid var(--line); }
+.mk-b aside b { padding: 0 8px 12px; color: var(--accent); font-size: 17px; }
+.mk-b aside span { padding: 7px 8px; border-radius: 6px; color: var(--muted); }
+.mk-b aside span.on { background: var(--accent-soft); color: var(--text); }
+.mk-b-main { flex: 1; padding: 14px 18px; }
+.mk-b-bar { display: flex; gap: 12px; align-items: center; }
+.mk-b-bar .mk-field { flex: 1; }
+.mk-b-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+.mk-b-tiles div { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+.mk-b-tiles b { font-size: 22px; }
+.mk-b table { width: 100%; border-collapse: collapse; }
+.mk-b th { text-align: left; color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+.mk-b th, .mk-b td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.mk-b td .mk-bar { width: 100px; }
+
+/* C. Search first */
+.mk-c { display: flex; flex-direction: column; align-items: center; background: var(--bg); }
+.mk-c-top { display: flex; gap: 16px; align-self: stretch; justify-content: flex-end; padding: 12px 20px; color: var(--muted); }
+.mk-c-logo { margin: 10px 0 14px; color: var(--accent); font-size: 34px; letter-spacing: -.02em; }
+.mk-c-box { width: 480px; padding: 12px 20px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--card); font-size: 15px; }
+.mk-c-tabs { display: flex; gap: 18px; margin: 12px 0 8px; color: var(--muted); }
+.mk-c-tabs .on { color: var(--text); border-bottom: 2px solid var(--accent); }
+.mk-c ul { width: 480px; margin: 0; padding: 0; list-style: none; }
+.mk-c li { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.mk-c li .mk-poster { width: 34px; }
+.mk-c li > div:nth-child(2) { flex: 1; }
+
+/* D. Board */
+.mk-d { background: var(--bg); }
+.mk-d-top { display: flex; gap: 16px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.mk-d-top b { color: var(--accent); font-size: 17px; }
+.mk-d-top .mk-field { width: 300px; }
+.mk-d-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 14px 16px; }
+.mk-d-col { min-height: 360px; padding: 10px; border-radius: 10px; background: var(--sunken); }
+.mk-d-col h4 { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+.mk-d-col h4 small { font-size: 12px; }
+.mk-d-card { display: flex; gap: 8px; margin-bottom: 8px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+.mk-d-card .mk-poster { width: 32px; flex: none; }
+.mk-d-card > div:last-child { flex: 1; }
+.mk-d-card .mk-bar { margin-top: 6px; }
+
+/* E. Phone app */
+.mk-e { display: flex; justify-content: center; padding: 14px 0; background: var(--sunken); }
+.mk-e-phone { display: flex; flex-direction: column; width: 240px; height: 100%; border: 6px solid #0c0c0c; border-radius: 28px; background: var(--bg); overflow: hidden; }
+.mk-e-head { padding: 16px 14px 8px; }
+.mk-e-head b { font-size: 20px; }
+.mk-e-list { flex: 1; overflow: hidden; padding: 0 10px; }
+.mk-e-card { display: flex; gap: 10px; margin-bottom: 8px; padding: 8px; border-radius: 12px; background: var(--card); }
+.mk-e-card .mk-poster { width: 38px; flex: none; }
+.mk-e-card .mk-st { margin-top: 4px; }
+.mk-e-tabs { display: flex; justify-content: space-around; padding: 8px 0 10px; border-top: 1px solid var(--line); background: #1a1a1a; }
+.mk-e-tabs span { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: 10px; }
+.mk-e-tabs i { width: 18px; height: 18px; border-radius: 5px; background: var(--line-strong); }
+.mk-e-tabs .on { color: var(--accent); }
+.mk-e-tabs .on i { background: var(--accent); }
