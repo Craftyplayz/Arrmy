@@ -23,6 +23,7 @@ const NAV: [href: string, label: string, adminOnly: boolean][] = [
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser()
+  const version = process.env.ARRMY_VERSION // baked into the image: 1.1.0-rc.30, or `latest`
   return (
     <html lang="en-GB">
       <body>
@@ -46,6 +47,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
         <footer className="site-footer">
           <p className="sf-meta">Movie and show details from TMDB and TheTVDB, book details from OpenLibrary.</p>
+          {version && (
+            <p className="sf-meta">
+              <a href={`https://github.com/Craftyplayz/Arrmy/releases/${version === 'latest' ? '' : `tag/v${version}`}`} target="_blank" rel="noreferrer">
+                Arrmy {version === 'latest' ? 'latest build' : `v${version}`}
+              </a>
+            </p>
+          )}
         </footer>
       </body>
     </html>
