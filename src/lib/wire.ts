@@ -82,12 +82,12 @@ export function startWiring() {
       await ll('forceBookSearch', { type: 'AudioBook' })
       setSetting('wired:audiobookBay', host)
     }],
-    // VueTorrent is put in /vuetorrent by the Docker mod in docker-compose.yml. Set once, so switching back is left alone.
-    ['qBittorrent: VueTorrent web UI', async () => {
-      if (getSetting<boolean>('wired:vuetorrent')) return
-      const json = JSON.stringify({ alternative_webui_enabled: true, alternative_webui_path: '/vuetorrent' })
-      await qbitApi('/app/setPreferences', new URLSearchParams({ json }))
-      setSetting('wired:vuetorrent', true)
+    // The VueTorrent Docker mod is gone (its download from ghcr.io hung qBittorrent's start), and /vuetorrent with it,
+    // so the alternative web UI that older Arrmy versions switched on goes back off. Set once, like VueTorrent was.
+    ['qBittorrent: built-in web UI', async () => {
+      if (getSetting<boolean>('wired:vuetorrentOff')) return
+      await qbitApi('/app/setPreferences', new URLSearchParams({ json: JSON.stringify({ alternative_webui_enabled: false }) }))
+      setSetting('wired:vuetorrentOff', true)
     }],
     // Audiobook results under 50 MB are ebooks posted as audiobooks (a 2 MB "La Belle Sauvage" got grabbed three times).
     // Set once, like AudioBook Bay, so a different value chosen in LazyLibrarian later is left alone.

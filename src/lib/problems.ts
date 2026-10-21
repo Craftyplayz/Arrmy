@@ -235,6 +235,6 @@ export function torrentStuck(t: Torrent, now = Date.now()): { reason: string; de
     return { reason, detail: `${done} done, ${t.last_activity > 0 ? `last moved ${ago(t.last_activity * 1000, now)}` : 'never moved'}, ${t.num_seeds} seeders` }
   if (t.state === 'queuedDL') return { reason, detail: `Waiting behind other downloads at ${done}` }
   if (t.state === 'stoppedDL' || t.state === 'pausedDL') return { reason, detail: `Paused at ${done}` }
-  if (t.state === 'error') return { reason, detail: 'qBittorrent reports an error. Its log in VueTorrent says why.' }
+  if (t.state === 'error') return { reason, detail: 'qBittorrent reports an error. Its log (Tools → Execution Log) says why.' }
   if (t.state === 'missingFiles') return { reason, detail: 'Its files are missing from the disk.' }
 }
