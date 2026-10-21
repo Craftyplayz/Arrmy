@@ -22,7 +22,7 @@ How every page in Arrmy looks and is built. This is a copy of the Crafty Playz d
 
 | Page | File | Kind | Layout |
 |---|---|---|---|
-| Search | `src/app/page.tsx` | Search first (`.ar-find`) | One centred column: big wordmark → round search field → Movies / TV Shows / Audiobooks segmented control → a list of results (poster, title, year · Media Type, overview, status, Request). TV and Audiobooks open a drawer with the season picker or Edition field |
+| Search | `src/app/page.tsx` | Search first (`.ar-find`) | One centred column: big wordmark → round search field → All / Movies / TV Shows / Audiobooks segmented control → a list of results (poster, title, a Media Type tag and year, overview, status, Request). All is the default: it runs every search at once and takes each one's best hit in turn; a search that is down only drops its own results. TV and Audiobooks open a drawer with the season picker or Edition field |
 | Requests | `src/app/requests/page.tsx` | Dashboard | `Hero` heading row → one `.ar-panel` with an `.ar-tbl` table (title, Media Type, who, when, size, status). A row opens the Request's own page; phones keep only title and status |
 | Admin | `src/app/admin/page.tsx` | Dashboard | `Hero` heading row → stat cards → `.ar-two`: Problems, Stuck, Downloading on the left; Disks, Requests by person, Layouts on the right |
 | Request | `src/app/requests/[id]/page.tsx` | Dashboard | `Hero` heading row → small stat cards (who, when, status, timings) → `.ar-two`: Request Log, Episodes (TV) and Manage on the left; the title (poster, facts, overview, links) and Cast on the right |

@@ -239,7 +239,7 @@ export async function requestTv(form: FormData) {
       `**${user.username}**'s Request was refused. ${problem}`,
       [['Seasons', seasons.join(', ')]],
     )
-    redirect(`/?type=tv&q=${encodeURIComponent(String(form.get('q') ?? ''))}&notice=${encodeURIComponent(problem)}`)
+    redirect(`/?type=${form.get('type') === 'all' ? 'all' : 'tv'}&q=${encodeURIComponent(String(form.get('q') ?? ''))}&notice=${encodeURIComponent(problem)}`)
   }
   const show = await addSeries(tvdbId, seasons)
   addRequest({ userId: user.id, type: 'tv', externalId: tvdbId, title: show.title, year: show.year, poster: posterOf(show), seasons })

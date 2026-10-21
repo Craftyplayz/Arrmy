@@ -97,7 +97,12 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-result-poster { flex: none; width: 56px; height: 84px; object-fit: cover; background: var(--card2); border-radius: 6px; }
 .ar-result .grow { flex: 1; min-width: 0; }
 .ar-result h3 { margin: 0; font-size: 19px; line-height: 1.3; }
-.ar-result-meta { margin: 0; color: var(--muted); font-size: 14px; }
+.ar-result-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+/* which search found it: one tint per Media Type */
+.ar-type { padding: 1px 8px; background: var(--btn2); border: 1px solid var(--line-strong); border-radius: 999px; color: var(--text); font-size: 12px; font-weight: 600; }
+.ar-type-movie { background: var(--info-bg); border-color: var(--info-line); }
+.ar-type-tv { background: #3d2a4f; border-color: #6c4b8f; }
+.ar-type-audiobook { background: var(--gold-bg); border-color: var(--gold-line); }
 .ar-result-over { display: -webkit-box; margin: 6px 0 0; overflow: hidden; color: var(--text); font-size: 15px; opacity: .8; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .ar-result-act { display: flex; flex: none; flex-direction: column; align-items: flex-end; align-self: center; gap: 8px; }
 @media (max-width: 520px) {

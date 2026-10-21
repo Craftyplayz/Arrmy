@@ -11,7 +11,10 @@ import { Badge } from './ui'
 
 export const metadata: Metadata = { title: 'Search' }
 
-const TABS: [MediaType, string][] = [
+/** All searches every Media Type at once; the others are for finer control. */
+type Mode = MediaType | 'all'
+const TABS: [Mode, string][] = [
+  ['all', 'All'],
   ['movie', 'Movies'],
   ['tv', 'TV Shows'],
   ['audiobook', 'Audiobooks'],
@@ -19,6 +22,7 @@ const TABS: [MediaType, string][] = [
 const TYPE_NAMES = { movie: 'Movie', tv: 'TV Show', audiobook: 'Audiobook' }
 /** Who answers the search, the field's label, and an example for its placeholder. */
 const LABELS = {
+  all: ['', 'Search movies, TV shows and audiobooks', 'Dune, Breaking Bad or Project Hail Mary'],
   movie: ['Radarr', 'Search movies', 'Dune'],
   tv: ['Sonarr', 'Search TV shows', 'Breaking Bad'],
   audiobook: ['The book search', 'Search audiobooks', 'Project Hail Mary'],
@@ -31,17 +35,25 @@ export default async function SearchPage({
 }) {
   await requireUser()
   const params = await searchParams
-  const type: MediaType = params.type === 'tv' || params.type === 'audiobook' ? params.type : 'movie'
+  const type: Mode = params.type === 'movie' || params.type === 'tv' || params.type === 'audiobook' ? params.type : 'all'
   const q = params.q?.trim() ?? ''
 
-  let results: SearchResult[] | undefined
+  let results: Found[] | undefined
   let error = ''
   if (q) {
-    try {
-      results = await search(type, q)
-    } catch (e) {
-      console.error(e)
-      error = `${LABELS[type][0]} isn't responding. Try again in a minute.`
+    const types: MediaType[] = type === 'all' ? ['movie', 'tv', 'audiobook'] : [type]
+    const settled = await Promise.allSettled(types.map((t) => search(t, q)))
+    const down = types.filter((t, i) => settled[i].status === 'rejected')
+    settled.forEach((r) => r.status === 'rejected' && console.error(r.reason))
+    const lists = settled.map((r, i) => (r.status === 'fulfilled' ? r.value.map((result) => ({ r: result, type: types[i] })) : []))
+    if (down.length < types.length) {
+      // All: each search's best hit in turn, so no Media Type is buried under another's
+      const longest = Math.max(...lists.map((l) => l.length))
+      results = Array.from({ length: longest }, (_, i) => lists.flatMap((l) => l[i] ?? [])).flat()
+    }
+    if (down.length) {
+      const names = `${down.map((t) => LABELS[t][0]).join(' and ')} ${down.length === 1 ? "isn't" : "aren't"} responding`
+      error = results ? `${names}, so some results are missing. Try again in a minute.` : `${names}. Try again in a minute.`
     }
   }
 
@@ -76,7 +88,7 @@ export default async function SearchPage({
       </div>
       {error && <p className="err">{error}</p>}
       {params.notice && <p className="err">{params.notice}</p>}
-      {results?.some((r) => r.status?.label === 'Downloading') && <AutoRefresh seconds={5} />}
+      {results?.some(({ r }) => r.status?.label === 'Downloading') && <AutoRefresh seconds={5} />}
       {results?.length === 0 && <p className="ar-count">Nothing found for “{q}”.</p>}
       {results && results.length > 0 && (
         <>
@@ -85,8 +97,8 @@ export default async function SearchPage({
           </p>
           {/* keyed on the notice, so a refused Request closes its drawer and the notice above shows */}
           <ul className="ar-results" key={params.notice}>
-            {results.map((r, i) => (
-              <Result key={r.id} r={r} type={type} q={q} eager={i < 6} />
+            {results.map(({ r, type: t }, i) => (
+              <Result key={`${t}-${r.id}`} r={r} type={t} mode={type} q={q} eager={i < 6} />
             ))}
           </ul>
         </>
@@ -95,8 +107,11 @@ export default async function SearchPage({
   )
 }
 
-/** One search result: poster, title, a line of overview, its status, and what can still be requested. */
-function Result({ r, type, q, eager }: { r: SearchResult; type: MediaType; q: string; eager: boolean }) {
+/** A search result and which search found it. */
+type Found = { r: SearchResult; type: MediaType }
+
+/** One search result: poster, title, its Media Type, a line of overview, its status, and what can still be requested. */
+function Result({ r, type, mode, q, eager }: { r: SearchResult; type: MediaType; mode: Mode; q: string; eager: boolean }) {
   // TV: seasons not yet requested; Audiobooks: another Edition can always be asked for
   const more = type === 'tv' ? r.seasons.some((n) => !r.requestedSeasons.includes(n)) : type === 'audiobook'
   const drawer = `d-${type}-${r.id}`
@@ -109,7 +124,10 @@ function Result({ r, type, q, eager }: { r: SearchResult; type: MediaType; q: st
       )}
       <div className="grow">
         <h3>{r.title}</h3>
-        <p className="ar-result-meta">{[r.year, TYPE_NAMES[type]].filter(Boolean).join(' · ')}</p>
+        <p className="ar-result-meta">
+          <span className={`ar-type ar-type-${type}`}>{TYPE_NAMES[type]}</span>
+          {r.year}
+        </p>
         {r.overview && <p className="ar-result-over">{r.overview}</p>}
       </div>
       <div className="ar-result-act">
@@ -132,7 +150,7 @@ function Result({ r, type, q, eager }: { r: SearchResult; type: MediaType; q: st
                   {r.status && <Badge status={r.status} />}
                 </div>
                 {r.overview && <p>{r.overview}</p>}
-                {type === 'tv' ? <TvAction r={r} q={q} /> : <AudiobookAction r={r} />}
+                {type === 'tv' ? <TvAction r={r} q={q} mode={mode} /> : <AudiobookAction r={r} />}
               </aside>
             </>
           )
@@ -174,14 +192,15 @@ function RequestButton({ r, action }: { r: SearchResult; action: (form: FormData
   )
 }
 
-/** `q` rides along so a refused Request comes back to the same search. */
-function TvAction({ r, q }: { r: SearchResult; q: string }) {
+/** `q` and `mode` ride along so a refused Request comes back to the same search. */
+function TvAction({ r, q, mode }: { r: SearchResult; q: string; mode: Mode }) {
   const unrequested = r.seasons.filter((n) => !r.requestedSeasons.includes(n))
   if (unrequested.length === 0) return null
   return (
     <form action={requestTv} className="form">
       <input type="hidden" name="id" value={r.id} />
       <input type="hidden" name="q" value={q} />
+      <input type="hidden" name="type" value={mode} />
       <fieldset className="ar-seasons">
         <legend>{r.status ? 'Request more seasons' : 'Choose seasons'}</legend>
         {r.seasons.map((n) => {
