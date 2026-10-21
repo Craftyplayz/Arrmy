@@ -135,7 +135,7 @@ export const audiobookStatuses = async (bookIds: string[]): Promise<(Status | nu
  * LazyLibrarian.
  */
 export async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
-  const query = new URLSearchParams({ q: term, limit: '30', fields: 'key,title,author_name,cover_i,first_publish_year' })
+  const query = new URLSearchParams({ q: term, limit: '30', fields: 'key,title,author_name,cover_i,first_publish_year,isbn' })
   const res = await fetch(`${OPENLIBRARY_URL}/search.json?${query}`, {
     headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' }, // OpenLibrary asks apps to identify themselves
     cache: 'no-store',
@@ -166,6 +166,26 @@ export async function lookupBook(bookId: string, edition?: string) {
   return bookInfo(bookId, work, author, ratings?.summary?.average, edition)
 }
 
+/**
+ * A cover from Google Books by ISBN, which needs no key. OpenLibrary's cover server is often unreachable and has none for
+ * many works, so this is tried first. shortcut: one request per result and the first ISBN only, fine for a family's
+ * searches; cache it if Google starts refusing.
+ */
+async function googleCover(isbns: string[] = []) {
+  const isbn = isbns.find((i) => i.length === 13) ?? isbns[0]
+  if (!isbn) return
+  try {
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&maxResults=1&fields=items(volumeInfo/imageLinks)`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(5_000),
+    })
+    const thumbnail: string | undefined = res.ok ? (await res.json()).items?.[0]?.volumeInfo?.imageLinks?.thumbnail : undefined
+    return thumbnail?.replace(/^http:/, 'https:').replace('&edge=curl', '').replace('zoom=1', 'zoom=2')
+  } catch {
+    return
+  }
+}
+
 /** Best match first (see rankBooks). Books already in Audiobookshelf show as Available. */
 export async function searchAudiobooks(term: string) {
   const [docs, status, library] = await Promise.all([
@@ -177,21 +197,22 @@ export async function searchAudiobooks(term: string) {
     }),
     owned(term),
   ])
-  return rankBooks(docs.map(fromOpenLibrary), term)
-    .slice(0, 12)
-    .map((b) => {
-      const inLibrary = library.some((item) => sameBook(item, { title: b.bookname, author: b.authorname }))
-      return {
-        id: b.bookid,
-        title: b.bookname,
-        year: b.year,
-        overview: `by ${b.authorname}`,
-        poster: coverUrl(b.bookimg, b.bookid),
-        seasons: [],
-        requestedSeasons: [],
-        status: inLibrary ? ({ label: 'Available' } as const) : status(b.bookid),
-      }
-    })
+  const isbns = new Map(docs.map((d) => [d.key.replace('/works/', ''), d.isbn?.slice(0, 5)]))
+  const top = rankBooks(docs.map(fromOpenLibrary), term).slice(0, 12)
+  const covers = await Promise.all(top.map((b) => googleCover(isbns.get(b.bookid))))
+  return top.map((b, i) => {
+    const inLibrary = library.some((item) => sameBook(item, { title: b.bookname, author: b.authorname }))
+    return {
+      id: b.bookid,
+      title: b.bookname,
+      year: b.year,
+      overview: `by ${b.authorname}`,
+      poster: covers[i] ?? coverUrl(b.bookimg, b.bookid),
+      seasons: [],
+      requestedSeasons: [],
+      status: inLibrary ? ({ label: 'Available' } as const) : status(b.bookid),
+    }
+  })
 }
 
 /** Adds the book to LazyLibrarian if it's new, wants its audiobook, and starts a search in the background. */

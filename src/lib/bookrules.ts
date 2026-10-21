@@ -44,7 +44,7 @@ export function coverUrl(img?: string | null, bookId?: string) {
 export const yearOf = (date?: string | null) => Number(date?.slice(0, 4)) || undefined
 
 /** One result of OpenLibrary's search.json. */
-export type OpenLibraryDoc = { key: string; title: string; author_name?: string[]; cover_i?: number; first_publish_year?: number }
+export type OpenLibraryDoc = { key: string; title: string; author_name?: string[]; cover_i?: number; first_publish_year?: number; isbn?: string[] }
 
 /** An OpenLibrary search result in LazyLibrarian's terms: its BookID is the OpenLibrary work id (OL66554W). */
 export const fromOpenLibrary = (doc: OpenLibraryDoc) => ({

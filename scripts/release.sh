@@ -34,9 +34,11 @@ else
 fi
 TAG="v$VERSION"
 NOTES="${2:-Arrmy $VERSION}"
-git rev-parse -q --verify "refs/tags/$TAG" >/dev/null && { echo "$TAG already exists." >&2; exit 1; }
+RESUME=0; git rev-parse -q --verify "refs/tags/$TAG" >/dev/null && RESUME=1 # an interrupted release carries on from its tag
 echo "Releasing $TAG from $(git rev-parse --short HEAD)"
 
+
+if [ "$RESUME" = 0 ]; then
 # --- release commit off main, temporary index ---
 BASE="$(git rev-parse HEAD)"
 TMP="$(mktemp -d)"
@@ -55,6 +57,8 @@ git tag -a "$TAG" "$COMMIT" -m "Arrmy $VERSION"
 git push -q origin "$TAG"
 PRE=(); [[ "$VERSION" == *-* ]] && PRE=(--prerelease)
 gh release create "$TAG" --verify-tag "${PRE[@]}" --title "Arrmy $VERSION" --notes "$NOTES"
+
+fi
 
 # --- wait for the image ---
 echo "Waiting for GitHub Actions to build arrmy:$VERSION..."
