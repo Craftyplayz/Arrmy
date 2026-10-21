@@ -227,6 +227,15 @@ Also possible: English-only audio on or off, backup status and last run, and the
 
 Chosen 2026-10-21. An installable app for Requesters and the Admin: first as a PWA of the existing site (home-screen icon, full screen, push notifications for Available and Problems), a native app only if the PWA falls short. Needs the Requester features above for push to be worth having.
 
+### Themes
+
+Possible add-on, asked for 2026-10-22. Let each person pick how Arrmy looks, from the styles mocked up on the Layouts page (Admin → Layouts):
+
+- **Colour themes:** the palettes only, same pages. About 1–2 hours, including a per-person setting.
+- **Full layouts** (Board, Chat feed and so on): about a day each, since every one needs its own working Search, Requests, Admin and Settings pages, and every later feature built into each.
+
+The current look (Sidebar dashboard colours and pages, Search-first Home) was picked on 2026-10-22.
+
 ### Other planned
 
 - **More Media Types.** Music (Lidarr → Plex); Books and Periodicals (LazyLibrarian → Kavita); Comics (Kapowarr → Kavita); Manga (Mangarr → Kavita).
