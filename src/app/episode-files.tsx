@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { EpisodeRow } from '@/lib/episodes'
 
 /**
- * A TV Request's episodes, each with its file and a progress bar. It loads only while its drawer is open, every
- * 5 seconds, so the Requests page doesn't ask Sonarr and qBittorrent about every file of every show.
+ * A TV Request's episodes, each with its file and a progress bar, read again every 5 seconds. Inside a drawer it
+ * loads only while the drawer is open, so a page of drawers doesn't ask Sonarr and qBittorrent about every show.
  */
 export function EpisodeFiles({ id }: { id: number }) {
   const ref = useRef<HTMLElement>(null)
@@ -14,7 +14,6 @@ export function EpisodeFiles({ id }: { id: number }) {
 
   useEffect(() => {
     const drawer = ref.current?.closest<HTMLElement>('[popover]')
-    if (!drawer) return
     let timer: ReturnType<typeof setInterval> | undefined
     const load = () =>
       fetch(`/api/requests/${id}/files`, { cache: 'no-store' })
@@ -28,9 +27,14 @@ export function EpisodeFiles({ id }: { id: number }) {
         )
     const toggle = () => {
       clearInterval(timer)
-      if (!drawer.matches(':popover-open')) return
+      if (drawer && !drawer.matches(':popover-open')) return
       load()
       timer = setInterval(() => document.hidden || load(), 5000)
+    }
+    // on the Request page it isn't in a drawer, so it loads straight away
+    if (!drawer) {
+      toggle()
+      return () => clearInterval(timer)
     }
     toggle() // the drawer can already be open when the page re-renders after a form
     drawer.addEventListener('toggle', toggle)

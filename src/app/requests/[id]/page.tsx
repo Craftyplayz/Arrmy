@@ -80,56 +80,81 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
         </div>
       </Hero>
       {running && <AutoRefresh seconds={15} />}
-      <div className="ar-request">
-        <aside className="ar-title">
-          {poster && <img className="ar-title-poster" src={poster} alt="" width={300} height={450} />}
-          {info?.overview && <p>{info.overview}</p>}
-          {info && info.facts.length > 0 && (
-            <div className="kv">
-              {info.facts.map(([k, v]) => (
-                <Fragment key={k}>
-                  <span>{k}</span>
-                  <span>{v}</span>
-                </Fragment>
-              ))}
-            </div>
-          )}
-          {info && info.links.length > 0 && (
-            <div className="actions">
-              {info.links.map((l) => (
-                <a className="btn small" key={l.label} href={l.href} target="_blank" rel="noreferrer">
-                  {l.label}
-                </a>
-              ))}
-            </div>
-          )}
-          {info && info.cast.length > 0 && (
-            <ul className="ar-cast">
-              {info.cast.map((c) => (
-                <li key={`${c.name}-${c.character}`}>
-                  {c.photo ? <img src={c.photo} alt="" width={36} height={36} loading="lazy" /> : <span className="ar-cast-none" />}
-                  <span>
-                    <b>{c.name}</b>
-                    {c.character && <small className="ar-sub">{c.character}</small>}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {!info && <p className="muted">Details for this title couldn't be loaded.</p>}
-        </aside>
-        <div className="ar-log">
-          <div className="kv">
-            {summary.map(([k, v]) => (
-              <Fragment key={k}>
-                <span>{k}</span>
-                <span>{v}</span>
-              </Fragment>
-            ))}
+      <div className="ar-stats-row ar-stats-small">
+        {summary.map(([k, v]) => (
+          <div className="ar-stat" key={k}>
+            <b>{v}</b>
+            <span>{k}</span>
           </div>
-          {logBody(request)}
-          {details && <Manage r={request} details={details} />}
-          {request.media_type === 'tv' && <EpisodeFiles id={request.id} />}
+        ))}
+      </div>
+      <div className="ar-two">
+        <div>
+          <section className="ar-panel">
+            <h2>
+              Request Log <span className="n">{steps.length} {steps.length === 1 ? 'step' : 'steps'}</span>
+            </h2>
+            {logBody(request)}
+          </section>
+          {request.media_type === 'tv' && (
+            <section className="ar-panel">
+              <h2>Episodes</h2>
+              <EpisodeFiles id={request.id} />
+            </section>
+          )}
+          {details && (
+            <section className="ar-panel">
+              <h2>Manage</h2>
+              <Manage r={request} details={details} />
+            </section>
+          )}
+        </div>
+        <div>
+          <section className="ar-panel ar-title">
+            <h2>{request.title}</h2>
+            <div className="ar-title-top">
+              {poster && <img className="ar-title-poster" src={poster} alt="" width={300} height={450} />}
+              {info && info.facts.length > 0 && (
+                <div className="kv">
+                  {info.facts.map(([k, v]) => (
+                    <Fragment key={k}>
+                      <span>{k}</span>
+                      <span>{v}</span>
+                    </Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
+            {info?.overview && <p>{info.overview}</p>}
+            {info && info.links.length > 0 && (
+              <div className="actions">
+                {info.links.map((l) => (
+                  <a className="btn small" key={l.label} href={l.href} target="_blank" rel="noreferrer">
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            )}
+            {!info && <p className="muted">Details for this title couldn't be loaded.</p>}
+          </section>
+          {info && info.cast.length > 0 && (
+            <section className="ar-panel">
+              <h2>
+                Cast <span className="n">{info.cast.length}</span>
+              </h2>
+              <ul className="ar-cast">
+                {info.cast.map((c) => (
+                  <li key={`${c.name}-${c.character}`}>
+                    {c.photo ? <img src={c.photo} alt="" width={36} height={36} loading="lazy" /> : <span className="ar-cast-none" />}
+                    <span>
+                      <b>{c.name}</b>
+                      {c.character && <small className="ar-sub">{c.character}</small>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </div>
     </>

@@ -25,6 +25,7 @@ How every page in Arrmy looks and is built. This is a copy of the Crafty Playz d
 | Search | `src/app/page.tsx` | Search first (`.ar-find`) | One centred column: big wordmark → round search field → Movies / TV Shows / Audiobooks segmented control → a list of results (poster, title, year · Media Type, overview, status, Request). TV and Audiobooks open a drawer with the season picker or Edition field |
 | Requests | `src/app/requests/page.tsx` | Dashboard | `Hero` heading row → one `.ar-panel` with an `.ar-tbl` table (title, Media Type, who, when, size, status). A row opens the Request's own page; phones keep only title and status |
 | Admin | `src/app/admin/page.tsx` | Dashboard | `Hero` heading row → stat cards → `.ar-two`: Problems, Stuck, Downloading on the left; Disks, Requests by person, Layouts on the right |
+| Request | `src/app/requests/[id]/page.tsx` | Dashboard | `Hero` heading row → small stat cards (who, when, status, timings) → `.ar-two`: Request Log, Episodes (TV) and Manage on the left; the title (poster, facts, overview, links) and Cast on the right |
 | Settings | `src/app/settings/page.tsx` | Plain form | `Hero` heading row → `.ar-panel.form-card` |
 | Layouts | `src/app/layouts/` | Mockups | Fifteen static redesign mockups on made-up data, linked from Admin. Each brings its own chrome, so the sidebar hides there |
 

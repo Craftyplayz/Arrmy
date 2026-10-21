@@ -21,16 +21,20 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-stat > span { color: var(--muted); font-size: 13px; }
 .ar-stat > small, .ar-stat > span > small { color: var(--accent); font-size: 12px; }
 
-/* ---------- Request page: the title beside its log ---------- */
-.ar-request { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; align-items: start; }
-.ar-title, .ar-log { display: grid; gap: 14px; min-width: 0; }
+/* ---------- Request page: the log and the title side by side in .ar-two panels ---------- */
+/* the headline facts as smaller stat cards: their values are phrases, not single numbers */
+.ar-stats-small > .ar-stat > b { font-size: 17px; }
+.ar-title { display: grid; gap: 12px; }
+.ar-title > h2 { margin-bottom: 0; }
+.ar-title p { margin: 0; }
+.ar-title-top { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; align-items: start; }
+.ar-title-top > :only-child { grid-column: 1 / -1; }
 .ar-title-poster { width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 2px 6px rgb(0 0 0 / .4); }
 .ar-cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
 .ar-cast li { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; }
 .ar-cast img, .ar-cast-none { flex: none; width: 36px; height: 36px; background: var(--card2); border-radius: 50%; object-fit: cover; }
 .ar-cast b { display: block; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .ar-cast small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 760px) { .ar-request { grid-template-columns: minmax(0, 1fr); } .ar-title-poster { max-width: 220px; } }
 
 /* ---------- ranked list (no art column) ---------- */
 .ar-ranks { display: grid; gap: 6px; }
@@ -108,9 +112,9 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 @starting-style { .drawer:popover-open { transform: translateX(105%); } }
 .drawer::backdrop { background: rgb(0 0 0 / .5); }
 .drawer h2 { margin: 0 40px 4px 0; font-size: 20px; line-height: 1.2; }
-.drawer section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
-.drawer summary { color: var(--muted); font-size: 14px; cursor: pointer; }
-.drawer details[open] > summary { margin-bottom: 8px; }
+.drawer section, .ar-panel section + section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+:is(.drawer, .ar-panel) summary { color: var(--muted); font-size: 14px; cursor: pointer; }
+:is(.drawer, .ar-panel) details[open] > summary { margin-bottom: 8px; }
 
 /* season checkboxes in columns */
 .ar-seasons { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0 12px; }
