@@ -183,7 +183,39 @@ From the Seerr and Requestarr comparison, 2026-10-21. In this order:
 6. **Title blocklist.** Titles nobody can request.
 7. **4K as its own Request, and several Radarr and Sonarr instances** (extends anime routing under Other planned).
 
-To decide: **issue reporting** ("this episode has no audio"). Requester reports are under Not planned; issue reporting is a different thing, so it stays out until that is settled.
+A form for Requesters to report issues ("this episode has no audio") was considered and dropped on 2026-10-21: see Not planned. Arrmy's own reporting to the Admin stays.
+
+### Request page
+
+Asked for 2026-10-21. Clicking a Request in All requests opens its own full page, in two halves:
+
+- **Title side.** Everything about the title, pulled from TMDB, IMDb and similar: poster, synopsis, cast, ratings, runtime, release dates, trailer.
+- **Log side.** The Request Log already built, laid out beside it: who asked and when, every step the apps took, the time from clicking Request to showing in Plex, the average download speed, and the rest of the totals.
+
+The Request Log page (`/requests/[id]`) becomes this page; the title side shares its data with the Discover and item pages above.
+
+### Search rework
+
+Asked for 2026-10-21. Search works like Overseerr's:
+
+- Suggestions appear as you type, and only for the Media Type tab you are on (Movies shows only movies, and the same for TV, Books and every later type). Never people or companies mixed in.
+- A small control on each tab switches what is searched, so a person can look for something other than a title:
+  - **Movies and TV:** actor, director, studio or company (Marvel, Disney).
+  - **Books and audiobooks:** individual book, series, author.
+  - **Comics:** individual issue, series, publisher, character (every comic with Spider-Man in it).
+- Comics need Kapowarr (see Other planned); the other tabs can be built first.
+
+### Settings page
+
+Settings holds only Size Limits today. Candidates, in the order they'd help most:
+
+1. **Resolution preference** and its blocklist (see above).
+2. **People:** who has access, and per person: approve first, quota, notifications.
+3. **Dead releases:** the 5 and 15 minute limits and the 3-strike rule, now fixed in code.
+4. **Discord:** bot status, which channels exist, who gets @mentioned, which slash commands everyone can use.
+5. **Connected apps:** each app up or down, and the keys Arrmy needs (Plex token, Audiobookshelf API key) without editing the stack file.
+
+Also possible: English-only audio on or off, backup status and last run, and the public address.
 
 ### Phone app
 
@@ -198,5 +230,5 @@ Chosen 2026-10-21. An installable app for Requesters and the Admin: first as a P
 ## Not planned
 
 - Usenet (SABnzbd) and Unpackerr.
-- Requester reports, and replacing each app's own settings pages.
+- Requester reports, and a form for Requesters to report issues (dropped 2026-10-21: they ask the Admin directly). Arrmy still reports problems to the Admin by itself: Problems, Stuck and #problems. And replacing each app's own settings pages.
 - Book wishlists (NYT bestsellers, Goodreads shelves): LazyLibrarian can do these itself.
