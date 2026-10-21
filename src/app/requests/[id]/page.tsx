@@ -2,18 +2,23 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { existsSync } from 'node:fs'
+import { Fragment } from 'react'
+import { lookupTitle, requestDetails } from '@/lib/arr'
 import { editionOf } from '@/lib/bookrules'
-import { getRequest, logFor, logItem, seasonsOf } from '@/lib/db'
-import { buildSteps, logText, releaseText, took, utc, type Grabbed } from '@/lib/logrules'
+import { getRequest, logFor, logItem, seasonsOf, type RequestRow } from '@/lib/db'
+import { buildSteps, logText, releaseText, stats, took, utc, type Grabbed } from '@/lib/logrules'
 import { torrentFile } from '@/lib/requestlog'
 import { requireUser } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
-import { duration } from '@/lib/botrules'
+import { duration, size } from '@/lib/botrules'
+import { speed } from '@/lib/embeds'
 import { AutoRefresh } from '../../auto-refresh'
+import { EpisodeFiles } from '../../episode-files'
 import { CopyLog, Elapsed } from '../../request-log'
 import { Hero } from '../../ui'
+import { Manage } from '../manage'
 
-export const metadata: Metadata = { title: 'Request Log' }
+export const metadata: Metadata = { title: 'Request' }
 
 const clock = (ms: number) => new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
@@ -43,9 +48,27 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
     </a>
   )
 
+  const [info, [details]] = await Promise.all([
+    lookupTitle(request.media_type, request.external_id),
+    requestDetails([request]).catch((e) => {
+      console.error(e)
+      return []
+    }),
+  ])
+  const dl = stats(events)
+  const summary: [string, string][] = [
+    ['Requested by', request.username],
+    ['Requested on', clock(utc(request.created_at))],
+    ...(details?.status ? ([['Status', `${details.status.label}${details.status.progress !== undefined ? ` ${details.status.progress}%` : ''}`]] as [string, string][]) : []),
+    ...(total !== undefined ? ([['Request to playable', duration(total)]] as [string, string][]) : []),
+    ...(dl.downloads ? ([['Downloaded', `${size(dl.bytes)} in ${duration(dl.seconds)}`]] as [string, string][]) : []),
+    ...(dl.bps ? ([['Average speed', speed(dl.bps)]] as [string, string][]) : []),
+    ...(dl.downloads ? ([['Best swarm', `${dl.seeds} seeders, ${dl.peers} peers`]] as [string, string][]) : []),
+  ]
+
   return (
     <>
-      <Hero title={title} lede="Every step from the Request to playable, with how long each took.">
+      <Hero title={title} lede="The title, and every step from the Request to playable.">
         <div className="actions">
           <Link className="btn small" href="/requests">
             All Requests
@@ -54,6 +77,64 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
         </div>
       </Hero>
       {running && <AutoRefresh seconds={15} />}
+      <div className="ar-request">
+        <aside className="ar-title">
+          {request.poster && <img className="ar-title-poster" src={request.poster} alt="" width={300} height={450} />}
+          {info?.overview && <p>{info.overview}</p>}
+          {info && info.facts.length > 0 && (
+            <div className="kv">
+              {info.facts.map(([k, v]) => (
+                <Fragment key={k}>
+                  <span>{k}</span>
+                  <span>{v}</span>
+                </Fragment>
+              ))}
+            </div>
+          )}
+          {info && info.links.length > 0 && (
+            <div className="actions">
+              {info.links.map((l) => (
+                <a className="btn small" key={l.label} href={l.href} target="_blank" rel="noreferrer">
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          )}
+          {info && info.cast.length > 0 && (
+            <ul className="ar-cast">
+              {info.cast.map((c) => (
+                <li key={`${c.name}-${c.character}`}>
+                  {c.photo ? <img src={c.photo} alt="" width={36} height={36} loading="lazy" /> : <span className="ar-cast-none" />}
+                  <span>
+                    <b>{c.name}</b>
+                    {c.character && <small className="ar-sub">{c.character}</small>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {!info && <p className="muted">Details for this title couldn't be loaded.</p>}
+        </aside>
+        <div className="ar-log">
+          <div className="kv">
+            {summary.map(([k, v]) => (
+              <Fragment key={k}>
+                <span>{k}</span>
+                <span>{v}</span>
+              </Fragment>
+            ))}
+          </div>
+          {logBody(request)}
+          {details && <Manage r={request} details={details} />}
+          {request.media_type === 'tv' && <EpisodeFiles id={request.id} />}
+        </div>
+      </div>
+    </>
+  )
+
+  function logBody(request: RequestRow) {
+    return (
+      <>
       {editionOf(request.external_id) && <p className="muted">Editions Arrmy finds itself only show when they were requested for now.</p>}
       {events.length === 0 && request.status === 'available' && <p className="muted">This finished before Arrmy kept Request Logs, so only the Request is here.</p>}
       <div className="rows">
@@ -85,11 +166,6 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
           </div>
         ))}
       </div>
-      {total !== undefined && (
-        <p>
-          <b>Request to playable: {duration(total)}</b>
-        </p>
-      )}
       {current && (
         <p className="ar-sub">
           Download .torrent: {torrentLink(current)}
@@ -106,5 +182,6 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
         </div>
       )}
     </>
-  )
+    )
+  }
 }

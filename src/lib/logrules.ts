@@ -160,6 +160,21 @@ export function buildSteps(request: { id?: number; created_at: string; username:
 
 const clock = (ms: number) => new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
+/** The totals over every finished download of a Request: how much, the average speed, the most seeders and peers. */
+export function stats(events: LogEvent[]) {
+  const done = events.filter((e) => e.kind === 'downloaded').map((e) => JSON.parse(e.detail) as Downloaded)
+  const bytes = done.reduce((n, d) => n + d.size, 0)
+  const seconds = done.reduce((n, d) => n + d.seconds, 0)
+  return {
+    downloads: done.length,
+    bytes,
+    seconds,
+    bps: seconds > 0 ? bytes / seconds : undefined,
+    seeds: Math.max(0, ...done.map((d) => d.seeds)),
+    peers: Math.max(0, ...done.map((d) => d.peers)),
+  }
+}
+
 /** How long a step took, or has been running. */
 export const took = (step: Step, now = Date.now()) => (step.end === step.start ? '' : duration(((step.end ?? now) - step.start) / 1000))
 

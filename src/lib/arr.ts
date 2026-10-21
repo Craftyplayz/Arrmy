@@ -1,8 +1,9 @@
 import { editionOf } from './bookrules'
-import { audiobookStatuses, searchAudiobooks } from './books'
+import { audiobookStatuses, lookupBook, searchAudiobooks } from './books'
 import { editionStatuses } from './editions'
 import { seasonsOf, type MediaType, type RequestRow } from './db'
 import { deleteTorrents, liveProgress } from './qbit'
+import { titleInfo, type Credit, type Lookup, type TitleInfo } from './titlerules'
 import { movieStatus, seriesStatus, type Movie, type QueueItem, type Season, type Series, type Status } from './status'
 
 export const MOVIES_ROOT = '/data/media/movies'
@@ -80,6 +81,26 @@ export type SearchResult = {
   seasons: number[]
   requestedSeasons: number[]
   status: Status | null
+}
+
+/** The title's own details (overview, ratings, cast…) from Radarr's, Sonarr's or OpenLibrary's records; undefined if it fails. */
+export async function lookupTitle(type: MediaType, id: number | string): Promise<TitleInfo | undefined> {
+  try {
+    if (type === 'audiobook') {
+      const e = editionOf(id)
+      return await lookupBook(e?.bookId ?? String(id), e?.edition)
+    }
+    if (type === 'movie') {
+      const movie = await arr<Lookup>('radarr', `/movie/lookup/tmdb?tmdbId=${id}`)
+      // Radarr keeps the cast for movies in its library, which a Request puts it in; a movie removed since just has none.
+      const library = await libraryMovie(Number(id)).catch(() => undefined)
+      const credits = library && (await arr<Credit[]>('radarr', `/credit?movieId=${(library as { id?: number }).id}`).catch(() => undefined))
+      return titleInfo('movie', movie, credits || undefined)
+    }
+    return titleInfo('tv', (await arr<Lookup[]>('sonarr', `/series/lookup?term=tvdb:${id}`))[0])
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 export const posterOf = (media: Media) => media.images?.find((i) => i.coverType === 'poster')?.remoteUrl

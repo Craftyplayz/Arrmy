@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { Status } from '@/lib/status'
 
 /** 1,204 */
@@ -43,25 +44,40 @@ export function Cover(props: {
   poster?: string | null
   status?: Status | null
   eager?: boolean
-  children: React.ReactNode
+  /** Opens that page instead of a drawer; `children` are then not shown. */
+  href?: string
+  children?: React.ReactNode
 }) {
   const drawer = `d-${props.id}`
   const { status } = props
+  const art = (
+    <>
+      {props.poster && (
+        <img src={props.poster} alt="" width={300} height={450} loading={props.eager ? undefined : 'lazy'} decoding="async" />
+      )}
+      {status === undefined ? null : status?.label === 'Downloading' ? (
+        <Ring p={status.progress ?? 0} label={`Downloading ${status.progress ?? 0}%`} />
+      ) : (
+        <Badge status={status} />
+      )}
+      <span className="ar-cap-info">
+        <b>{props.title}</b>
+        {props.sub && <small>{props.sub}</small>}
+      </span>
+    </>
+  )
+  if (props.href)
+    return (
+      <li>
+        <Link className="ar-cap" href={props.href}>
+          {art}
+        </Link>
+      </li>
+    )
   return (
     <li>
       <button className="ar-cap" popoverTarget={drawer}>
-        {props.poster && (
-          <img src={props.poster} alt="" width={300} height={450} loading={props.eager ? undefined : 'lazy'} decoding="async" />
-        )}
-        {status === undefined ? null : status?.label === 'Downloading' ? (
-          <Ring p={status.progress ?? 0} label={`Downloading ${status.progress ?? 0}%`} />
-        ) : (
-          <Badge status={status} />
-        )}
-        <span className="ar-cap-info">
-          <b>{props.title}</b>
-          {props.sub && <small>{props.sub}</small>}
-        </span>
+        {art}
       </button>
       <aside className="drawer" id={drawer} popover="auto" aria-label={props.title}>
         <button className="close" popoverTarget={drawer} popoverTargetAction="hide" aria-label="Close" title="Close">

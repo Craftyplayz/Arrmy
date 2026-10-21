@@ -194,6 +194,8 @@ Asked for 2026-10-21. Clicking a Request in All requests opens its own full page
 
 The Request Log page (`/requests/[id]`) becomes this page; the title side shares its data with the Discover and item pages above.
 
+**Built 2026-10-21 (not yet live):** the All Requests posters now open the page. Title side: poster, synopsis, rating, genres, runtime, studio or network, dates and IMDb, TMDB, TheTVDB and trailer links, from Radarr's and Sonarr's lookups, plus the first 12 of the cast with headshots (Radarr's credits for movies, Sonarr's actors for shows if its version has them). Audiobooks get a description, author, edition, first published year, rating and subjects from OpenLibrary. Log side: who and when, status, Request to playable, size downloaded, average speed and best swarm, then the steps, with Edit seasons, Remove and the episode files moved onto it. Unit tests cover the totals and the title facts.
+
 ### Search rework
 
 Asked for 2026-10-21. Search works like Overseerr's:

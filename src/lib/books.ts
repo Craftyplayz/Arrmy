@@ -18,6 +18,7 @@ import { watchEditions } from './editions'
 import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
+import { bookInfo, type OpenLibraryWork } from './titlerules'
 import { lazyLibrarianKey, sessionSecret } from './token'
 
 export const LAZYLIBRARIAN_URL = process.env.LAZYLIBRARIAN_URL ?? 'http://lazylibrarian:5299'
@@ -142,6 +143,27 @@ export async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
   })
   if (!res.ok) throw new Error(`OpenLibrary search → ${res.status}`)
   return (await res.json()).docs ?? []
+}
+
+/** A book's description, author and rating from OpenLibrary (BookIDs are its work ids); undefined if it can't be reached. */
+export async function lookupBook(bookId: string, edition?: string) {
+  if (!/^OL\d+W$/.test(bookId)) return
+  const get = async <T>(path: string) => {
+    const res = await fetch(`${OPENLIBRARY_URL}${path}`, {
+      headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) throw new Error(`OpenLibrary ${path} → ${res.status}`)
+    return (await res.json()) as T
+  }
+  const [work, ratings] = await Promise.all([
+    get<OpenLibraryWork & { authors?: { author?: { key?: string } }[] }>(`/works/${bookId}.json`),
+    get<{ summary?: { average?: number } }>(`/works/${bookId}/ratings.json`).catch(() => undefined),
+  ])
+  const key = work.authors?.[0]?.author?.key
+  const author = key ? (await get<{ name?: string }>(`${key}.json`).catch(() => undefined))?.name : undefined
+  return bookInfo(bookId, work, author, ratings?.summary?.average, edition)
 }
 
 /** Best match first (see rankBooks). Books already in Audiobookshelf show as Available. */

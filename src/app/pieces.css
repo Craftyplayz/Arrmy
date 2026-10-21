@@ -62,6 +62,17 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-cap-info b { overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .ar-cap-info small { overflow: hidden; color: var(--text); font-size: 12px; opacity: .75; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ---------- Request page: the title beside its log ---------- */
+.ar-request { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.ar-title, .ar-log { display: grid; gap: 14px; min-width: 0; }
+.ar-title-poster { width: 100%; height: auto; border-radius: var(--radius); box-shadow: 0 2px 6px rgb(0 0 0 / .4); }
+.ar-cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ar-cast li { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; }
+.ar-cast img, .ar-cast-none { flex: none; width: 36px; height: 36px; background: var(--card2); border-radius: 50%; object-fit: cover; }
+.ar-cast b { display: block; overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.ar-cast small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 760px) { .ar-request { grid-template-columns: minmax(0, 1fr); } .ar-title-poster { max-width: 220px; } }
+
 /* ---------- ranked list (no art column) ---------- */
 .ar-ranks { display: grid; gap: 6px; }
 .ar-rank { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 10px 6px 6px; background: var(--card2); border-radius: var(--radius); }

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { buildSteps, logText, type LogEvent, type LogKind } from '../src/lib/logrules.ts'
+import { buildSteps, logText, stats, type LogEvent, type LogKind } from '../src/lib/logrules.ts'
+import { bookInfo, titleInfo } from '../src/lib/titlerules.ts'
 
 const ev = (kind: LogKind, at: string, detail: object): LogEvent => ({ kind, at: `2026-10-20 ${at}`, detail: JSON.stringify(detail) })
 const request = { created_at: '2026-10-20 10:00:00', username: 'Crafty', seasons: [] as number[] }
@@ -123,4 +124,40 @@ test('already in Audiobookshelf: Searching ends there, and the log is complete',
   ])
   assert.deepEqual(steps.map((s) => s.name), ['Requested', 'Searching', 'Already in Audiobookshelf, so nothing to download', 'In Audiobookshelf'])
   assert.equal(total, 2 * 60)
+})
+
+test('stats: totals and the average speed over finished downloads', () => {
+  const s = stats([
+    ev('downloaded', '10:25:00', { downloadId: 'a', seconds: 100, size: 1e9, seeds: 40, peers: 3 }),
+    ev('downloaded', '10:45:00', { downloadId: 'b', seconds: 100, size: 3e9, seeds: 9, peers: 12 }),
+  ])
+  assert.deepEqual([s.downloads, s.bytes, s.bps, s.seeds, s.peers], [2, 4e9, 2e7, 40, 12])
+  assert.equal(stats([]).bps, undefined)
+})
+
+test('titleInfo: facts, links and the backdrop, skipping what is missing', () => {
+  const movie = titleInfo('movie', {
+    overview: 'x', genres: ['Sci-Fi'], runtime: 155, studio: 'Legendary', inCinemas: '2021-10-22T00:00:00Z', imdbId: 'tt1160419', tmdbId: 438631,
+    ratings: { imdb: { value: 8.0 }, rottenTomatoes: { value: 83 } }, images: [{ coverType: 'fanart', remoteUrl: 'http://f' }],
+  })
+  assert.deepEqual(movie.facts, [['Rating', 'IMDb 8.0 · Rotten Tomatoes 83%'], ['Genres', 'Sci-Fi'], ['Runtime', '2h 35m'], ['Studio', 'Legendary'], ['In cinemas', '2021-10-22']])
+  assert.deepEqual(movie.links.map((l) => l.label), ['IMDb', 'TMDB'])
+  assert.equal(movie.backdrop, 'http://f')
+  assert.deepEqual(titleInfo('tv', { network: 'HBO', ratings: { value: 9.1 }, tvdbId: 1 }).facts, [['Rating', '9.1 / 10'], ['Network', 'HBO']])
+})
+
+test('cast: Radarr credits without the crew, Sonarr actors, at most 12; a book from OpenLibrary', () => {
+  const credits = [
+    { personName: 'Timothée Chalamet', character: 'Paul', type: 'cast', images: [{ coverType: 'headshot', remoteUrl: 'http://p' }] },
+    { personName: 'Denis Villeneuve', type: 'crew' },
+    ...Array.from({ length: 20 }, (_, i) => ({ personName: `A${i}`, type: 'cast' })),
+  ]
+  const movie = titleInfo('movie', {}, credits)
+  assert.equal(movie.cast.length, 12)
+  assert.deepEqual(movie.cast[0], { name: 'Timothée Chalamet', character: 'Paul', photo: 'http://p' })
+  assert.deepEqual(titleInfo('tv', { actors: [{ name: 'Pedro Pascal', character: 'Joel' }] }).cast, [{ name: 'Pedro Pascal', character: 'Joel', photo: undefined }])
+  const book = bookInfo('OL1W', { description: { value: 'A desert planet.' }, subjects: ['Sci-Fi'], first_publish_date: '1965' }, 'Frank Herbert', 4.4, 'Full Cast')
+  assert.equal(book.overview, 'A desert planet.')
+  assert.deepEqual(book.facts.map((f) => f[0]), ['Author', 'Edition', 'First published', 'Rating', 'Subjects'])
+  assert.equal(book.links[0].href, 'https://openlibrary.org/works/OL1W')
 })
