@@ -27,6 +27,8 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 
 **Releases:** `refs/heads/main` always runs the newest build. To run a fixed, tested version instead, set the stack's **Repository reference** to a release tag, e.g. `refs/tags/v1.0.0`. A release's stack file names its own Arrmy image (`arrmy:1.0.0`), so nothing else needs changing. Releases are listed at <https://github.com/Craftyplayz/Arrmy/releases>.
 
+**Releasing from your PC:** with `PORTAINER_URL` (e.g. `http://192.168.16.3:9000`) and `PORTAINER_TOKEN` (Portainer → My account → Access tokens) in `.env`, `bash scripts/release.sh` releases what is on `main` as the next release candidate and redeploys the stack. Give it a version (`bash scripts/release.sh 1.1.0`) to choose one, or to resume a release that was interrupted. The page footer shows which version is running.
+
 **Backups:** the `backup` container saves every app's settings to `BACKUP_DIR` when it starts and nightly at 04:00 (UTC), keeping `BACKUP_KEEP_DAYS` days. To restore:
 
 1. Stop the stack in Portainer.
