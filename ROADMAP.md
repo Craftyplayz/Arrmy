@@ -162,6 +162,33 @@ Both change the rule that a Request is the smallest useful unit (one book), so t
   - How: LazyLibrarian adds the author with their books (`addAuthorID`), then Arrmy wants each one. For new releases the author is set to Active. LazyLibrarian's "New AudioBook Status" setting applies to every Active author, so Arrmy may need to want new books itself instead.
   - To decide: a cap, because prolific authors list 100+ works on OpenLibrary, including translations and collections. How to skip collections and duplicates. Whether Requesters can do this, or only the Admin.
 
+### Resolution preference
+
+Chosen 2026-10-21. A Request (or a person's default) names a preferred resolution, and Arrmy walks down a ladder until a release is acceptable: 4K, then 1440p, then 1080p, then 720p.
+
+- Each rung gets a full search first (Arrmy's own movie search already lists every release and why it was turned down). Only when nothing acceptable exists at that resolution does it drop to the next, and the Request Log says which rung it is on.
+- Landing on 720p does not download by itself: it becomes a Problem, so the Admin can approve that copy or find a better one by hand. Whether Arrmy keeps watching the higher rungs afterwards (and upgrades if one turns up) is still to decide.
+- A resolution blocklist sits next to it: resolutions or release groups never to grab, per Request or globally.
+- To decide: whether the ladder is per Request or a per-person default; how it maps onto Radarr and Sonarr quality profiles; TV, which waits on the season pack question above.
+
+### Requester features
+
+From the Seerr and Requestarr comparison, 2026-10-21. In this order:
+
+1. **Per-user approval, quotas and permissions.** Auto-approve stays the default. A per-person "Approve first" switch, and a quota such as N movies a week, protect the disk and the VPN.
+2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB.
+3. **Library scan.** Anything Plex already has shows Available without a Request (audiobooks already do this).
+4. **Plex Watchlist auto-request.** Whatever a person adds to their Plex watchlist is requested for them.
+5. **Per-user notifications.** A Discord DM or email when your Request is Available, with an opt-out.
+6. **Title blocklist.** Titles nobody can request.
+7. **4K as its own Request, and several Radarr and Sonarr instances** (extends anime routing under Other planned).
+
+To decide: **issue reporting** ("this episode has no audio"). Requester reports are under Not planned; issue reporting is a different thing, so it stays out until that is settled.
+
+### Phone app
+
+Chosen 2026-10-21. An installable app for Requesters and the Admin: first as a PWA of the existing site (home-screen icon, full screen, push notifications for Available and Problems), a native app only if the PWA falls short. Needs the Requester features above for push to be worth having.
+
 ### Other planned
 
 - **More Media Types.** Music (Lidarr → Plex); Books and Periodicals (LazyLibrarian → Kavita); Comics (Kapowarr → Kavita); Manga (Mangarr → Kavita).
