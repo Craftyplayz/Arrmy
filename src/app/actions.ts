@@ -5,14 +5,16 @@ import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, retryRelease, type Media } from '@/lib/arr'
 import { cleanEdition, editionId, editionOf } from '@/lib/bookrules'
-import { addAudiobook, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
+import { addAudiobook, audiobookTorrents, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
 import { addEdition, removeEdition } from '@/lib/editions'
 import {
+  addLog,
   addRequest,
   deleteRequest,
   getLimits,
   getRequest,
   hasRequest,
+  logItem,
   otherRequests,
   requestsFor,
   seasonsOf,
@@ -26,6 +28,7 @@ import { embed } from '@/lib/embeds'
 import { applyLimits, showLimitProblem } from '@/lib/limits'
 import { tellRequest } from '@/lib/notify'
 import { createPin } from '@/lib/plex'
+import { logEpisodeSearch, logRetry, searchMovie } from '@/lib/requestlog'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
 
@@ -36,6 +39,9 @@ const positiveInt = (value: FormDataEntryValue | null) => {
 }
 
 const union = (...lists: number[][]) => [...new Set(lists.flat())].sort((a, b) => a - b)
+
+/** The Request Log is a record, not part of the job: failing to write it never stops the action. */
+const logged = (what: Promise<unknown>) => what.catch((e) => console.warn(`[log] ${(e as Error).message}`))
 
 /** One-click fix for a Problem on the Admin page. */
 export async function fixProblem(form: FormData) {
@@ -48,6 +54,12 @@ export async function fixProblem(form: FormData) {
     // An audiobook's dead release (see dead.ts): drop it, and search again once LazyLibrarian has marked it Failed.
     const hash = String(form.get('hash'))
     if (!/^[a-f0-9]{40}$/.test(hash)) throw new Error(`Bad torrent hash: ${hash}`)
+    await logged(
+      audiobookTorrents().then((books) => {
+        const book = books.get(hash)
+        if (book) addLog(logItem('audiobook', book), 'dead', { downloadId: hash, reason: 'Try another release', by: user.username })
+      }),
+    )
     await dropAudiobookRelease(hash)
     setSearchPending(hash, true)
     fixed('Try another release')
@@ -56,11 +68,16 @@ export async function fixProblem(form: FormData) {
   if (service !== 'radarr' && service !== 'sonarr') throw new Error(`Unknown service: ${service}`)
   const ids = form.getAll('id').map(positiveInt)
   if (form.get('fix') === 'retry') {
+    await logged(logRetry(service, ids, user.username)) // before the release leaves the queue
     await retryRelease(service, ids)
     fixed('Try another release')
   } else if (form.get('fix') === 'search') {
-    const command = service === 'radarr' ? { name: 'MoviesSearch', movieIds: ids } : { name: 'EpisodeSearch', episodeIds: ids }
-    await arr(service, '/command', 'POST', command)
+    // Movies: Arrmy's own search, in the background (it waits on every indexer), logging every release.
+    if (service === 'radarr') for (const id of ids) logged(searchMovie(id, { text: 'Search again', by: user.username }))
+    else {
+      await logged(logEpisodeSearch(ids, user.username))
+      await arr(service, '/command', 'POST', { name: 'EpisodeSearch', episodeIds: ids })
+    }
     fixed('Search again')
   } else throw new Error(`Unknown fix: ${form.get('fix')}`)
   revalidatePath('/admin')
@@ -111,12 +128,13 @@ export async function signOut() {
 export async function requestMovie(form: FormData) {
   const user = await requireUser()
   const tmdbId = positiveInt(form.get('id'))
-  const movie = await addMovie(tmdbId)
+  const { movie, search } = await addMovie(tmdbId)
   if (!hasRequest(user.id, 'movie', tmdbId)) {
     addRequest({ userId: user.id, type: 'movie', externalId: tmdbId, title: movie.title, year: movie.year, poster: posterOf(movie) })
     const item = { media_type: 'movie' as const, external_id: tmdbId, title: movie.title, year: movie.year ?? null, poster: posterOf(movie) ?? null }
     tellRequest(item, 'info', `Requested by **${user.username}**.`)
   }
+  if (search) logged(searchMovie(search)) // in the background: it waits on every indexer
   revalidatePath('/')
 }
 
@@ -200,7 +218,10 @@ export async function editSeasons(form: FormData) {
   }
   setSeasons(request.id, after, added.length > 0)
   const what = [added.length && `added ${seasonLabel(added)}`, removed.length && `removed ${seasonLabel(removed)}`].filter(Boolean).join(' and ')
-  if (what) tellRequest(request, 'info', `${by(user, request)} ${what}.`, [['Seasons', after.join(', ')]])
+  if (what) {
+    tellRequest(request, 'info', `${by(user, request)} ${what}.`, [['Seasons', after.join(', ')]])
+    addLog(logItem('tv', request.external_id), 'note', { text: what[0].toUpperCase() + what.slice(1), by: user.username, request: request.id })
+  }
   revalidatePath('/requests')
 }
 

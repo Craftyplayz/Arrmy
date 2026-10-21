@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { existsSync } from 'node:fs'
+import { editionOf } from '@/lib/bookrules'
 import { getRequest, logFor, logItem, seasonsOf } from '@/lib/db'
-import { buildSteps, logText, took, type Grabbed } from '@/lib/logrules'
+import { buildSteps, logText, releaseText, took, type Grabbed } from '@/lib/logrules'
 import { torrentFile } from '@/lib/requestlog'
 import { requireUser } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
@@ -25,7 +26,8 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
   const title = `${request.title}${request.year ? ` (${request.year})` : ''}${request.seasons ? ` · ${seasonLabel(seasonsOf(request))}` : ''}`
 
   const events = logFor(logItem(request.media_type, request.external_id))
-  const { steps, total } = buildSteps({ created_at: request.created_at, username: request.username, seasons: seasonsOf(request) }, events)
+  const app = request.media_type === 'audiobook' ? 'Audiobookshelf' : 'Plex'
+  const { steps, total } = buildSteps({ id: request.id, created_at: request.created_at, username: request.username, seasons: seasonsOf(request), app }, events)
   const running = steps.some((s) => s.end === undefined)
   // .torrent copies, Admin only: one per grab whose file was saved.
   const torrents = admin ? events.filter((e) => e.kind === 'grabbed').map((e) => (JSON.parse(e.detail) as Grabbed).downloadId).filter((h) => existsSync(torrentFile(h))) : []
@@ -41,10 +43,10 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
         </div>
       </Hero>
       {running && <AutoRefresh seconds={15} />}
-      {request.media_type === 'audiobook' && <p className="muted">Audiobooks only show when they were requested for now; their steps come in a later version.</p>}
+      {editionOf(request.external_id) && <p className="muted">Editions Arrmy finds itself only show when they were requested for now.</p>}
       {events.length === 0 && request.status === 'available' && <p className="muted">This finished before Arrmy kept Request Logs, so only the Request is here.</p>}
       <div className="rows">
-        {(request.media_type === 'audiobook' || (events.length === 0 && request.status === 'available') ? steps.slice(0, 1) : steps).map((s, i) => (
+        {(editionOf(request.external_id) || (events.length === 0 && request.status === 'available') ? steps.slice(0, 1) : steps).map((s, i) => (
           <div className="rowi" key={i}>
             <div className="grow">
               <b>{s.name}</b> {s.end === undefined ? <Elapsed since={s.start} /> : took(s) && <span className="badge">{took(s)}</span>}
@@ -56,6 +58,16 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
                     {l.text}
                   </span>
                 ))}
+              {admin && s.releases && (
+                <details>
+                  <summary className="ar-sub">Every release ({s.releases.length})</summary>
+                  {s.releases.map((r, j) => (
+                    <small className={`ar-sub ar-name${r.rejections.length ? ' muted' : ''}`} key={j} title={r.rejections.join('\n')}>
+                      {releaseText(r)}
+                    </small>
+                  ))}
+                </details>
+              )}
             </div>
           </div>
         ))}

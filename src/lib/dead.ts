@@ -56,6 +56,7 @@ async function targets(categories: Set<string>) {
       app: 'LazyLibrarian',
       art: request?.poster ?? coverUrl(undefined, book),
       book,
+      log: { item: logItem('audiobook', book) },
       swap: () => dropAudiobookRelease(hash),
     })
   }

@@ -3,8 +3,9 @@ import { metaFor, unfinished } from './admin'
 import { arr, queueOf } from './arr'
 import { editionOf, type LLBook } from './bookrules'
 import { ll } from './books'
-import { requestsFor, waitingOfType } from './db'
+import { logFor, logItem, requestsFor, waitingOfType } from './db'
 import { editionStatuses } from './editions'
+import { utc, whyNothing, type Searched } from './logrules'
 import { byDownload, day, movieStuck, seasonStuck, torrentStuck, type MissingEpisode, type MissingMovie, type Stuck } from './problems'
 import { qbit } from './qbit'
 
@@ -23,6 +24,20 @@ const time = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: 
 // Most urgent first; anything else goes last.
 const ORDER = ['Stalled', 'Fetching file list', 'Error', 'Nothing found', 'Searching', 'Queued', 'Paused', 'Not released yet']
 const rank = (s: Stuck) => (ORDER.includes(s.reason) ? ORDER.indexOf(s.reason) : ORDER.length)
+
+/**
+ * A wanted movie, with Arrmy's own last search (see searchMovie): Radarr doesn't count it as a search, and it says why
+ * nothing was grabbed.
+ */
+function movieWithSearch(m: MissingMovie, now: number) {
+  const last = m.tmdbId ? logFor(logItem('movie', m.tmdbId)).findLast((e) => e.kind === 'searched') : undefined
+  if (!last) return movieStuck(m, now)
+  const ours = new Date(utc(last.at)).toISOString()
+  const stuck = movieStuck({ ...m, lastSearchTime: !m.lastSearchTime || ours > m.lastSearchTime ? ours : m.lastSearchTime }, now)
+  const search = JSON.parse(last.detail) as Searched
+  if (stuck.reason === 'Nothing found' && !search.error && !search.picked) stuck.detail += `. ${whyNothing(search.releases)}`
+  return stuck
+}
 
 // shortcut: reads the wanted lists, queues and LazyLibrarian's whole library each time; fine for a family server.
 export async function stuckRequests() {
@@ -78,7 +93,7 @@ export async function stuckRequests() {
   const settling = (queue: unknown[], category: string) => !queue.length && list.some((t) => t.category === category)
   const downloadingMovies = new Set(movieQueue.map((q) => q.movieId))
   for (const m of settling(movieQueue, 'movies') ? [] : movies.records.filter((m) => !downloadingMovies.has(m.id)))
-    items.push({ ...movieStuck(m, now), by: m.tmdbId ? requestsFor('movie', m.tmdbId).map((r) => r.username) : [] })
+    items.push({ ...movieWithSearch(m, now), by: m.tmdbId ? requestsFor('movie', m.tmdbId).map((r) => r.username) : [] })
   const downloadingEpisodes = new Set(tvQueue.map((q) => q.episodeId))
   const seasons = new Map<string, MissingEpisode[]>()
   for (const e of settling(tvQueue, 'tv') ? [] : episodes.records.filter((e) => !downloadingEpisodes.has(e.id))) {

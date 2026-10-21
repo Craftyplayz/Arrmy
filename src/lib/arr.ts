@@ -238,25 +238,24 @@ export async function removeSeasons(tvdbId: number, seasons: number[]) {
   await deleteTorrents(torrents)
 }
 
-export async function addMovie(tmdbId: number): Promise<Media> {
+/** Adds the movie, or monitors it again. `search`: Radarr's id of a movie that now needs searching (see searchMovie). */
+export async function addMovie(tmdbId: number): Promise<{ movie: Media; search?: number }> {
   const existing = await libraryMovie(tmdbId)
   if (existing) {
-    if (!existing.monitored) {
-      await arr('radarr', `/movie/${existing.id}`, 'PUT', { ...existing, monitored: true })
-      await arr('radarr', '/command', 'POST', { name: 'MoviesSearch', movieIds: [existing.id] })
-    }
-    return existing
+    if (existing.monitored) return { movie: existing }
+    await arr('radarr', `/movie/${existing.id}`, 'PUT', { ...existing, monitored: true })
+    return { movie: existing, search: existing.id }
   }
   const movie = await arr<LookupMovie>('radarr', `/movie/lookup/tmdb?tmdbId=${tmdbId}`)
-  await arr('radarr', '/movie', 'POST', {
+  const added = await arr<{ id: number }>('radarr', '/movie', 'POST', {
     ...movie,
     qualityProfileId: await qualityProfile('radarr'),
     rootFolderPath: MOVIES_ROOT,
     monitored: true,
     minimumAvailability: 'released',
-    addOptions: { searchForMovie: true },
+    addOptions: { searchForMovie: false }, // Arrmy searches, so the Request Log sees every release
   })
-  return movie
+  return { movie, search: added.id }
 }
 
 /** Adds the show if new, otherwise also monitors the extra seasons, then searches. */
