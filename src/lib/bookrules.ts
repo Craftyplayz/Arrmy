@@ -1,4 +1,5 @@
 // Audiobook rules. No I/O here, so they can be unit-tested.
+import { duration } from './botrules.ts'
 import type { Status } from './status'
 
 /**
@@ -126,15 +127,59 @@ const FULL_CAST = / (full cast|dramati[sz]ed|dramati[sz]ation) /
  * and of the edition. "Full Cast" also matches Dramatised. Packs of a whole series fail on purpose: they lack the title.
  * shortcut: a title inside a longer one matches too ("Dune" in "Dune Messiah"); check the year or author if that bites.
  */
-export function isEdition(release: string, title: string, edition: string) {
+export function isEdition(release: string, title: string | string[], edition: string) {
   const name = padded(release)
   const has = (w: string) => name.includes(` ${w} `)
-  const titleWords = words(title)
-    .split(' ')
-    .filter((w) => w.length > 1 && !['and', 'the', 'of', 'an'].includes(w))
-  if (!titleWords.every(has)) return false
+  if (!matchesTitle(name, title)) return false
   const e = padded(edition)
   return FULL_CAST.test(e) ? FULL_CAST.test(name) : e.trim().split(' ').every(has)
+}
+
+const SKIP = ['and', 'the', 'of', 'an']
+const titleWords = (title: string) => words(title).split(' ').filter((w) => w.length > 1 && !SKIP.includes(w))
+/** The text (already padded) has every word of at least one of the titles. */
+const matchesTitle = (padded: string, title: string | string[]) =>
+  [title].flat().some((t) => titleWords(t).every((w) => padded.includes(` ${w} `)))
+
+// Books retitled between countries: the narrator's release may use the other name. Add pairs as they turn up.
+const RETITLED: [string, string][] = [
+  ["philosopher's stone", "sorcerer's stone"],
+  ['northern lights', 'the golden compass'],
+]
+
+/** The title and its regional retitles ("Philosopher's Stone" is "Sorcerer's Stone" in the US, which Jim Dale reads). */
+export function titleVariants(title: string) {
+  const plain = title.replace(/[’‘]/g, "'")
+  const out = new Set([title])
+  for (const [a, b] of RETITLED) {
+    if (plain.toLowerCase().includes(a)) out.add(plain.replace(new RegExp(a, 'i'), b))
+    if (plain.toLowerCase().includes(b)) out.add(plain.replace(new RegExp(b, 'i'), a))
+  }
+  return [...out]
+}
+
+/** A series name taken from a book's title: what comes before "and the", a colon, a dash or a bracket. */
+export const seriesOf = (title: string) => title.split(/:| and the | - |\(/i)[0].trim()
+
+const PACK = /\b\d+\s*-\s*\d+\b|\b(complete|collection|series|saga|box ?set|books)\b/i
+/** A release of the whole series by this narrator (name has the series' words, the edition and a sign of several books). */
+export function isPack(release: string, title: string, edition: string) {
+  const name = padded(release)
+  const e = padded(edition)
+  const narrated = FULL_CAST.test(e) ? FULL_CAST.test(name) : e.trim().split(' ').every((w) => name.includes(` ${w} `))
+  return PACK.test(release) && narrated && matchesTitle(name, seriesOf(title))
+}
+
+/** The files of a pack that belong to this book: their path (folders included) has every word of one of its titles. */
+export const packFiles = <T extends { name: string }>(files: T[], titles: string[]) => files.filter((f) => matchesTitle(padded(f.name), titles))
+
+/** The folder all of these paths share ('' when they don't share one), with its trailing slash. */
+export function commonDir(names: string[]) {
+  const dirs = names.map((n) => n.split('/').slice(0, -1))
+  const first = dirs[0] ?? []
+  let n = 0
+  while (n < first.length && dirs.every((d) => d[n] === first[n])) n++
+  return first.slice(0, n).map((d) => d + '/').join('')
 }
 
 /** A search result from Prowlarr. */
@@ -145,6 +190,34 @@ export const bestEdition = (releases: Release[], title: string, edition: string)
   releases
     .filter((r) => r.protocol === 'torrent' && r.size >= 50e6 && (r.seeders ?? 0) > 0 && (r.magnetUrl || r.downloadUrl) && isEdition(r.title, title, edition))
     .sort((a, b) => (b.seeders ?? 0) - (a.seeders ?? 0))[0]
+
+/**
+ * What to try for an edition, best first: a seeded release of the book itself, then a seeded series pack by the narrator
+ * (only the book's files are downloaded), and only if neither exists, a release of the book nobody is seeding.
+ */
+export type Candidate = { release: Release; kind: 'single' | 'pack' | 'seedless' }
+export function editionCandidates(releases: Release[], titles: string[], edition: string): Candidate[] {
+  const ok = releases.filter((r) => r.protocol === 'torrent' && r.size >= 50e6 && (r.magnetUrl || r.downloadUrl))
+  const seeders = (r: Release) => r.seeders ?? 0
+  const bySeeders = (a: Release, b: Release) => seeders(b) - seeders(a)
+  const single = ok.filter((r) => isEdition(r.title, titles, edition))
+  return [
+    ...single.filter((r) => seeders(r) > 0).sort(bySeeders).map((release) => ({ release, kind: 'single' as const })),
+    ...ok.filter((r) => seeders(r) > 0 && !single.includes(r) && isPack(r.title, titles[0], edition)).sort(bySeeders).map((release) => ({ release, kind: 'pack' as const })),
+    ...single.filter((r) => seeders(r) === 0).sort((a, b) => b.size - a.size).map((release) => ({ release, kind: 'seedless' as const })),
+  ]
+}
+
+/** What the last search for an edition found, kept so the Request Log and Stuck can say why nothing is downloading. */
+export type EditionSearch = { at: number; found: number; singles: number; seeded: number; packs: number; grabbed?: string }
+export function searchText(s: EditionSearch, edition: string, now = Date.now()) {
+  const ago = duration(Math.max(0, now - s.at) / 1000)
+  const parts = [`${s.found} releases found`]
+  if (s.singles) parts.push(`${s.singles} of this book with ${edition}${s.seeded ? '' : ', none with seeders'}`)
+  else parts.push(`none of this book with ${edition}`)
+  if (s.packs) parts.push(`${s.packs} series pack${s.packs === 1 ? '' : 's'} with seeders`)
+  return `Searched ${ago} ago: ${parts.join('; ')}.${s.grabbed ? ` ${s.grabbed}` : ''}`
+}
 
 /** Books whose Request was removed, by BookID, with when (ms). Kept for a day: see unwantAgain. */
 export type Removed = Record<string, number>

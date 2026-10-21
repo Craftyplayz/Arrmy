@@ -4,7 +4,7 @@ import { arr, queueOf } from './arr'
 import { editionOf, type LLBook } from './bookrules'
 import { ll } from './books'
 import { logFor, logItem, requestsFor, waitingOfType } from './db'
-import { editionStatuses } from './editions'
+import { editionSearch, editionStatuses } from './editions'
 import { utc, whyNothing, type Searched } from './logrules'
 import { byDownload, day, movieStuck, seasonStuck, torrentStuck, type MissingEpisode, type MissingMovie, type Stuck } from './problems'
 import { qbit } from './qbit'
@@ -129,7 +129,7 @@ export async function stuckRequests() {
     const requests = requestsFor('audiobook', id)
     items.push({
       reason: 'Nothing found',
-      detail: `No release of this edition found yet, searched every 6 hours. Requested ${day(`${requests[0].created_at.replace(' ', 'T')}Z`, now)}`,
+      detail: `${editionSearch(id) ?? 'No release of this edition found yet'} Searched every 6 hours. Requested ${day(`${requests[0].created_at.replace(' ', 'T')}Z`, now)}`,
       service: 'lazylibrarian',
       title: requests[0].title,
       ids: [],

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { audiobookStatus, bestEdition, cleanEdition, coverUrl, editionId, isbn10, editionOf, fromOpenLibrary, isEdition, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
+import { audiobookStatus, bestEdition, cleanEdition, coverUrl, editionId, isbn10, editionOf, fromOpenLibrary, isEdition, titleVariants, seriesOf, isPack, editionCandidates, packFiles, commonDir, searchText, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
 
 const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary', AuthorName: 'Andy Weir', ...over })
 
@@ -115,4 +115,39 @@ test('isbn10: the 978- ISBN-13 as an ISBN-10, with its check digit', () => {
   assert.equal(isbn10('9780545790352'), '0545790352')
   assert.equal(isbn10('9780306406157'), '0306406152')
   assert.equal(isbn10('9791234567896'), undefined, '979- has no ISBN-10')
+})
+
+test('Edition search: retitled books, packs by the narrator, the order to try, and why nothing was found', () => {
+  const titles = titleVariants("Harry Potter and the Philosopher's Stone")
+  assert.deepEqual(titles, ["Harry Potter and the Philosopher's Stone", "Harry Potter and the sorcerer's stone"])
+  assert.ok(isEdition("Harry Potter and The Sorcerer\'s Stone Audiobook by Jim Dale", titles, 'Jim Dale'), 'the US title with the same narrator')
+  assert.ok(!isEdition("Harry Potter and The Sorcerer's Stone Audiobook by Stephen Fry", titles, 'Jim Dale'), 'not another narrator')
+  assert.equal(seriesOf("Harry Potter and the Philosopher's Stone"), 'Harry Potter')
+  assert.ok(isPack('Harry Potter Audio Books 1-7; Read by Jim Dale [MP3]', titles[0], 'Jim Dale'))
+  assert.ok(!isPack('Harry Potter Audio Books 1-7; Read by Stephen Fry', titles[0], 'Jim Dale'), 'another narrator')
+  assert.ok(!isPack('Twilight Complete Collection Jim Dale', titles[0], 'Jim Dale'), 'another series')
+
+  const r = (title: string, seeders: number, size = 1e9) => ({ title, seeders, size, protocol: 'torrent', downloadUrl: 'x' })
+  const releases = [
+    r("Harry Potter And The Philosopher's Stone Audiobook Jim Dale", 0, 119e6),
+    r('Harry Potter Audio Books 1-7; Read by Jim Dale [MP3]', 28),
+    r('Complete Harry Potter Audiobook by Jim Dale [MP3]', 19),
+    r("Harry Potter and The Sorcerer's Stone Audiobook by Jim Dale", 5),
+  ]
+  assert.deepEqual(editionCandidates(releases, titles, 'Jim Dale').map((c) => [c.kind, c.release.seeders]), [['single', 5], ['pack', 28], ['pack', 19], ['seedless', 0]])
+  assert.deepEqual(editionCandidates(releases.slice(0, 3), titles, 'Jim Dale').map((c) => c.kind), ['pack', 'pack', 'seedless'])
+
+  const files = [
+    { name: "Harry Potter Audio Books 1-7/1 Sorcerer's Stone/01.mp3" },
+    { name: "Harry Potter Audio Books 1-7/1 Sorcerer's Stone/02.mp3" },
+    { name: 'Harry Potter Audio Books 1-7/2 Chamber of Secrets/01.mp3' },
+  ]
+  assert.equal(packFiles(files, titles).length, 2)
+  assert.equal(commonDir(packFiles(files, titles).map((f) => f.name)), "Harry Potter Audio Books 1-7/1 Sorcerer's Stone/")
+  assert.equal(commonDir(['a.mp3', 'b.mp3']), '')
+  const now = Date.now()
+  assert.equal(
+    searchText({ at: now - 7_200_000, found: 17, singles: 2, seeded: 0, packs: 0 }, 'Jim Dale', now),
+    'Searched 2 h ago: 17 releases found; 2 of this book with Jim Dale, none with seeders.',
+  )
 })

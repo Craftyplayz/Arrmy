@@ -6,6 +6,7 @@ import { Fragment } from 'react'
 import { lookupTitle, requestDetails } from '@/lib/arr'
 import { editionOf } from '@/lib/bookrules'
 import { betterPoster } from '@/lib/books'
+import { editionSearch } from '@/lib/editions'
 import { getRequest, logFor, logItem, seasonsOf, type RequestRow } from '@/lib/db'
 import { buildSteps, logText, releaseText, stats, took, utc, type Grabbed } from '@/lib/logrules'
 import { torrentFile } from '@/lib/requestlog'
@@ -137,7 +138,7 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
   function logBody(request: RequestRow) {
     return (
       <>
-      {editionOf(request.external_id) && <p className="muted">Editions Arrmy finds itself only show when they were requested for now.</p>}
+      {editionOf(request.external_id) && <p className="muted">{editionSearch(String(request.external_id)) ?? 'Arrmy has not searched for this edition yet.'}</p>}
       {events.length === 0 && request.status === 'available' && <p className="muted">This finished before Arrmy kept Request Logs, so only the Request is here.</p>}
       <div className="rows">
         {(editionOf(request.external_id) || (events.length === 0 && request.status === 'available') ? steps.slice(0, 1) : steps).map((s, i) => (

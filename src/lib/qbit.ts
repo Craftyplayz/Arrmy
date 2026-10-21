@@ -40,7 +40,7 @@ export async function liveProgress(): Promise<Map<string, { size: number; sizele
 }
 
 /** A file in a torrent, with progress from 0 to 1. `name` includes the torrent's folder. */
-export type TorrentFile = { name: string; size: number; progress: number }
+export type TorrentFile = { name: string; size: number; progress: number; priority?: number }
 export const torrentFiles = async (hash: string): Promise<TorrentFile[]> =>
   (await qbit(`/torrents/files?hash=${hash.toLowerCase()}`)).json()
 
