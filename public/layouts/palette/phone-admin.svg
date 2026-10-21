@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<style>.t{fill:#ededf0;font-size:15px;font-weight:500}.s{fill:#8b8b97;font-size:12px}.h{fill:#8b8b97;font-size:11px;font-weight:600}.c{font-size:11px;font-weight:500;text-anchor:middle}.r{fill:#8b8b97;font-size:12px;text-anchor:end}.m{fill:#c9c0ff;font-size:12px;font-weight:600;font-family:ui-monospace,Consolas,monospace}.on{fill:#2a2650;stroke:#5a4fb8}.kb{fill:#22222b;stroke:#33333d}.ka{fill:#8b8b97;font-size:11px;text-anchor:middle}.tb{fill:#8b8b97;font-size:11px;text-anchor:middle}.i{fill:none;stroke:#8b8b97;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.ia{fill:none;stroke:#c9c0ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.bg{fill:#2a2a33}.bf{fill:#9d8cff}</style>
+<defs><radialGradient id="glow" cx=".5" cy=".25" r=".55"><stop offset="0" stop-color="#8c78ff" stop-opacity=".3"/><stop offset="1" stop-color="#8c78ff" stop-opacity="0"/></radialGradient></defs>
+<rect width="390" height="844" fill="#0a0a0e"/>
+<rect width="390" height="844" fill="url(#glow)"/>
+<g fill="#ededf0"><text x="24" y="33" font-size="15" font-weight="600">9:41</text><rect x="318" y="27" width="3" height="6" rx="1"/><rect x="323" y="25" width="3" height="8" rx="1"/><rect x="328" y="23" width="3" height="10" rx="1"/><rect x="333" y="21" width="3" height="12" rx="1"/><rect x="343" y="22" width="22" height="11" rx="3" fill="none" stroke="#ededf0"/><rect x="345" y="24" width="15" height="7" rx="1.5"/></g>
+<rect x="0" y="56" width="390" height="820" rx="24" fill="#141419" stroke="#26262e"/>
+<rect x="175" y="64" width="40" height="4" rx="2" fill="#3a3a45"/>
+<rect x="16" y="78" width="76" height="24" rx="6" class="on"/><text x="26" y="94" class="m">&gt; admin</text>
+<text x="370" y="95" fill="#ff9b9b" font-size="12" text-anchor="end">2 need fixing</text>
+<text x="20" y="118" class="h">Needs fixing</text>
+<rect x="10" y="126" width="370" height="84" rx="10" fill="#22222b"/>
+<rect x="18" y="134" width="28" height="28" rx="7" fill="#3f1d1d"/><text x="32" y="153" fill="#ff7b7b" font-size="15" font-weight="700" text-anchor="middle">!</text>
+<text x="56" y="145" class="t">Past Lives</text><text x="56" y="161" class="s">No release found in 4 days · 6 searches</text>
+<rect x="320" y="138" width="20" height="20" rx="4" fill="#2e2e38" stroke="#3d3d48"/><text x="330" y="152" class="ka">↵</text><text x="346" y="153" class="s">Fix</text>
+<rect x="56" y="178" width="104" height="24" rx="6" class="bf"/><text x="108" y="194" fill="#0b0b12" font-weight="600" class="c">↵ Search again</text>
+<rect x="168" y="178" width="70" height="24" rx="6" fill="#3f1d1d" stroke="#8a3a3a"/><text x="203" y="194" fill="#ff9b9b" class="c">Remove</text>
+<rect x="18" y="228" width="28" height="28" rx="7" fill="#3f1d1d"/><text x="32" y="247" fill="#ff7b7b" font-size="15" font-weight="700" text-anchor="middle">!</text>
+<text x="56" y="239" class="t">Shōgun S01E09</text><text x="56" y="255" class="s">Import failed: file already exists</text>
+<rect x="320" y="232" width="20" height="20" rx="4" class="kb"/><text x="330" y="246" class="ka">↵</text><text x="346" y="247" class="s">Fix</text>
+<text x="20" y="288" class="h">Downloading</text>
+<path d="M32 302v10M27 307l5 5 5-5M24 316h16" class="i"/><text x="56" y="315" class="t">Severance S02</text><text x="56" y="330" class="s">12.4 MB/s · 41 min left · 48 seeds</text><text x="370" y="320" class="r">62%</text>
+<rect x="56" y="336" width="314" height="3" rx="1.5" class="bg"/><rect x="56" y="336" width="195" height="3" rx="1.5" class="bf"/>
+<path d="M32 350v10M27 355l5 5 5-5M24 364h16" class="i"/><text x="56" y="363" class="t">Slow Horses S04E03</text><text x="56" y="378" class="s">3.1 MB/s · 2 h 10 min left · 7 seeds</text><text x="370" y="368" class="r">44%</text>
+<rect x="56" y="384" width="314" height="3" rx="1.5" class="bg"/><rect x="56" y="384" width="138" height="3" rx="1.5" class="bf"/>
+<path d="M32 398v10M27 403l5 5 5-5M24 412h16" class="i"/><text x="56" y="411" class="t">Project Hail Mary (Ray Porter)</text><text x="56" y="426" class="s">0.4 MB/s · 18 min left · 2 seeds</text><text x="370" y="416" class="r">18%</text>
+<rect x="56" y="432" width="314" height="3" rx="1.5" class="bg"/><rect x="56" y="432" width="57" height="3" rx="1.5" class="bf"/>
+<text x="20" y="460" class="h">Disks</text>
+<path d="M24 478h16v5H24zM24 487h16v5H24z" class="i"/><text x="56" y="490" class="t">Movies</text>
+<rect x="150" y="483" width="140" height="5" rx="2.5" class="bg"/><rect x="150" y="483" width="112" height="5" rx="2.5" class="bf"/><text x="370" y="490" class="r">3.2 / 4.0 TB</text>
+<path d="M24 518h16v5H24zM24 527h16v5H24z" class="i"/><text x="56" y="530" class="t">TV</text>
+<rect x="150" y="523" width="140" height="5" rx="2.5" class="bg"/><rect x="150" y="523" width="101" height="5" rx="2.5" class="bf"/><text x="370" y="530" class="r">5.8 / 8.0 TB</text>
+<path d="M24 558h16v5H24zM24 567h16v5H24z" class="i"/><text x="56" y="570" class="t">Audiobooks</text>
+<rect x="150" y="563" width="140" height="5" rx="2.5" class="bg"/><rect x="150" y="563" width="17" height="5" rx="2.5" class="bf"/><text x="370" y="570" class="r">0.12 / 1.0 TB</text>
+<text x="20" y="608" class="h">Services</text>
+<circle cx="26" cy="624" r="4" fill="#7ee29a"/><text x="40" y="628" class="t" font-size="13">Radarr</text><text x="100" y="628" class="s">5.14.0</text>
+<circle cx="206" cy="624" r="4" fill="#7ee29a"/><text x="220" y="628" class="t" font-size="13">qBittorrent</text><text x="302" y="628" class="s">5.0.3</text>
+<circle cx="26" cy="652" r="4" fill="#7ee29a"/><text x="40" y="656" class="t" font-size="13">Sonarr</text><text x="100" y="656" class="s">4.0.11</text>
+<circle cx="206" cy="652" r="4" fill="#ff7b7b"/><text x="220" y="656" class="t" font-size="13">LazyLibrarian</text><text x="316" y="656" fill="#ff9b9b" font-size="12">down</text>
+<circle cx="26" cy="680" r="4" fill="#7ee29a"/><text x="40" y="684" class="t" font-size="13">Prowlarr</text><text x="100" y="684" class="s">1.28.2</text>
+<circle cx="206" cy="680" r="4" fill="#7ee29a"/><text x="220" y="684" class="t" font-size="13">Plex</text><text x="260" y="684" class="s">1.41.3</text>
+<rect x="12" y="722" width="366" height="44" rx="12" fill="#1c1c23" stroke="#2a2a33"/>
+<path d="M27 737a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM36 755l-4.5-4.5" class="i"/>
+<rect x="46" y="732" width="72" height="24" rx="6" class="on"/><text x="55" y="748" class="m">&gt; admin</text>
+<text x="128" y="749" class="s" font-size="15">Filter…</text>
+<rect x="0" y="776" width="390" height="68" fill="#0e0e13"/><path d="M0 776h390" stroke="#26262e"/>
+<circle cx="46" cy="800" r="6" class="i"/><path d="M50.5 804.5l4 4" class="i"/><text x="48" y="830" class="tb">Home</text>
+<path d="M138 795h16M138 801h16M138 807h10" class="i"/><text x="146" y="830" class="tb">Requests</text>
+<path d="M244 793l7 2.5v5c0 4.5-3.5 7-7 8.5-3.5-1.5-7-4-7-8.5v-5z" class="ia"/><text x="244" y="830" fill="#c9c0ff" class="tb">Admin</text>
+<circle cx="342" cy="801" r="6" class="i"/><circle cx="342" cy="801" r="2" class="i"/><text x="342" y="830" class="tb">Settings</text>
+</svg>

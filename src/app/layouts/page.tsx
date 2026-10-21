@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/session'
 import './layouts.css'
@@ -25,7 +26,24 @@ const LAYOUTS: [id: string, name: string, how: string, mock: React.ReactNode][] 
   ['sidebar', 'B. Sidebar dashboard', 'A fixed menu down the left, search across the top, and the Requests as a table with counts above it. Fast to scan, feels like the *arr apps.', <Sidebar key="b" />],
   ['search', 'C. Search first', 'One big search box and nothing else until you type. Results come as a plain list with a Request button on each. Requests live on their own page.', <SearchFirst key="c" />],
   ['board', 'D. Board', 'Every Request is a card that moves across columns as it goes from Requested to Available. You see where everything is stuck at a glance.', <Board key="d" />],
-  ['phone', 'E. Phone app', 'Built for phones first: tabs along the bottom, big tap targets, one column of cards. On a computer it stays a narrow centred column.', <Phone key="e" />],
+  ['phone', 'E. Tiles', 'Big rounded tiles of different sizes, like a console dashboard or a smart-TV app. Everything is a tile: search, Requests, counts, settings. The small preview below is its phone form.', <Phone key="e" />],
+]
+
+/** Where each full mockup lives: /layouts/<folder>, one folder per style with all four tabs and phone pictures. */
+const FULL: Record<string, string> = { streaming: 'streaming', sidebar: 'sidebar', search: 'search', board: 'board', phone: 'tiles' }
+
+/** Ten more styles, full mockups only (no small preview). */
+const MORE: [folder: string, name: string, how: string][] = [
+  ['chat', 'F. Chat feed', 'Discord or Slack. Home is a timeline: "Sam requested Severance", "Dune is now Available". You request by typing into the message box. Admin is an alerts channel.'],
+  ['terminal', 'G. Terminal', 'Monospace, keyboard-driven, one dense grid for everything. "/" to search, letters for actions, ASCII progress bars. For people who love the *arr CLI feel.'],
+  ['calendar', 'H. Calendar', 'A month grid of when things were requested, arrived, or release. Requests are an agenda by day. Admin shows a "this week" strip.'],
+  ['magazine', 'I. Magazine', 'Editorial: serif headlines, a front-page lead story, columns of text, posters as illustrations. Reads like a film magazine.'],
+  ['wizard', 'J. One thing at a time', 'A guided flow with one big question per screen: what do you want, which seasons, done. Very simple for family.'],
+  ['mobile', 'K. Phone app everywhere', 'A phone-width column with a bottom tab bar on every screen size, centred on a blurred backdrop. One layout for everything.'],
+  ['split', 'L. Split pane', 'List on the left, big detail panel on the right, like Mail. Click a Request to see its log, files and actions without leaving the page.'],
+  ['shelf', 'M. Shelf', 'Covers standing on wooden shelves, a cover-flow row at the top, status tags on the covers. Audiobook-first feel. Admin is the "back room".'],
+  ['pipeline', 'N. Pipeline', 'A Request → Indexer → Download → Import → Plex diagram with each title as a chip on its stage. Admin is the same diagram with Services as nodes.'],
+  ['palette', 'O. Command palette', 'An almost empty screen with a ⌘K palette: type to search, request, jump to a tab or fix a problem. A thin status bar at the bottom.'],
 ]
 
 export default async function LayoutsPage() {
@@ -34,17 +52,29 @@ export default async function LayoutsPage() {
   return (
     <>
       <h1 className="page-title">Layouts</h1>
-      <p className="page-lede">Five ways Arrmy could look. They are pictures only: nothing on them works. Pick one and say what to change.</p>
+      <p className="page-lede">Five ways Arrmy could look. Each has a full mockup with every tab (Home, Requests, Admin, Settings) and phone pictures. Nothing on them works. Pick one and say what to change.</p>
       <nav className="mk-jump" aria-label="Layouts">
         {LAYOUTS.map(([id, name]) => <a key={id} href={`#${id}`}>{name}</a>)}
+        <a href="#more">F–O. Ten more</a>
       </nav>
       {LAYOUTS.map(([id, name, how, mock]) => (
         <section key={id} id={id} className="mk-section">
           <h2>{name}</h2>
           <p className="mk-how">{how}</p>
+          <p className="mk-open"><Link href={`/layouts/${FULL[id]}`} className="btn primary small">Open the full {name.slice(3)} mockup</Link></p>
           <div className="mk-frame" aria-hidden="true" inert>{mock}</div>
         </section>
       ))}
+      <h2 className="mk-more-title" id="more">Ten more</h2>
+      <div className="mk-more">
+        {MORE.map(([folder, name, how]) => (
+          <section key={folder} className="card mk-more-card">
+            <h3>{name}</h3>
+            <p className="mk-how">{how}</p>
+            <Link href={`/layouts/${folder}`} className="btn primary small">Open the full {name.slice(3)} mockup</Link>
+          </section>
+        ))}
+      </div>
     </>
   )
 }

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<style>.t{fill:#ededf0;font-size:15px;font-weight:500}.s{fill:#8b8b97;font-size:12px}.h{fill:#8b8b97;font-size:11px;font-weight:600}.k{fill:#e9e9ee;font-size:17px;text-anchor:middle}.kb{fill:#22222b;stroke:#33333d}.ka{fill:#8b8b97;font-size:11px;text-anchor:middle}.i{fill:none;stroke:#8b8b97;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}</style>
+<defs>
+<radialGradient id="glow" cx=".5" cy=".25" r=".55"><stop offset="0" stop-color="#8c78ff" stop-opacity=".3"/><stop offset="1" stop-color="#8c78ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="g14" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a69c30"/><stop offset="1" stop-color="#2a4319"/></linearGradient>
+<linearGradient id="g15" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#7f30a6"/><stop offset="1" stop-color="#431935"/></linearGradient>
+<linearGradient id="g16" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#3044a6"/><stop offset="1" stop-color="#2e1943"/></linearGradient>
+<linearGradient id="g13" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#30a692"/><stop offset="1" stop-color="#192e43"/></linearGradient>
+<linearGradient id="g1" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="g4" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#3057a6"/><stop offset="1" stop-color="#271943"/></linearGradient>
+<symbol id="key"><rect width="32" height="42" rx="5" fill="#3b3b45"/></symbol>
+</defs>
+<rect width="390" height="844" fill="#0a0a0e"/>
+<rect width="390" height="844" fill="url(#glow)"/>
+<g fill="#ededf0"><text x="24" y="33" font-size="15" font-weight="600">9:41</text><rect x="318" y="27" width="3" height="6" rx="1"/><rect x="323" y="25" width="3" height="8" rx="1"/><rect x="328" y="23" width="3" height="10" rx="1"/><rect x="333" y="21" width="3" height="12" rx="1"/><rect x="343" y="22" width="22" height="11" rx="3" fill="none" stroke="#ededf0"/><rect x="345" y="24" width="15" height="7" rx="1.5"/></g>
+<rect x="0" y="56" width="390" height="820" rx="24" fill="#141419" stroke="#26262e"/>
+<rect x="175" y="64" width="40" height="4" rx="2" fill="#3a3a45"/>
+<text x="20" y="96" class="h">Titles</text>
+<rect x="10" y="104" width="370" height="44" rx="10" fill="#22222b"/>
+<rect x="20" y="111" width="20" height="30" rx="3" fill="url(#g14)"/><text x="52" y="123" class="t">Fallout</text><text x="52" y="139" class="s">2024 · TV Show</text>
+<rect x="292" y="116" width="20" height="20" rx="4" fill="#2e2e38" stroke="#3d3d48"/><text x="302" y="130" class="ka">↵</text><text x="318" y="131" class="s">Request</text>
+<rect x="20" y="157" width="20" height="30" rx="3" fill="url(#g15)"/><text x="52" y="169" class="t">Poor Things</text><text x="52" y="185" class="s">2023 · Movie</text>
+<rect x="292" y="162" width="20" height="20" rx="4" class="kb"/><text x="302" y="176" class="ka">↵</text><text x="318" y="177" class="s">Request</text>
+<rect x="20" y="203" width="20" height="30" rx="3" fill="url(#g16)"/><text x="52" y="215" class="t">Blue Eye Samurai</text><text x="52" y="231" class="s">2023 · TV Show</text>
+<rect x="292" y="208" width="20" height="20" rx="4" class="kb"/><text x="302" y="222" class="ka">↵</text><text x="318" y="223" class="s">Request</text>
+<rect x="20" y="249" width="20" height="30" rx="3" fill="url(#g13)"/><text x="52" y="261" class="t">Children of Time</text><text x="52" y="277" class="s">2015 · Audiobook</text>
+<rect x="292" y="254" width="20" height="20" rx="4" class="kb"/><text x="302" y="268" class="ka">↵</text><text x="318" y="269" class="s">Request</text>
+<text x="20" y="308" class="h">Recent</text>
+<rect x="20" y="323" width="20" height="30" rx="3" fill="url(#g1)"/><text x="52" y="335" class="t">Dune: Part Two</text><text x="52" y="351" class="s">2024 · Movie</text>
+<path d="M286 333l9 6-9 6z" fill="#8b8b97"/><text x="302" y="343" class="s">Open in Plex</text>
+<rect x="20" y="369" width="20" height="30" rx="3" fill="url(#g4)"/><text x="52" y="381" class="t">Arrival</text><text x="52" y="397" class="s">2016 · Movie</text>
+<path d="M286 379l9 6-9 6z" fill="#8b8b97"/><text x="302" y="389" class="s">Open in Plex</text>
+<text x="20" y="428" class="h">Commands</text>
+<path d="M22 452h16M22 458h16M22 464h10" class="i"/><text x="52" y="463" class="t">Show my Requests</text>
+<rect x="340" y="448" width="30" height="20" rx="4" class="kb"/><text x="355" y="462" class="ka">⌘2</text>
+<path d="M30 492l7 2.5v5c0 4.5-3.5 7-7 8.5-3.5-1.5-7-4-7-8.5v-5z" class="i"/><text x="52" y="505" class="t">Open Admin</text>
+<rect x="340" y="490" width="30" height="20" rx="4" class="kb"/><text x="355" y="504" class="ka">⌘3</text>
+<text x="20" y="552" class="s">↑↓ Move · ↵ Request · esc Close</text>
+<rect x="12" y="572" width="366" height="46" rx="12" fill="#1c1c23" stroke="#5a4fb8"/>
+<path d="M27 587a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM36 605l-4.5-4.5" class="i"/>
+<text x="50" y="601" fill="#ededf0" font-size="17">the</text><rect x="80" y="585" width="2" height="20" fill="#9d8cff"/>
+<circle cx="356" cy="595" r="9" fill="#33333d"/><text x="356" y="599" fill="#ededf0" font-size="11" text-anchor="middle">×</text>
+<rect x="0" y="636" width="390" height="208" fill="#1b1b21"/>
+<g class="k">
+<use href="#key" x="8" y="644"/><text x="24" y="672">Q</text><use href="#key" x="46" y="644"/><text x="62" y="672">W</text><use href="#key" x="84" y="644"/><text x="100" y="672">E</text><use href="#key" x="122" y="644"/><text x="138" y="672">R</text><use href="#key" x="160" y="644"/><text x="176" y="672">T</text><use href="#key" x="198" y="644"/><text x="214" y="672">Y</text><use href="#key" x="236" y="644"/><text x="252" y="672">U</text><use href="#key" x="274" y="644"/><text x="290" y="672">I</text><use href="#key" x="312" y="644"/><text x="328" y="672">O</text><use href="#key" x="350" y="644"/><text x="366" y="672">P</text>
+<use href="#key" x="27" y="696"/><text x="43" y="724">A</text><use href="#key" x="65" y="696"/><text x="81" y="724">S</text><use href="#key" x="103" y="696"/><text x="119" y="724">D</text><use href="#key" x="141" y="696"/><text x="157" y="724">F</text><use href="#key" x="179" y="696"/><text x="195" y="724">G</text><use href="#key" x="217" y="696"/><text x="233" y="724">H</text><use href="#key" x="255" y="696"/><text x="271" y="724">J</text><use href="#key" x="293" y="696"/><text x="309" y="724">K</text><use href="#key" x="331" y="696"/><text x="347" y="724">L</text>
+<rect x="8" y="748" width="44" height="42" rx="5" fill="#2a2a32"/><text x="30" y="776">⇧</text>
+<use href="#key" x="58" y="748"/><text x="74" y="776">Z</text><use href="#key" x="96" y="748"/><text x="112" y="776">X</text><use href="#key" x="134" y="748"/><text x="150" y="776">C</text><use href="#key" x="172" y="748"/><text x="188" y="776">V</text><use href="#key" x="210" y="748"/><text x="226" y="776">B</text><use href="#key" x="248" y="748"/><text x="264" y="776">N</text><use href="#key" x="286" y="748"/><text x="302" y="776">M</text>
+<rect x="338" y="748" width="44" height="42" rx="5" fill="#2a2a32"/><text x="360" y="776">⌫</text>
+<rect x="8" y="800" width="86" height="42" rx="5" fill="#2a2a32"/><text x="51" y="827" font-size="15">123</text>
+<rect x="100" y="800" width="180" height="42" rx="5" fill="#3b3b45"/><text x="190" y="827" font-size="15">space</text>
+<rect x="286" y="800" width="96" height="42" rx="5" fill="#5a4fb8"/><text x="334" y="827" font-size="15">return</text>
+</g>
+</svg>

@@ -1,0 +1,194 @@
+/* Magazine mockup: a cream editorial page with a serif display face. Every rule is scoped to .l-magazine so
+   nothing leaks into the real site or the other mockups. */
+.l-magazine {
+  --bg: #f6f1e7;
+  --card: #fbf8f1;
+  --card2: #efe8d9;
+  --sunken: #ebe3d2;
+  --line: #d8cfbc;
+  --line-strong: #1d1a15;
+  --text: #1d1a15;
+  --muted: #6b6356;
+  --accent: #8b1e1e;
+  --accent-soft: #f2dbd5;
+  --btn: #1d1a15;
+  --btn-line: #1d1a15;
+  --btn-hover: #3a342b;
+  --btn2: #efe8d9;
+  --link: #1d1a15;
+  --highlight: #b8860b;
+  --danger-bg: #f6e0dc;
+  --danger-line: #a01c1c;
+  --info-bg: #dfe8f3;
+  --info-line: #1f4e8c;
+  --ok-bg: #dfeadf;
+  --ok-line: #1f6b35;
+  --gold-bg: #f3e8cf;
+  --gold-line: #8a5a00;
+  --radius: 2px;
+  --radius-lg: 2px;
+  --serif: Georgia, "Times New Roman", serif;
+  /* status colours, all at least 4.5:1 on the cream */
+  --st-available: #1f6b35;
+  --st-downloading: #1f4e8c;
+  --st-importing: #8a5a00;
+  --st-requested: #6b6356;
+  --st-stuck: #a01c1c;
+  width: 100vw; max-width: none; margin: -16px 0 0 calc(50% - 50vw); padding: 0 0 48px;
+  background: var(--bg); color: var(--text); color-scheme: light; font-family: var(--font); font-size: 15px;
+}
+.l-magazine a { color: var(--link); text-decoration: none; }
+.l-magazine a:hover { text-decoration: underline; }
+.l-magazine :focus-visible { outline-color: var(--accent); }
+
+/* ---------- masthead ---------- */
+.l-magazine .lm-masthead { max-width: 1180px; margin: 0 auto; padding: 12px 24px 0; text-align: center; }
+.l-magazine .lm-ears { display: flex; justify-content: space-between; gap: 16px; margin: 0; padding-bottom: 6px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.l-magazine .lm-wordmark { display: block; padding: 20px 0 6px; color: var(--text); font: 400 clamp(56px, 8vw, 96px)/1 var(--serif); letter-spacing: .02em; }
+.l-magazine .lm-wordmark:hover { text-decoration: none; }
+.l-magazine .lm-tagline { margin: 0 0 12px; color: var(--muted); font: italic 15px/1.3 var(--serif); }
+.l-magazine .lm-nav { display: flex; justify-content: center; border-top: 1px solid var(--text); border-bottom: 3px double var(--text); }
+.l-magazine .lm-tab { padding: 10px 24px; color: var(--text); font-size: 14px; font-variant-caps: all-small-caps; font-weight: 600; letter-spacing: .16em; }
+.l-magazine .lm-tab:hover { color: var(--accent); text-decoration: none; }
+.l-magazine .lm-tab.is-active { color: var(--accent); box-shadow: inset 0 -3px var(--accent); }
+.l-magazine .l-note { margin: 8px 0 0; color: var(--muted); font: italic 12px/1.3 var(--serif); }
+
+.l-magazine .lm-body { max-width: 1180px; margin: 0 auto; padding: 28px 24px 0; }
+.l-magazine .lm-title { margin: 0 0 4px; font: 400 42px/1.05 var(--serif); }
+.l-magazine .lm-lede { margin: 0 0 24px; color: var(--muted); font: italic 17px/1.4 var(--serif); }
+
+/* section headers: small caps with a rule running out to the right */
+.l-magazine .lm-kicker { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; font: 600 14px/1 var(--font); font-variant-caps: all-small-caps; letter-spacing: .16em; }
+.l-magazine .lm-kicker::after { content: ''; flex: 1; border-top: 1px solid var(--text); }
+.l-magazine .lm-kicker .n { color: var(--muted); font-weight: 400; }
+
+.l-magazine .lm-poster { display: block; width: 100%; aspect-ratio: 2 / 3; border: 1px solid rgb(0 0 0 / .18); }
+.l-magazine figure { margin: 0; }
+.l-magazine figcaption { margin-top: 6px; color: var(--muted); font: italic 12px/1.4 var(--serif); }
+.l-magazine .lm-byline { margin: 0 0 10px; color: var(--muted); font-size: 13px; letter-spacing: .02em; }
+
+/* outlined editorial button; .primary fills it */
+.l-magazine .lm-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; background: transparent; border: 1px solid var(--btn-line); border-radius: var(--radius); color: var(--text); font: 600 13px/1.2 var(--font); font-variant-caps: all-small-caps; letter-spacing: .14em; cursor: pointer; }
+.l-magazine .lm-btn:hover { background: var(--btn); color: var(--bg); text-decoration: none; }
+.l-magazine .lm-btn.small { padding: 4px 11px; font-size: 12px; }
+.l-magazine .lm-btn.primary { background: var(--btn); color: var(--bg); }
+.l-magazine .lm-btn.primary:hover { background: var(--btn-hover); }
+.l-magazine .lm-field { width: 100%; min-width: 0; padding: 9px 12px; background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--radius); color: var(--text); font: 16px/1.3 var(--serif); }
+.l-magazine select.lm-field { font-family: var(--font); font-size: 15px; }
+
+/* ---------- status ---------- */
+.l-magazine .lm-status { margin: 0; font: italic 15px/1.3 var(--serif); }
+.l-magazine .st-available { color: var(--st-available); }
+.l-magazine .st-downloading { color: var(--st-downloading); }
+.l-magazine .st-importing { color: var(--st-importing); }
+.l-magazine .st-requested { color: var(--st-requested); }
+.l-magazine .st-stuck { color: var(--st-stuck); }
+/* a thin progress rule; the fill takes the status colour from the class */
+.l-magazine .lm-rule { height: 2px; margin-top: 6px; background: var(--line); }
+.l-magazine .lm-rule i { display: block; height: 100%; background: currentColor; }
+
+/* ---------- home: the front page ---------- */
+.l-magazine .lm-front { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 0 36px; }
+.l-magazine .lm-side { padding-left: 28px; border-left: 1px solid var(--line); }
+.l-magazine .lm-lead { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 28px; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--text); }
+.l-magazine .lm-lead h1 { margin: 0 0 10px; font: 400 clamp(36px, 4.5vw, 56px)/1.05 var(--serif); letter-spacing: -.01em; }
+.l-magazine .lm-standfirst { margin: 0 0 12px; font: 400 20px/1.4 var(--serif); }
+.l-magazine .lm-cols { margin-bottom: 18px; columns: 2; column-gap: 28px; column-rule: 1px solid var(--line); font-size: 14.5px; line-height: 1.55; }
+.l-magazine .lm-cols p { margin: 0 0 10px; }
+.l-magazine .lm-cols p:first-child::first-letter { float: left; margin: 5px 8px 0 0; font: 400 54px/.8 var(--serif); }
+.l-magazine .lm-pull { margin: 6px 0 12px; padding: 10px 0; border-top: 1px solid var(--text); border-bottom: 1px solid var(--text); color: var(--accent); font: italic 19px/1.3 var(--serif); break-inside: avoid; }
+
+.l-magazine .lm-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; }
+.l-magazine .lm-story { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.l-magazine .lm-story h3 { margin: 0 0 4px; font: 400 21px/1.15 var(--serif); }
+.l-magazine .lm-story p { margin: 0 0 6px; font-size: 13.5px; line-height: 1.5; }
+.l-magazine .lm-story small { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+
+.l-magazine .lm-archive { margin-top: 28px; padding: 18px 22px 16px; border: 3px double var(--text); }
+.l-magazine .lm-archive h2 { margin: 0 0 10px; font: 400 26px/1.1 var(--serif); }
+.l-magazine .lm-archive form { display: flex; gap: 8px; }
+.l-magazine .lm-types { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.l-magazine .lm-types a { margin-left: 14px; padding-bottom: 1px; border-bottom: 1px solid var(--line-strong); color: var(--text); font-variant-caps: all-small-caps; font-weight: 600; letter-spacing: .12em; }
+
+.l-magazine .lm-numbered { margin: 0 0 28px; padding: 0; list-style: none; counter-reset: n; }
+.l-magazine .lm-numbered li { display: grid; grid-template-columns: 26px 40px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); counter-increment: n; }
+.l-magazine .lm-numbered li::before { content: counter(n); color: var(--muted); font: 400 26px/1 var(--serif); }
+.l-magazine .lm-numbered b { display: block; font: 400 16px/1.2 var(--serif); }
+.l-magazine .lm-numbered small { color: var(--muted); font-size: 12px; }
+.l-magazine .lm-numbered .lm-status { font-size: 13px; }
+
+/* ---------- requests: listings ---------- */
+.l-magazine .lm-section { margin-bottom: 28px; }
+.l-magazine .lm-listings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 36px; }
+.l-magazine .lm-listing { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.l-magazine .lm-listing h3 { margin: 0 0 2px; font: 400 22px/1.15 var(--serif); }
+.l-magazine .lm-listing h3 small { color: var(--muted); font-size: 15px; }
+.l-magazine .lm-listing .lm-byline { margin-bottom: 4px; }
+
+/* ---------- admin: editor's desk ---------- */
+.l-magazine .lm-counts { display: flex; margin: 0 0 28px; border-top: 1px solid var(--text); border-bottom: 1px solid var(--text); }
+.l-magazine .lm-counts div { flex: 1; padding: 12px 16px; border-left: 1px solid var(--line); text-align: center; }
+.l-magazine .lm-counts div:first-child { border-left: 0; }
+.l-magazine .lm-counts b { display: block; font: 400 36px/1 var(--serif); }
+.l-magazine .lm-counts span { color: var(--muted); font-size: 13px; font-variant-caps: all-small-caps; letter-spacing: .14em; }
+.l-magazine .lm-desk { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0 36px; }
+.l-magazine .lm-box { margin-bottom: 28px; padding: 16px 18px 6px; border: 3px double var(--accent); }
+.l-magazine .lm-box .lm-kicker { color: var(--accent); }
+.l-magazine .lm-box .lm-kicker::after { border-color: var(--accent); }
+.l-magazine .lm-problem { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.l-magazine .lm-problem:first-of-type { border-top: 0; }
+.l-magazine .lm-problem div { flex: 1; min-width: 0; }
+.l-magazine .lm-problem b { display: block; font: 400 18px/1.2 var(--serif); }
+.l-magazine .lm-problem span { color: var(--muted); font-size: 13px; }
+.l-magazine .lm-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.l-magazine .lm-table th { padding: 6px 8px; border-bottom: 1px solid var(--text); font: 600 13px/1 var(--font); font-variant-caps: all-small-caps; letter-spacing: .14em; text-align: left; }
+.l-magazine .lm-table td { padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.l-magazine .lm-table td:first-child { font: 400 17px/1.2 var(--serif); }
+.l-magazine .lm-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.l-magazine .lm-table .lm-rule { width: 140px; margin-top: 0; }
+.l-magazine .lm-table .lm-rule + small { color: var(--muted); font-size: 12px; }
+.l-magazine .lm-disk { padding: 8px 0 12px; border-bottom: 1px solid var(--line); }
+.l-magazine .lm-disk b { display: flex; justify-content: space-between; font: 400 17px/1.3 var(--serif); }
+.l-magazine .lm-disk b small { color: var(--muted); font: 13px/1.3 var(--font); }
+.l-magazine .lm-disk .lm-rule { height: 8px; background: var(--card2); border: 1px solid var(--line); }
+.l-magazine .lm-disk .lm-rule i { background: var(--text); }
+.l-magazine .lm-disk .lm-rule.low i { background: var(--st-stuck); }
+.l-magazine .lm-people { margin: 0 0 28px; padding: 0; list-style: none; }
+.l-magazine .lm-people li { display: flex; align-items: baseline; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line); font: 400 17px/1.3 var(--serif); }
+.l-magazine .lm-people li small { color: var(--muted); font: italic 13px/1 var(--serif); }
+.l-magazine .lm-people li span { margin-left: auto; font-variant-numeric: tabular-nums; }
+.l-magazine .lm-wire { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; padding: 14px 0; border-top: 1px solid var(--text); border-bottom: 3px double var(--text); font-size: 14px; }
+.l-magazine .lm-wire b { font-variant-caps: all-small-caps; letter-spacing: .14em; }
+.l-magazine .lm-wire small { color: var(--muted); font-size: 12px; }
+.l-magazine .lm-dot { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; background: var(--st-available); }
+.l-magazine .lm-dot.off { background: var(--st-stuck); }
+
+/* ---------- settings: masthead & policies ---------- */
+.l-magazine .lm-policies { max-width: 880px; }
+.l-magazine .lm-policy { padding: 20px 0 26px; border-top: 1px solid var(--text); }
+.l-magazine .lm-policy h2 { margin: 0 0 4px; font: 400 28px/1.1 var(--serif); }
+.l-magazine .lm-policy > p { margin: 0 0 16px; color: var(--muted); font: italic 14px/1.4 var(--serif); }
+.l-magazine .lm-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; }
+.l-magazine .lm-fields label { display: grid; align-content: start; gap: 5px; font-size: 13px; font-variant-caps: all-small-caps; font-weight: 600; letter-spacing: .14em; }
+.l-magazine .lm-fields .lm-field { font-family: var(--font); font-size: 15px; font-variant-caps: normal; font-weight: 400; letter-spacing: 0; }
+.l-magazine .lm-fields small { color: var(--muted); font: italic 12.5px/1.4 var(--serif); letter-spacing: 0; }
+.l-magazine .lm-fields .lm-check { display: flex; align-items: center; gap: 8px; min-height: 38px; font: 15px/1.3 var(--font); font-variant-caps: normal; letter-spacing: 0; }
+.l-magazine .lm-check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+.l-magazine .lm-save { display: flex; align-items: center; gap: 14px; padding-top: 20px; border-top: 3px double var(--text); }
+.l-magazine .lm-save small { color: var(--muted); font: italic 13px/1.3 var(--serif); }
+
+/* ---------- phone pictures ---------- */
+.l-magazine .lm-phones { display: flex; gap: 24px; padding-bottom: 12px; overflow-x: auto; }
+.l-magazine .lm-phones figure { flex: none; text-align: center; }
+.l-magazine .lm-phones img { display: block; width: 300px; height: auto; border: 1px solid var(--line-strong); }
+
+@media (max-width: 860px) {
+  .l-magazine .lm-front, .l-magazine .lm-desk, .l-magazine .lm-listings, .l-magazine .lm-three, .l-magazine .lm-fields { grid-template-columns: minmax(0, 1fr); }
+  .l-magazine .lm-side { margin-top: 28px; padding-left: 0; border-left: 0; }
+  .l-magazine .lm-lead { grid-template-columns: 160px minmax(0, 1fr); }
+  .l-magazine .lm-cols { columns: 1; }
+  .l-magazine .lm-nav { overflow-x: auto; justify-content: flex-start; }
+}
+
+/* 100vw counts the scrollbar on Windows, so the full-bleed wrapper overshoots by half a scrollbar each side: clip it rather than scroll */
+body:has(.l-magazine) { overflow-x: clip; }

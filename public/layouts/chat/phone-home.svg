@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<defs>
+<linearGradient id="sev" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="dune" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="fall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a69c30"/><stop offset="1" stop-color="#2b4319"/></linearGradient>
+<linearGradient id="poor" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7f30a6"/><stop offset="1" stop-color="#431935"/></linearGradient>
+<linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3044a6"/><stop offset="1" stop-color="#2e1943"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#313338"/>
+<text x="30" y="34" fill="#fff" font-size="15" font-weight="600">9:41</text>
+<g fill="#fff"><rect x="316" y="30" width="3" height="5" rx="1"/><rect x="321" y="28" width="3" height="7" rx="1"/><rect x="326" y="26" width="3" height="9" rx="1"/><rect x="331" y="24" width="3" height="11" rx="1"/></g>
+<rect x="340" y="24" width="24" height="12" rx="3" fill="none" stroke="#fff" stroke-width="1.5"/><rect x="342.5" y="26.5" width="17" height="7" rx="1.5" fill="#fff"/><rect x="365" y="27.5" width="2" height="5" rx="1" fill="#fff"/>
+<rect y="50" width="390" height="48" fill="#2b2d31"/>
+<path d="M20 66h20M20 74h20M20 82h20" stroke="#dbdee1" stroke-width="2" stroke-linecap="round"/>
+<text x="56" y="81" fill="#80848e" font-size="22">#</text>
+<text x="74" y="80" fill="#f2f3f5" font-size="17" font-weight="600">home</text>
+<circle cx="328" cy="72" r="7" fill="none" stroke="#b5bac1" stroke-width="2"/><path d="M333 77l5 5" stroke="#b5bac1" stroke-width="2" stroke-linecap="round"/>
+<circle cx="362" cy="68" r="4.5" fill="none" stroke="#b5bac1" stroke-width="2"/><path d="M353 83c0-6 18-6 18 0" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round"/>
+<rect y="98" width="390" height="1" fill="#1e1f22"/>
+
+<rect x="16" y="113" width="150" height="1" fill="#3f4147"/><text x="195" y="117" text-anchor="middle" fill="#949ba4" font-size="11" font-weight="600">TODAY</text><rect x="224" y="113" width="150" height="1" fill="#3f4147"/>
+
+<circle cx="34" cy="148" r="18" fill="#39ac60"/><text x="34" y="154" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">S</text>
+<text x="64" y="144" fill="#f2f3f5" font-size="15" font-weight="600">Sam <tspan fill="#949ba4" font-size="11" font-weight="400">Today at 09:15</tspan></text>
+<text x="64" y="164" fill="#dbdee1" font-size="14">Requested <tspan fill="#f2f3f5" font-weight="600">Severance</tspan> (Seasons 1, 2)</text>
+<rect x="64" y="174" width="310" height="92" rx="4" fill="#2b2d31"/><rect x="64" y="174" width="4" height="92" rx="2" fill="#38b6ff"/>
+<rect x="78" y="184" width="44" height="66" rx="3" fill="url(#sev)"/>
+<text x="132" y="198" fill="#00a8fc" font-size="14" font-weight="600">Severance</text>
+<text x="132" y="214" fill="#949ba4" font-size="12">2022 · TV Show · Seasons 1, 2</text>
+<rect x="132" y="222" width="96" height="20" rx="10" fill="#1f2f3f" stroke="#2a5a80"/><circle cx="143" cy="232" r="3.5" fill="#38b6ff"/><text x="150" y="236" fill="#38b6ff" font-size="11" font-weight="600">Downloading</text>
+<rect x="132" y="251" width="196" height="6" rx="3" fill="#1e1f22"/><rect x="132" y="251" width="122" height="6" rx="3" fill="#38b6ff"/><text x="336" y="257" fill="#949ba4" font-size="11">62%</text>
+
+<circle cx="34" cy="300" r="18" fill="#5865f2"/><text x="34" y="306" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">A</text>
+<text x="64" y="296" fill="#f2f3f5" font-size="15" font-weight="600">Arrmy</text><rect x="112" y="285" width="28" height="14" rx="3" fill="#5865f2"/><text x="126" y="296" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">BOT</text><text x="146" y="296" fill="#949ba4" font-size="11">Today at 12:03</text>
+<text x="64" y="316" fill="#dbdee1" font-size="14"><tspan fill="#f2f3f5" font-weight="600">Dune: Part Two</tspan> is now Available on Plex.</text>
+<rect x="64" y="326" width="310" height="120" rx="4" fill="#2b2d31"/><rect x="64" y="326" width="4" height="120" rx="2" fill="#2dc770"/>
+<rect x="78" y="336" width="44" height="66" rx="3" fill="url(#dune)"/>
+<text x="132" y="350" fill="#00a8fc" font-size="14" font-weight="600">Dune: Part Two</text>
+<text x="132" y="366" fill="#949ba4" font-size="12">2024 · Movie · 2h 46m · 24.1 GB</text>
+<rect x="132" y="374" width="82" height="20" rx="10" fill="#1f3527" stroke="#2d6b3c"/><circle cx="143" cy="384" r="3.5" fill="#2dc770"/><text x="150" y="388" fill="#2dc770" font-size="11" font-weight="600">Available</text>
+<rect x="78" y="408" width="104" height="28" rx="3" fill="#23a559"/><text x="130" y="426" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Open in Plex</text>
+
+<circle cx="34" cy="474" r="18" fill="#3986ac"/><text x="34" y="480" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">C</text>
+<text x="64" y="470" fill="#f2f3f5" font-size="15" font-weight="600">Crafty <tspan fill="#949ba4" font-size="11" font-weight="400">Today at 14:20</tspan></text>
+<text x="64" y="490" fill="#dbdee1" font-size="14">the</text>
+
+<circle cx="34" cy="524" r="18" fill="#5865f2"/><text x="34" y="530" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">A</text>
+<text x="64" y="520" fill="#f2f3f5" font-size="15" font-weight="600">Arrmy</text><rect x="112" y="509" width="28" height="14" rx="3" fill="#5865f2"/><text x="126" y="520" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">BOT</text><text x="146" y="520" fill="#949ba4" font-size="11">Today at 14:20</text>
+<text x="64" y="540" fill="#dbdee1" font-size="14">6 titles match <tspan fill="#f2f3f5" font-weight="600">the</tspan>. Press Request:</text>
+
+<rect x="64" y="550" width="310" height="40" rx="4" fill="#2b2d31"/><rect x="64" y="550" width="4" height="40" rx="2" fill="#5865f2"/>
+<rect x="76" y="554" width="22" height="32" rx="2" fill="url(#fall)"/>
+<text x="106" y="567" fill="#f2f3f5" font-size="13" font-weight="600">Fallout</text><text x="106" y="581" fill="#949ba4" font-size="11">2024 · TV Show · 1 season</text>
+<rect x="302" y="558" width="64" height="24" rx="3" fill="#5865f2"/><text x="334" y="574" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Request</text>
+
+<rect x="64" y="594" width="310" height="40" rx="4" fill="#2b2d31"/><rect x="64" y="594" width="4" height="40" rx="2" fill="#5865f2"/>
+<rect x="76" y="598" width="22" height="32" rx="2" fill="url(#poor)"/>
+<text x="106" y="611" fill="#f2f3f5" font-size="13" font-weight="600">Poor Things</text><text x="106" y="625" fill="#949ba4" font-size="11">2023 · Movie · 2h 21m</text>
+<rect x="302" y="602" width="64" height="24" rx="3" fill="#5865f2"/><text x="334" y="618" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Request</text>
+
+<rect x="64" y="638" width="310" height="40" rx="4" fill="#2b2d31"/><rect x="64" y="638" width="4" height="40" rx="2" fill="#5865f2"/>
+<rect x="76" y="642" width="22" height="32" rx="2" fill="url(#blue)"/>
+<text x="106" y="655" fill="#f2f3f5" font-size="13" font-weight="600">Blue Eye Samurai</text><text x="106" y="669" fill="#949ba4" font-size="11">2023 · TV Show · 1 season</text>
+<rect x="302" y="646" width="64" height="24" rx="3" fill="#5865f2"/><text x="334" y="662" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Request</text>
+
+<circle cx="32" cy="724" r="16" fill="#383a40"/><path d="M26 724h12M32 718v12" stroke="#b5bac1" stroke-width="2" stroke-linecap="round"/>
+<rect x="56" y="704" width="318" height="40" rx="20" fill="#383a40"/>
+<text x="72" y="729" fill="#dbdee1" font-size="14">the</text><rect x="96" y="716" width="1.5" height="16" fill="#dbdee1"/>
+
+<rect y="764" width="390" height="80" fill="#1e1f22"/>
+<path d="M39 783l10-9 10 9v12H39z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><text x="49" y="812" text-anchor="middle" fill="#fff" font-size="11">Home</text>
+<path d="M137 777h18M137 784h18M137 791h18" stroke="#80848e" stroke-width="2" stroke-linecap="round"/><text x="146" y="812" text-anchor="middle" fill="#80848e" font-size="11">Requests</text>
+<path d="M244 773l9 3v7c0 6-4 10-9 12-5-2-9-6-9-12v-7z" fill="none" stroke="#80848e" stroke-width="2" stroke-linejoin="round"/><circle cx="254" cy="774" r="7" fill="#f23f43"/><text x="254" y="778" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">2</text><text x="244" y="812" text-anchor="middle" fill="#80848e" font-size="11">Admin</text>
+<circle cx="341" cy="784" r="7" fill="none" stroke="#80848e" stroke-width="2"/><circle cx="341" cy="784" r="2" fill="#80848e"/><text x="341" y="812" text-anchor="middle" fill="#80848e" font-size="11">Settings</text>
+<rect x="135" y="830" width="120" height="5" rx="2.5" fill="#fff"/>
+</svg>

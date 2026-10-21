@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<style>.t{fill:#ededf0;font-size:15px;font-weight:500}.s{fill:#8b8b97;font-size:12px}.c{font-size:11px;font-weight:500;text-anchor:middle}.m{fill:#c9c0ff;font-size:12px;font-weight:600;font-family:ui-monospace,Consolas,monospace}.on{fill:#2a2650;stroke:#5a4fb8}.kb{fill:#22222b;stroke:#33333d}.ka{fill:#8b8b97;font-size:11px;text-anchor:middle}.tb{fill:#8b8b97;font-size:11px;text-anchor:middle}.i{fill:none;stroke:#8b8b97;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.ia{fill:none;stroke:#c9c0ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}</style>
+<defs><radialGradient id="glow" cx=".5" cy=".25" r=".55"><stop offset="0" stop-color="#8c78ff" stop-opacity=".3"/><stop offset="1" stop-color="#8c78ff" stop-opacity="0"/></radialGradient>
+<symbol id="g"><circle cx="8" cy="8" r="6" class="i"/><circle cx="8" cy="8" r="2" class="i"/></symbol>
+<symbol id="e"><rect width="20" height="20" rx="4" class="kb"/><text x="10" y="14" class="ka">↵</text><text x="26" y="15" class="s">Edit</text></symbol></defs>
+<rect width="390" height="844" fill="#0a0a0e"/>
+<rect width="390" height="844" fill="url(#glow)"/>
+<g fill="#ededf0"><text x="24" y="33" font-size="15" font-weight="600">9:41</text><rect x="318" y="27" width="3" height="6" rx="1"/><rect x="323" y="25" width="3" height="8" rx="1"/><rect x="328" y="23" width="3" height="10" rx="1"/><rect x="333" y="21" width="3" height="12" rx="1"/><rect x="343" y="22" width="22" height="11" rx="3" fill="none" stroke="#ededf0"/><rect x="345" y="24" width="15" height="7" rx="1.5"/></g>
+<rect x="0" y="56" width="390" height="820" rx="24" fill="#141419" stroke="#26262e"/>
+<rect x="175" y="64" width="40" height="4" rx="2" fill="#3a3a45"/>
+<rect x="16" y="78" width="88" height="24" rx="6" class="on"/><text x="26" y="94" class="m">&gt; settings</text>
+<text x="370" y="95" class="s" text-anchor="end">10 settings</text>
+<rect x="10" y="112" width="370" height="100" rx="10" fill="#22222b"/>
+<use href="#g" x="20" y="126"/><text x="52" y="131" class="t">Movie size limit</text><text x="52" y="147" class="s">— 40 GB</text>
+<rect x="20" y="164" width="110" height="32" rx="8" fill="#1c1c23" stroke="#5a4fb8"/><text x="30" y="185" fill="#ededf0" font-size="15">40</text><rect x="90" y="172" width="2" height="16" fill="#9d8cff"/><text x="104" y="185" class="s">GB</text>
+<rect x="206" y="168" width="70" height="24" rx="6" fill="#9d8cff"/><text x="241" y="184" fill="#0b0b12" font-weight="600" class="c">Save ↵</text>
+<rect x="284" y="168" width="86" height="24" rx="6" class="kb"/><text x="327" y="184" fill="#bdbdc6" class="c">Cancel esc</text>
+<use href="#g" x="20" y="232"/><text x="52" y="237" class="t">Episode limit</text><text x="52" y="253" class="s">— 4 GB/h</text><use href="#e" x="314" y="230"/>
+<use href="#g" x="20" y="282"/><text x="52" y="287" class="t">Audiobook limit</text><text x="52" y="303" class="s">— 600 MB</text><use href="#e" x="314" y="280"/>
+<use href="#g" x="20" y="332"/><text x="52" y="337" class="t">Movie quality</text><text x="52" y="353" class="s">— HD-1080p</text><use href="#e" x="314" y="330"/>
+<use href="#g" x="20" y="382"/><text x="52" y="387" class="t">TV quality</text><text x="52" y="403" class="s">— HD-1080p</text><use href="#e" x="314" y="380"/>
+<use href="#g" x="20" y="432"/><text x="52" y="437" class="t">Anime quality</text><text x="52" y="453" class="s">— Any</text><use href="#e" x="314" y="430"/>
+<use href="#g" x="20" y="482"/><text x="52" y="487" class="t">Discord</text><text x="52" y="503" class="s">— On, #arrmy</text><use href="#e" x="314" y="480"/>
+<use href="#g" x="20" y="532"/><text x="52" y="537" class="t">Plex</text><text x="52" y="553" class="s">— Crafty Plex</text><use href="#e" x="314" y="530"/>
+<use href="#g" x="20" y="582"/><text x="52" y="587" class="t">Plex libraries</text><text x="52" y="603" class="s">— Movies, TV Shows, Audiobooks</text><use href="#e" x="314" y="580"/>
+<use href="#g" x="20" y="632"/><text x="52" y="637" class="t">Public address</text><text x="52" y="653" class="s">— https://arrmy.craftyplayz.com</text><use href="#e" x="314" y="630"/>
+<rect x="12" y="722" width="366" height="44" rx="12" fill="#1c1c23" stroke="#2a2a33"/>
+<path d="M27 737a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM36 755l-4.5-4.5" class="i"/>
+<rect x="46" y="732" width="84" height="24" rx="6" class="on"/><text x="55" y="748" class="m">&gt; settings</text>
+<text x="140" y="749" class="s" font-size="15">Filter settings…</text>
+<rect x="0" y="776" width="390" height="68" fill="#0e0e13"/><path d="M0 776h390" stroke="#26262e"/>
+<circle cx="46" cy="800" r="6" class="i"/><path d="M50.5 804.5l4 4" class="i"/><text x="48" y="830" class="tb">Home</text>
+<path d="M138 795h16M138 801h16M138 807h10" class="i"/><text x="146" y="830" class="tb">Requests</text>
+<path d="M244 793l7 2.5v5c0 4.5-3.5 7-7 8.5-3.5-1.5-7-4-7-8.5v-5z" class="i"/><text x="244" y="830" class="tb">Admin</text>
+<circle cx="342" cy="801" r="6" class="ia"/><circle cx="342" cy="801" r="2" class="ia"/><text x="342" y="830" fill="#c9c0ff" class="tb">Settings</text>
+</svg>

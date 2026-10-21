@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" fill="#eef2ff">
+<defs>
+<linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1a2550"/><stop offset=".45" stop-color="#0b1020"/><stop offset="1" stop-color="#070a16"/></linearGradient>
+<linearGradient id="sh" x1="0" x2="0" y1="0" y2="1"><stop offset=".2" stop-color="#070a16" stop-opacity="0"/><stop offset="1" stop-color="#070a16" stop-opacity=".95"/></linearGradient>
+<linearGradient id="av" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3d9fd6"/><stop offset="1" stop-color="#2a3f80"/></linearGradient>
+<linearGradient id="p1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="p2" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="p3" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#433c19"/></linearGradient>
+<linearGradient id="p5" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a63044"/><stop offset="1" stop-color="#432e19"/></linearGradient>
+<linearGradient id="p10" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a67f30"/><stop offset="1" stop-color="#354319"/></linearGradient>
+<linearGradient id="p14" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a69c30"/><stop offset="1" stop-color="#2b4319"/></linearGradient>
+<linearGradient id="p15" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#7f30a6"/><stop offset="1" stop-color="#431935"/></linearGradient>
+<linearGradient id="p16" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3044a6"/><stop offset="1" stop-color="#2e1943"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="url(#bg)"/>
+<text x="24" y="36" font-size="15" font-weight="700">9:41</text>
+<g><rect x="306" y="27" width="3" height="5" rx="1"/><rect x="311" y="25" width="3" height="7" rx="1"/><rect x="316" y="23" width="3" height="9" rx="1"/><rect x="321" y="21" width="3" height="11" rx="1"/></g>
+<rect x="336" y="23" width="26" height="12" rx="3.5" fill="none" stroke="#eef2ff" stroke-opacity=".6"/><rect x="338" y="25" width="19" height="8" rx="2"/><rect x="363" y="27" width="2" height="4" rx="1" fill-opacity=".6"/>
+<rect x="20" y="60" width="104" height="48" rx="24" fill="#161f3a" stroke="#2a3659"/>
+<circle cx="44" cy="84" r="9" fill="#5ec8ff"/><text x="60" y="90" font-size="18" font-weight="800">Arrmy</text>
+<rect x="134" y="60" width="134" height="48" rx="24" fill="#161f3a" stroke="#2a3659"/>
+<circle cx="158" cy="83" r="6" fill="none" stroke="#97a3c2" stroke-width="2"/><path d="m163 88 4 4" stroke="#97a3c2" stroke-width="2" stroke-linecap="round"/><text x="176" y="89" font-size="14" fill="#97a3c2">Search</text>
+<rect x="278" y="60" width="92" height="48" rx="24" fill="#161f3a" stroke="#2a3659"/>
+<circle cx="300" cy="84" r="15" fill="url(#av)"/><text x="300" y="89" font-size="14" font-weight="800" text-anchor="middle">C</text><text x="320" y="89" font-size="13" font-weight="700">Crafty</text>
+<rect x="20" y="124" width="350" height="220" rx="22" fill="url(#p1)"/>
+<rect x="20" y="124" width="350" height="220" rx="22" fill="url(#sh)"/>
+<rect x="20.5" y="124.5" width="349" height="219" rx="22" fill="none" stroke="#eef2ff" stroke-opacity=".12"/>
+<rect x="298" y="140" width="56" height="84" rx="8" fill="url(#p1)" stroke="#eef2ff" stroke-opacity=".3"/>
+<rect x="36" y="140" width="92" height="24" rx="12" fill="#5ec8ff"/><text x="82" y="156" font-size="11" font-weight="800" text-anchor="middle" fill="#06111f">FEATURED</text>
+<text x="36" y="268" font-size="26" font-weight="900">Dune: Part Two</text>
+<text x="36" y="290" font-size="13" font-weight="600" fill="#97a3c2">2024 · Movie · 2h 46m · ★ 8.5</text>
+<rect x="36" y="302" width="100" height="32" rx="16" fill="#5ec8ff"/><text x="86" y="323" font-size="14" font-weight="800" text-anchor="middle" fill="#06111f">Request</text>
+<rect x="146" y="302" width="122" height="32" rx="16" fill="#eef2ff" fill-opacity=".14" stroke="#eef2ff" stroke-opacity=".25"/><text x="207" y="323" font-size="14" font-weight="700" text-anchor="middle">Open in Plex</text>
+<rect x="20" y="360" width="350" height="160" rx="22" fill="#141d36" stroke="#263351"/>
+<text x="36" y="388" font-size="16" font-weight="800">Trending this week</text>
+<rect x="36" y="400" width="56" height="84" rx="8" fill="url(#p14)"/><rect x="101" y="400" width="56" height="84" rx="8" fill="url(#p16)"/><rect x="166" y="400" width="56" height="84" rx="8" fill="url(#p10)"/><rect x="231" y="400" width="56" height="84" rx="8" fill="url(#p15)"/><rect x="296" y="400" width="56" height="84" rx="8" fill="url(#p5)"/>
+<g font-size="9.5" font-weight="600"><text x="36" y="500">Fallout</text><text x="101" y="500">Blue Eye S…</text><text x="166" y="500">Oppenheimer</text><text x="231" y="500">Poor Things</text><text x="296" y="500">Shōgun</text></g>
+<rect x="20" y="536" width="350" height="156" rx="22" fill="#141d36" stroke="#263351"/>
+<text x="36" y="564" font-size="16" font-weight="800">Your Requests</text>
+<rect x="156" y="548" width="30" height="22" rx="11" fill="#5ec8ff"/><text x="171" y="563" font-size="12" font-weight="800" text-anchor="middle" fill="#06111f">12</text>
+<text x="354" y="563" font-size="12" font-weight="600" text-anchor="end" fill="#97a3c2">See all →</text>
+<rect x="36" y="580" width="26" height="38" rx="6" fill="url(#p1)"/><text x="72" y="595" font-size="14" font-weight="700">Dune: Part Two</text><text x="72" y="611" font-size="11" fill="#97a3c2">Movie · 2 h ago</text>
+<rect x="274" y="587" width="80" height="24" rx="12" fill="#1b4a2a" stroke="#4fb05a"/><text x="314" y="603" font-size="11" font-weight="700" text-anchor="middle" fill="#9be89b">Available</text>
+<rect x="36" y="626" width="26" height="38" rx="6" fill="url(#p2)"/><text x="72" y="641" font-size="14" font-weight="700">Severance</text><text x="72" y="657" font-size="11" fill="#97a3c2">Seasons 1, 2 · 5 h ago</text>
+<rect x="236" y="633" width="118" height="24" rx="12" fill="#17395a" stroke="#4a9ad0"/><text x="295" y="649" font-size="11" font-weight="700" text-anchor="middle" fill="#9fd4ff">Downloading 62%</text>
+<rect x="36" y="672" width="26" height="38" rx="6" fill="url(#p3)" opacity=".9"/><text x="72" y="687" font-size="14" font-weight="700">The Bear</text><text x="72" y="703" font-size="11" fill="#97a3c2">Season 3 · yesterday</text>
+<rect x="270" y="679" width="84" height="24" rx="12" fill="#222b45" stroke="#3a4668"/><text x="312" y="695" font-size="11" font-weight="700" text-anchor="middle" fill="#97a3c2">Requested</text>
+<rect x="20" y="704" width="170" height="52" rx="18" fill="#141d36" stroke="#263351"/>
+<text x="40" y="741" font-size="30" font-weight="900" fill="#9fd4ff">3</text><text x="66" y="738" font-size="13" font-weight="700" fill="#97a3c2">Downloading</text>
+<rect x="200" y="704" width="170" height="52" rx="18" fill="#141d36" stroke="#263351"/>
+<text x="220" y="741" font-size="30" font-weight="900" fill="#ff9c9c">1</text><text x="246" y="738" font-size="13" font-weight="700" fill="#97a3c2">Stuck</text>
+<rect y="764" width="390" height="80" fill="#0a0e1d"/><rect y="764" width="390" height="1" fill="#2a3659"/>
+<rect x="14" y="774" width="70" height="44" rx="22" fill="#5ec8ff" fill-opacity=".16"/>
+<path d="M49 779l-10 9v10h7v-7h6v7h7v-10z" fill="#5ec8ff"/><text x="49" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#5ec8ff">Home</text>
+<g fill="#97a3c2"><rect x="137" y="781" width="18" height="3" rx="1.5"/><rect x="137" y="788" width="18" height="3" rx="1.5"/><rect x="137" y="795" width="11" height="3" rx="1.5"/></g><text x="146" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#97a3c2">Requests</text>
+<path d="M244 779l9 3v7c0 5-4 8-9 10-5-2-9-5-9-10v-7z" fill="#97a3c2"/><text x="244" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#97a3c2">Admin</text>
+<circle cx="341" cy="789" r="6" fill="none" stroke="#97a3c2" stroke-width="3"/><path d="M341 778v3M341 797v3M330 789h3M349 789h3" stroke="#97a3c2" stroke-width="3" stroke-linecap="round"/><text x="341" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#97a3c2">Settings</text>
+<rect x="130" y="832" width="130" height="5" rx="2.5" fill="#eef2ff" fill-opacity=".8"/>
+</svg>

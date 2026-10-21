@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<rect width="390" height="844" fill="#313338"/>
+<text x="30" y="34" fill="#fff" font-size="15" font-weight="600">9:41</text>
+<g fill="#fff"><rect x="316" y="30" width="3" height="5" rx="1"/><rect x="321" y="28" width="3" height="7" rx="1"/><rect x="326" y="26" width="3" height="9" rx="1"/><rect x="331" y="24" width="3" height="11" rx="1"/></g>
+<rect x="340" y="24" width="24" height="12" rx="3" fill="none" stroke="#fff" stroke-width="1.5"/><rect x="342.5" y="26.5" width="17" height="7" rx="1.5" fill="#fff"/><rect x="365" y="27.5" width="2" height="5" rx="1" fill="#fff"/>
+<rect y="50" width="390" height="48" fill="#2b2d31"/>
+<path d="M20 66h20M20 74h20M20 82h20" stroke="#dbdee1" stroke-width="2" stroke-linecap="round"/>
+<text x="56" y="81" fill="#80848e" font-size="22">#</text>
+<text x="74" y="80" fill="#f2f3f5" font-size="17" font-weight="600">settings</text>
+<circle cx="328" cy="72" r="7" fill="none" stroke="#b5bac1" stroke-width="2"/><path d="M333 77l5 5" stroke="#b5bac1" stroke-width="2" stroke-linecap="round"/>
+<circle cx="362" cy="68" r="4.5" fill="none" stroke="#b5bac1" stroke-width="2"/><path d="M353 83c0-6 18-6 18 0" fill="none" stroke="#b5bac1" stroke-width="2" stroke-linecap="round"/>
+<rect y="98" width="390" height="1" fill="#1e1f22"/>
+
+<circle cx="34" cy="128" r="18" fill="#3986ac"/><text x="34" y="134" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">C</text>
+<text x="64" y="124" fill="#f2f3f5" font-size="15" font-weight="600">Crafty <tspan fill="#949ba4" font-size="11" font-weight="400">Today at 14:31</tspan></text>
+<rect x="64" y="134" width="68" height="20" rx="3" fill="#3c4290"/><text x="70" y="148" fill="#c9cdfb" font-family="Consolas,monospace" font-size="12">/settings</text>
+
+<circle cx="34" cy="180" r="18" fill="#5865f2"/><text x="34" y="186" text-anchor="middle" fill="#fff" font-size="16" font-weight="600">A</text>
+<text x="64" y="176" fill="#f2f3f5" font-size="15" font-weight="600">Arrmy</text><rect x="112" y="165" width="28" height="14" rx="3" fill="#5865f2"/><text x="126" y="176" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">BOT</text><text x="146" y="176" fill="#949ba4" font-size="11">Today at 14:31</text>
+<text x="64" y="196" fill="#dbdee1" font-size="14">Here is how Arrmy is set up.</text>
+
+<rect x="64" y="206" width="310" height="92" rx="4" fill="#2b2d31"/><rect x="64" y="206" width="4" height="92" rx="2" fill="#5865f2"/>
+<text x="78" y="226" fill="#f2f3f5" font-size="15" font-weight="600">Size limits</text>
+<text x="78" y="248" fill="#f2f3f5" font-size="10" font-weight="600">MOVIE</text><text x="78" y="264" fill="#dbdee1" font-size="13">40 GB</text>
+<text x="150" y="248" fill="#f2f3f5" font-size="10" font-weight="600">EPISODE</text><text x="150" y="264" fill="#dbdee1" font-size="13">4 GB per hour</text>
+<text x="270" y="248" fill="#f2f3f5" font-size="10" font-weight="600">AUDIOBOOK</text><text x="270" y="264" fill="#dbdee1" font-size="13">600 MB</text>
+<rect x="78" y="272" width="48" height="22" rx="3" fill="#4e5058"/><text x="102" y="287" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Edit</text><text x="136" y="287" fill="#949ba4" font-family="Consolas,monospace" font-size="11">/settings limits</text>
+
+<rect x="64" y="306" width="310" height="92" rx="4" fill="#2b2d31"/><rect x="64" y="306" width="4" height="92" rx="2" fill="#5865f2"/>
+<text x="78" y="326" fill="#f2f3f5" font-size="15" font-weight="600">Quality</text>
+<text x="78" y="348" fill="#f2f3f5" font-size="10" font-weight="600">MOVIES</text><text x="78" y="364" fill="#dbdee1" font-size="13">HD-1080p</text>
+<text x="160" y="348" fill="#f2f3f5" font-size="10" font-weight="600">TV SHOWS</text><text x="160" y="364" fill="#dbdee1" font-size="13">HD-1080p</text>
+<text x="250" y="348" fill="#f2f3f5" font-size="10" font-weight="600">ANIME</text><text x="250" y="364" fill="#dbdee1" font-size="13">Any</text>
+<rect x="78" y="372" width="48" height="22" rx="3" fill="#4e5058"/><text x="102" y="387" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Edit</text><text x="136" y="387" fill="#949ba4" font-family="Consolas,monospace" font-size="11">/settings quality</text>
+
+<rect x="64" y="406" width="310" height="92" rx="4" fill="#2b2d31"/><rect x="64" y="406" width="4" height="92" rx="2" fill="#5865f2"/>
+<text x="78" y="426" fill="#f2f3f5" font-size="15" font-weight="600">Discord</text>
+<text x="78" y="448" fill="#f2f3f5" font-size="10" font-weight="600">BOT</text><text x="78" y="464" fill="#dbdee1" font-size="13">On</text>
+<text x="130" y="448" fill="#f2f3f5" font-size="10" font-weight="600">SERVER</text><text x="130" y="464" fill="#dbdee1" font-size="13">The Crafty Lounge</text>
+<text x="280" y="448" fill="#f2f3f5" font-size="10" font-weight="600">CHANNEL</text><text x="280" y="464" fill="#dbdee1" font-size="13">#arrmy</text>
+<rect x="78" y="472" width="48" height="22" rx="3" fill="#4e5058"/><text x="102" y="487" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Edit</text><text x="136" y="487" fill="#949ba4" font-family="Consolas,monospace" font-size="11">/settings discord</text>
+
+<rect x="64" y="506" width="310" height="92" rx="4" fill="#2b2d31"/><rect x="64" y="506" width="4" height="92" rx="2" fill="#5865f2"/>
+<text x="78" y="526" fill="#f2f3f5" font-size="15" font-weight="600">Plex</text>
+<text x="78" y="548" fill="#f2f3f5" font-size="10" font-weight="600">SERVER</text><text x="78" y="564" fill="#dbdee1" font-size="13">Crafty Plex</text>
+<text x="170" y="548" fill="#f2f3f5" font-size="10" font-weight="600">LIBRARIES</text><text x="170" y="564" fill="#dbdee1" font-size="13">Movies, TV Shows, Audiobooks</text>
+<rect x="78" y="572" width="48" height="22" rx="3" fill="#4e5058"/><text x="102" y="587" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Edit</text><text x="136" y="587" fill="#949ba4" font-family="Consolas,monospace" font-size="11">/settings plex</text>
+
+<rect x="64" y="606" width="310" height="92" rx="4" fill="#2b2d31"/><rect x="64" y="606" width="4" height="92" rx="2" fill="#5865f2"/>
+<text x="78" y="626" fill="#f2f3f5" font-size="15" font-weight="600">Public address</text>
+<text x="78" y="648" fill="#f2f3f5" font-size="10" font-weight="600">ADDRESS</text><text x="78" y="664" fill="#00a8fc" font-size="13">https://arrmy.craftyplayz.com</text>
+<rect x="78" y="672" width="48" height="22" rx="3" fill="#4e5058"/><text x="102" y="687" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Edit</text><text x="136" y="687" fill="#949ba4" font-family="Consolas,monospace" font-size="11">/settings url</text>
+
+<circle cx="32" cy="724" r="16" fill="#383a40"/><path d="M26 724h12M32 718v12" stroke="#b5bac1" stroke-width="2" stroke-linecap="round"/>
+<rect x="56" y="704" width="318" height="40" rx="20" fill="#383a40"/>
+<text x="72" y="729" fill="#dbdee1" font-size="14"><tspan fill="#c9cdfb" font-weight="600">/settings</tspan> limits movie 40</text><rect x="238" y="716" width="1.5" height="16" fill="#dbdee1"/>
+
+<rect y="764" width="390" height="80" fill="#1e1f22"/>
+<path d="M39 783l10-9 10 9v12H39z" fill="none" stroke="#80848e" stroke-width="2" stroke-linejoin="round"/><text x="49" y="812" text-anchor="middle" fill="#80848e" font-size="11">Home</text>
+<path d="M137 777h18M137 784h18M137 791h18" stroke="#80848e" stroke-width="2" stroke-linecap="round"/><text x="146" y="812" text-anchor="middle" fill="#80848e" font-size="11">Requests</text>
+<path d="M244 773l9 3v7c0 6-4 10-9 12-5-2-9-6-9-12v-7z" fill="none" stroke="#80848e" stroke-width="2" stroke-linejoin="round"/><circle cx="254" cy="774" r="7" fill="#f23f43"/><text x="254" y="778" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">2</text><text x="244" y="812" text-anchor="middle" fill="#80848e" font-size="11">Admin</text>
+<circle cx="341" cy="784" r="7" fill="none" stroke="#fff" stroke-width="2"/><circle cx="341" cy="784" r="2" fill="#fff"/><text x="341" y="812" text-anchor="middle" fill="#fff" font-size="11">Settings</text>
+<rect x="135" y="830" width="120" height="5" rx="2.5" fill="#fff"/>
+</svg>

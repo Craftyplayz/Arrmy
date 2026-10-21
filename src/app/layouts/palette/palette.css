@@ -1,0 +1,110 @@
+/* Command palette mockup: an almost empty dark screen, a soft glow and one floating ⌘K window that carries
+   everything. Every selector starts with .l-palette so nothing leaks into the real site or the other mockups. */
+.l-palette {
+  --text: #ededf0; --muted: #8b8b97; --line: rgba(255, 255, 255, .08); --accent: #9d8cff; --hot: rgba(255, 255, 255, .07);
+  position: relative; display: flex; flex-direction: column; width: 100vw; max-width: none; min-height: 760px;
+  margin: -16px 0 0 calc(50% - 50vw); overflow: hidden; background: #09090d; color: var(--text); font-size: 14px;
+}
+/* :link beats the site's `.page a` whatever order the stylesheets load in */
+.l-palette a:link, .l-palette a:visited, .l-palette a:link:hover { color: inherit; text-decoration: none; }
+.l-palette .pal-glow { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 55% 45% at 50% 38%, rgba(140, 120, 255, .22), transparent 70%); }
+
+/* ---------- chrome: brand glyph, note, status bar ---------- */
+.l-palette .pal-brand { position: absolute; top: 18px; left: 22px; z-index: 2; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
+.l-palette .pal-brand i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(145deg, #b0a4ff, #5f4fd6); box-shadow: 0 2px 10px rgba(120, 100, 255, .4); color: #fff; font: 700 13px/1 var(--font); }
+.l-palette .l-note { position: absolute; top: 20px; right: 22px; z-index: 2; margin: 0; color: var(--muted); font-size: 12px; }
+
+.l-palette .pal-status { position: sticky; bottom: 0; z-index: 2; display: flex; align-items: center; gap: 18px; height: 34px; padding: 0 16px; background: rgba(10, 10, 14, .85); border-top: 1px solid var(--line); backdrop-filter: blur(10px); color: var(--muted); font-size: 12px; white-space: nowrap; }
+.l-palette .pal-status .is-bad { color: #ff9b9b; }
+.l-palette .pal-tabs { display: flex; gap: 2px; margin-left: auto; }
+.l-palette .pal-tab { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 6px; color: var(--muted); }
+.l-palette .pal-tab:hover { background: rgba(255, 255, 255, .05); color: var(--text); }
+.l-palette .pal-tab.is-active { background: rgba(255, 255, 255, .09); color: var(--text); }
+.l-palette .pal-me { display: flex; align-items: center; gap: 6px; margin-left: 8px; color: var(--text); }
+.l-palette .pal-me i { width: 16px; height: 16px; border-radius: 50%; }
+
+.l-palette kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); border-radius: 5px; color: var(--muted); font: 500 11px/1 var(--font); white-space: nowrap; }
+
+/* ---------- the stage and the wallpaper behind the palette ---------- */
+.l-palette .pal-stage { position: relative; z-index: 1; display: flex; flex: 1; flex-direction: column; align-items: center; padding: 84px 16px 64px; }
+.l-palette .pal-wall { position: absolute; inset: 0; z-index: 0; display: grid; grid-template-columns: repeat(8, 1fr); gap: 18px; padding: 24px 60px; opacity: .14; filter: blur(2px) saturate(.8); mask-image: radial-gradient(ellipse at 50% 45%, #000 20%, transparent 72%); pointer-events: none; }
+.l-palette .pal-wall i { display: block; aspect-ratio: 2 / 3; border-radius: 10px; }
+
+/* ---------- the palette window ---------- */
+.l-palette .pal {
+  position: relative; z-index: 1; width: 640px; max-width: 100%; overflow: hidden;
+  background: rgba(22, 22, 29, .72); border: 1px solid rgba(255, 255, 255, .12); border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 40px 100px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .06);
+  backdrop-filter: blur(28px) saturate(1.5);
+}
+.l-palette .pal-in { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+.l-palette .pal-in svg { flex: none; width: 18px; height: 18px; color: var(--muted); }
+.l-palette .pal-in input { flex: 1; min-width: 0; padding: 0; background: none; border: 0; color: var(--text); font: inherit; font-size: 17px; outline: none; caret-color: var(--accent); }
+.l-palette .pal-in input::placeholder { color: var(--muted); }
+.l-palette .pal-mode { flex: none; padding: 2px 8px; background: rgba(157, 140, 255, .18); border: 1px solid rgba(157, 140, 255, .35); border-radius: 6px; color: #c9c0ff; font: 600 12px/1.4 var(--mono); }
+
+.l-palette .pal-filters { display: flex; gap: 6px; padding: 10px 10px 4px; }
+.l-palette .pal-filters span { padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; }
+.l-palette .pal-filters span.on { background: rgba(157, 140, 255, .16); border-color: rgba(157, 140, 255, .4); color: var(--text); }
+.l-palette .pal-filters b { margin-left: 5px; font-weight: 500; opacity: .7; }
+
+.l-palette .pal-list { max-height: max(420px, calc(100vh - 260px)); overflow-y: auto; padding: 6px 8px 8px; }
+.l-palette .pal-group h2 { margin: 8px 10px 4px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+
+.l-palette .pal-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 7px 10px; border-radius: 8px; color: var(--text); }
+.l-palette .pal-row:hover { background: rgba(255, 255, 255, .04); }
+.l-palette .pal-row.is-hot { background: var(--hot); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.l-palette .pal-ico { display: grid; place-items: center; width: 28px; height: 28px; color: var(--muted); }
+.l-palette .pal-ico svg { width: 16px; height: 16px; }
+.l-palette .pal-ico.is-bad { background: rgba(255, 90, 90, .12); border-radius: 7px; color: #ff7b7b; }
+.l-palette .pal-poster { display: block; width: 22px; height: 30px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+.l-palette .pal-dot { display: block; width: 18px; height: 18px; border-radius: 50%; }
+.l-palette .pal-av { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 11px; font-weight: 600; }
+.l-palette .pal-led { width: 8px; height: 8px; background: #7ee29a; border-radius: 50%; box-shadow: 0 0 6px #7ee29a; }
+.l-palette .pal-led.off { background: #ff7b7b; box-shadow: 0 0 6px #ff7b7b; }
+.l-palette .pal-txt { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.l-palette .pal-txt b { overflow: hidden; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.l-palette .pal-txt small { overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.l-palette .pal-r { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.l-palette .pal-r svg { width: 14px; height: 14px; }
+.l-palette .pal-r .bad { color: #ff9b9b; }
+
+/* a slim progress bar under a row's text, and the wider disk bar on the right */
+.l-palette .pal-bar { grid-column: 2 / -1; height: 3px; margin: -3px 0 1px; overflow: hidden; background: rgba(255, 255, 255, .08); border-radius: 2px; }
+.l-palette .pal-bar i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.l-palette .pal-bar.gold i { background: #ffd84a; }
+.l-palette .pal-disk { width: 160px; height: 5px; overflow: hidden; background: rgba(255, 255, 255, .08); border-radius: 3px; }
+.l-palette .pal-disk i { display: block; height: 100%; background: var(--accent); }
+.l-palette .pal-disk.warn i { background: #ff7b7b; }
+
+.l-palette .pal-chip { padding: 2px 8px; border: 1px solid; border-radius: 999px; font-size: 11px; font-weight: 500; line-height: 1.4; }
+.l-palette .st-available { background: rgba(63, 185, 80, .14); border-color: rgba(63, 185, 80, .4); color: #7ee29a; }
+.l-palette .st-downloading { background: rgba(102, 192, 244, .12); border-color: rgba(102, 192, 244, .4); color: #8cc8ff; }
+.l-palette .st-importing { background: rgba(255, 216, 74, .12); border-color: rgba(255, 216, 74, .4); color: #ffd84a; }
+.l-palette .st-requested { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .14); color: #bdbdc6; }
+.l-palette .st-stuck { background: rgba(255, 90, 90, .12); border-color: rgba(255, 90, 90, .4); color: #ff9b9b; }
+
+/* the detail footer for the highlighted row */
+.l-palette .pal-foot { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: rgba(0, 0, 0, .25); border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.l-palette .pal-foot b { color: var(--text); font-weight: 500; }
+.l-palette .sp { flex: 1; }
+
+/* the inline editor under a highlighted setting */
+.l-palette .pal-edit { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 2px 0 2px 40px; padding: 8px 10px; background: rgba(0, 0, 0, .3); border: 1px solid var(--line); border-radius: 8px; }
+.l-palette .pal-edit label { color: var(--muted); font-size: 12px; }
+.l-palette .pal-edit input { width: 110px; padding: 5px 8px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(157, 140, 255, .5); border-radius: 6px; color: var(--text); font: inherit; font-size: 13px; outline: none; }
+.l-palette .pal-edit input.wide { width: 260px; }
+.l-palette .pal-btn { display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); border-radius: 6px; color: var(--text); font: inherit; font-size: 12px; cursor: pointer; }
+.l-palette .pal-btn.primary { background: var(--accent); border-color: transparent; color: #0b0b12; font-weight: 600; }
+.l-palette .pal-btn.primary kbd { background: rgba(0, 0, 0, .15); border-color: transparent; color: #0b0b12; }
+
+/* ---------- the phone pictures ---------- */
+.l-palette .pal-h { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+.l-palette .pal-lede { max-width: 640px; margin: 0 0 24px; color: var(--muted); text-align: center; }
+.l-palette .pal-phones { display: flex; gap: 24px; max-width: 100%; padding: 8px 0 16px; overflow-x: auto; }
+.l-palette .pal-phones figure { flex: none; margin: 0; text-align: center; }
+.l-palette .pal-phones img { display: block; width: 300px; height: auto; border: 1px solid rgba(255, 255, 255, .12); border-radius: 28px; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); }
+.l-palette .pal-phones figcaption { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+/* 100vw counts the scrollbar on Windows, so the full-bleed wrapper overshoots by half a scrollbar each side: clip it rather than scroll */
+body:has(.l-palette) { overflow-x: clip; }

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<rect width="390" height="844" fill="#0e0f14"/>
+<text x="32" y="40" font-size="15" font-weight="600" fill="#f3f3f7">9:41</text>
+<g fill="#f3f3f7"><rect x="296" y="32" width="3" height="8" rx="1"/><rect x="301" y="30" width="3" height="10" rx="1"/><rect x="306" y="28" width="3" height="12" rx="1"/><rect x="311" y="26" width="3" height="14" rx="1"/><rect x="336" y="30" width="19" height="8" rx="2"/><rect x="359.5" y="32" width="2" height="4" rx="1"/><circle cx="324" cy="39" r="1.5"/></g>
+<path d="M318 33a9 9 0 0 1 12 0M321 36.5a5 5 0 0 1 6 0" fill="none" stroke="#f3f3f7" stroke-width="2" stroke-linecap="round"/>
+<rect x="334" y="28" width="24" height="12" rx="3.5" fill="none" stroke="#f3f3f7"/>
+<text x="24" y="74" font-size="14" font-weight="700" fill="#f3f3f7">Arrmy</text>
+<text x="332" y="74" font-size="13" fill="#8f919f" text-anchor="end">Crafty</text>
+<circle cx="352" cy="70" r="13" fill="#3488b2"/><text x="352" y="74" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">C</text>
+<text x="195" y="98" font-size="12" fill="#8f919f" text-anchor="middle" opacity=".75">↓ Pull down to refresh</text>
+
+<text x="20" y="148" font-size="34" font-weight="800" fill="#f3f3f7" letter-spacing="-.6">Settings</text>
+<rect x="16" y="166" width="358" height="260" rx="18" fill="#1a1b22"/>
+<g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+<rect x="32" y="177" width="30" height="30" rx="8" fill="#e5484d" stroke="none"/><path transform="translate(38,183) scale(.75)" d="M4 7h16M4 12h10M4 17h7"/>
+<rect x="32" y="229" width="30" height="30" rx="8" fill="#3b82f6" stroke="none"/><path transform="translate(38,235) scale(.75)" d="M3 6h18v12H3zM8 21h8"/>
+<rect x="32" y="281" width="30" height="30" rx="8" fill="#5865f2" stroke="none"/><path transform="translate(38,287) scale(.75)" d="M5 8a9 9 0 0 1 14 0l1 9-4 2-1-2H9l-1 2-4-2z"/>
+<rect x="32" y="333" width="30" height="30" rx="8" fill="#d4a52a" stroke="none"/><path transform="translate(38,339) scale(.75)" d="M6 4h5l7 8-7 8H6l7-8z"/>
+<rect x="32" y="385" width="30" height="30" rx="8" fill="#30a46c" stroke="none"/><path transform="translate(38,391) scale(.75)" d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>
+</g>
+<g font-size="16" fill="#f3f3f7"><text x="74" y="198">Size Limits</text><text x="74" y="250">Quality</text><text x="74" y="302">Discord</text><text x="74" y="354">Plex</text><text x="74" y="406">Public address</text></g>
+<g font-size="15" fill="#8f919f" text-anchor="end"><text x="338" y="198">40 GB</text><text x="338" y="250">HD-1080p</text><text x="338" y="302">On</text><text x="338" y="354">Crafty Plex</text><text x="338" y="406">arrmy.craftyplayz.com</text></g>
+<g font-size="22" fill="#3b3e4a"><text x="350" y="199">›</text><text x="350" y="251">›</text><text x="350" y="303">›</text><text x="350" y="355">›</text><text x="350" y="407">›</text></g>
+<g stroke="#2b2d37"><line x1="74" y1="218.5" x2="374" y2="218.5"/><line x1="74" y1="270.5" x2="374" y2="270.5"/><line x1="74" y1="322.5" x2="374" y2="322.5"/><line x1="74" y1="374.5" x2="374" y2="374.5"/></g>
+
+<text x="20" y="462" font-size="20" font-weight="700" fill="#f3f3f7">Size Limits</text>
+<rect x="16" y="474" width="358" height="156" rx="18" fill="#1a1b22"/>
+<g font-size="16" fill="#f3f3f7"><text x="32" y="506">Movie</text><text x="32" y="558">TV episode, per hour</text><text x="32" y="610">Audiobook</text></g>
+<g fill="#23242d"><rect x="236" y="483" width="84" height="34" rx="8"/><rect x="236" y="535" width="84" height="34" rx="8"/><rect x="236" y="587" width="84" height="34" rx="8"/></g>
+<g font-size="15" fill="#f3f3f7" text-anchor="end"><text x="310" y="506">40</text><text x="310" y="558">4</text><text x="310" y="610">600</text></g>
+<g font-size="14" fill="#8f919f"><text x="330" y="506">GB</text><text x="330" y="558">GB</text><text x="330" y="610">MB</text></g>
+<g stroke="#2b2d37"><line x1="32" y1="526.5" x2="374" y2="526.5"/><line x1="32" y1="578.5" x2="374" y2="578.5"/></g>
+<text x="32" y="650" font-size="12" fill="#8f919f">A Request over its limit is refused before anything downloads.</text>
+
+<text x="20" y="688" font-size="20" font-weight="700" fill="#f3f3f7">Discord</text>
+<rect x="16" y="700" width="358" height="156" rx="18" fill="#1a1b22"/>
+<text x="32" y="732" font-size="16" fill="#f3f3f7">Post to Discord</text>
+<rect x="307" y="710" width="51" height="31" rx="15.5" fill="#8b6dff"/><circle cx="343.5" cy="725.5" r="13.5" fill="#fff"/>
+<line x1="32" y1="752.5" x2="374" y2="752.5" stroke="#2b2d37"/>
+
+<rect y="764" width="390" height="80" fill="#121318"/><line x1="0" y1="764.5" x2="390" y2="764.5" stroke="#2b2d37"/>
+<g fill="none" stroke="#8f919f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path transform="translate(33,776)" d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+<path transform="translate(108,776)" d="M3 13l2-8h14l2 8v6H3zM3 13h5l2 3h4l2-3h5"/>
+<path transform="translate(183,776)" d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/>
+<path transform="translate(258,776)" stroke="#8b6dff" d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>
+<path transform="translate(333,776)" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM10 18h4"/>
+</g>
+<g font-size="11" font-weight="500" text-anchor="middle" fill="#8f919f"><text x="45" y="816">Home</text><text x="120" y="816">Requests</text><text x="195" y="816">Admin</text><text x="270" y="816" fill="#8b6dff">Settings</text><text x="345" y="816">Phone</text></g>
+<rect x="128" y="830" width="134" height="5" rx="2.5" fill="#f3f3f7"/>
+</svg>

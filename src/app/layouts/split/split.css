@@ -1,0 +1,146 @@
+/* Mockup: Split pane. Three panes like a desktop mail client: an icon rail, a list, and the detail of the selected
+   row. Every selector starts with .l-split so nothing leaks into the site or the other mockups. */
+.l-split {
+  --rail: #171717; --list: #1c1c1c; --pane: #232323; --line: #343434; --line-strong: #4a4a4a; --sel: #263340;
+  --text: #e8e8e8; --muted: #969696; --accent: #6cb8e8; --btn: #2a6e9e; --btn-line: #4a9ad0;
+  --ok: #5fb04a; --info: #4a9ad0; --gold: #d4a62a; --grey: #6e6e6e; --danger: #d64c4c;
+  display: grid; grid-template-columns: 84px 360px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
+  width: 100vw; max-width: none; height: clamp(720px, calc(100vh - 140px), 1100px); margin: -16px 0 0 calc(50% - 50vw);
+  background: var(--pane); border-bottom: 1px solid var(--line); color: var(--text); font-size: 14px; line-height: 1.45;
+}
+.l-split a { color: inherit; text-decoration: none; }
+.l-split a:hover { text-decoration: none; }
+.l-split .lbl { margin: 0 0 10px; color: var(--muted); font-size: 13px; font-weight: 600; letter-spacing: .06em; font-variant-caps: all-small-caps; }
+
+/* ---------- icon rail ---------- */
+.l-split .rail { display: flex; flex-direction: column; align-items: center; min-height: 0; padding: 14px 6px 12px; background: var(--rail); border-right: 1px solid var(--line); }
+.l-split .brand { display: grid; justify-items: center; gap: 3px; margin-bottom: 16px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.l-split .tabs { display: grid; gap: 2px; width: 100%; }
+.l-split .tabs a { display: grid; justify-items: center; gap: 3px; padding: 8px 0 6px; border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 500; }
+.l-split .tabs a:hover { background: #222; color: var(--text); }
+.l-split .tabs a.is-active { background: var(--sel); color: var(--accent); }
+.l-split .tabs svg { width: 22px; height: 22px; }
+.l-split .rail-foot { display: grid; justify-items: center; gap: 4px; margin-top: auto; text-align: center; }
+.l-split .avatar { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: #fff; font-size: 14px; font-weight: 700; }
+.l-split .rail-foot small { color: var(--muted); font-size: 11px; }
+.l-split .l-note { margin: 10px 0 0; color: #6a6a6a; font-size: 10px; line-height: 1.3; }
+
+/* ---------- list pane ---------- */
+.l-split .list { min-height: 0; overflow-y: auto; background: var(--list); border-right: 1px solid var(--line); }
+.l-split .list-top { position: sticky; top: 0; z-index: 1; display: grid; gap: 8px; padding: 10px 12px; background: var(--list); border-bottom: 1px solid var(--line); }
+.l-split .search { width: 100%; padding: 7px 10px; background: #141414; border: 1px solid var(--line-strong); border-radius: 7px; color: var(--text); font: inherit; font-size: 13px; outline: none; }
+.l-split .search:focus { border-color: var(--accent); }
+.l-split .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.l-split .chip { padding: 2px 9px; background: none; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }
+.l-split .chip.on { background: var(--sel); border-color: var(--btn-line); color: var(--text); }
+.l-split .chip small { margin-left: 4px; opacity: .7; }
+.l-split .group { display: flex; justify-content: space-between; margin: 0; padding: 12px 12px 4px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .06em; font-variant-caps: all-small-caps; }
+.l-split .row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.l-split .row.plain { grid-template-columns: minmax(0, 1fr) auto; padding: 11px 12px; }
+.l-split .row:hover { background: #212121; }
+.l-split .row.is-selected { background: var(--sel); box-shadow: inset 3px 0 0 var(--accent); }
+.l-split .thumb { width: 34px; height: 51px; border-radius: 4px; }
+.l-split .row-text { min-width: 0; }
+.l-split .row b { display: block; overflow: hidden; font-size: 13.5px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.l-split .row small { display: block; overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.l-split .row .num { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.l-split .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey); }
+.l-split .dot.available { background: var(--ok); }
+.l-split .dot.downloading { background: var(--info); }
+.l-split .dot.importing { background: var(--gold); }
+.l-split .dot.stuck, .l-split .dot.bad { background: var(--danger); }
+.l-split .dot.none { background: none; border: 1px solid var(--line-strong); }
+.l-split .line { height: 3px; margin-top: 5px; overflow: hidden; background: #333; border-radius: 2px; }
+.l-split .line i { display: block; height: 100%; background: var(--info); }
+.l-split .line.importing i { background: var(--gold); }
+
+/* ---------- detail pane ---------- */
+.l-split .detail { min-height: 0; overflow-y: auto; }
+.l-split .toolbar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 6px; padding: 9px 20px; background: rgb(35 35 35 / .94); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }
+.l-split .crumb { flex: 1; min-width: 0; overflow: hidden; color: var(--muted); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.l-split .tb { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; background: #2e2e2e; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--text); font: inherit; font-size: 13px; white-space: nowrap; cursor: pointer; }
+.l-split .tb:hover { background: #383838; }
+.l-split .tb.primary { background: var(--btn); border-color: var(--btn-line); color: #fff; }
+.l-split .tb.primary:hover { background: #327bb0; }
+.l-split .tb:disabled { opacity: .45; cursor: default; }
+.l-split .body { max-width: 920px; padding: 20px 24px 32px; }
+.l-split .hero { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; margin-bottom: 20px; }
+.l-split .hero.small { grid-template-columns: 96px minmax(0, 1fr); align-items: center; }
+.l-split .poster { aspect-ratio: 2 / 3; border-radius: 8px; box-shadow: 0 8px 20px rgb(0 0 0 / .4); }
+.l-split .hero h1 { margin: 0 0 4px; font-size: 26px; line-height: 1.15; }
+.l-split .meta { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.l-split .meta b { color: var(--text); }
+.l-split .genres { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.l-split .genre { padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font-size: 12px; }
+.l-split .overview { max-width: 62ch; margin: 0; }
+.l-split .sec { padding: 16px 0 4px; border-top: 1px solid var(--line); }
+.l-split .sec p { margin: 0 0 8px; }
+.l-split .pairs { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 4px 12px; font-size: 13px; }
+.l-split .pairs > :nth-child(odd) { color: var(--muted); }
+.l-split .status-tag { display: inline-flex; align-items: center; gap: 6px; }
+
+/* timeline of a Request log */
+.l-split .tl { margin: 0; padding: 0; list-style: none; }
+.l-split .tl li { position: relative; padding: 0 0 14px 22px; }
+.l-split .tl li::before { content: ''; position: absolute; top: 6px; left: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.l-split .tl li::after { content: ''; position: absolute; top: 17px; bottom: -3px; left: 7px; width: 2px; background: var(--line); }
+.l-split .tl li:last-child::after { display: none; }
+.l-split .tl li.now::before { background: var(--info); box-shadow: 0 0 0 4px rgb(74 154 208 / .25); }
+.l-split .tl li.bad::before { background: var(--danger); }
+.l-split .tl li.grey::before { background: var(--grey); }
+.l-split .tl b { display: block; font-size: 13.5px; }
+.l-split .tl small { display: block; color: var(--muted); font-size: 12px; }
+
+/* bars */
+.l-split .big { height: 10px; margin: 6px 0 8px; overflow: hidden; background: #333; border-radius: 5px; }
+.l-split .big i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); }
+.l-split .big.warn i { background: linear-gradient(90deg, #a8862a, #d4a62a); }
+.l-split .disks { display: grid; gap: 10px; }
+.l-split .disk { display: grid; grid-template-columns: 110px minmax(0, 1fr) 120px; align-items: center; gap: 12px; font-size: 13px; }
+.l-split .disk .big { margin: 0; }
+.l-split .disk small { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* tables: files, requesters */
+.l-split .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.l-split .tbl th { padding: 4px 8px; color: var(--muted); font-size: 12px; font-weight: 600; text-align: left; }
+.l-split .tbl td { padding: 6px 8px; border-top: 1px solid var(--line); }
+.l-split .tbl .num { text-align: right; font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.l-split .tbl .file { font-family: var(--mono); font-size: 12px; }
+.l-split .tbl .pending { color: var(--muted); }
+
+/* similar strip */
+.l-split .strip { display: flex; gap: 12px; padding-bottom: 6px; overflow-x: auto; }
+.l-split .strip a { flex: none; width: 92px; font-size: 12px; }
+.l-split .strip .poster { margin-bottom: 4px; border-radius: 6px; box-shadow: none; }
+.l-split .strip span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.l-split .strip small { color: var(--muted); }
+
+/* checkbox list, forms */
+.l-split .opts { display: grid; gap: 4px; }
+.l-split .opt { display: flex; align-items: center; gap: 8px; font-size: 13.5px; cursor: pointer; }
+.l-split .opt input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); }
+.l-split .opt small { color: var(--muted); font-size: 12px; }
+.l-split .form { display: grid; gap: 16px; max-width: 520px; }
+.l-split .form label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.l-split .form .unit { display: grid; grid-template-columns: 140px auto; align-items: center; gap: 8px; font-weight: 400; }
+.l-split .form input, .l-split .form select { width: 100%; padding: 7px 10px; background: #141414; border: 1px solid var(--line-strong); border-radius: 6px; color: var(--text); font: inherit; font-size: 13px; }
+.l-split .form .help { color: var(--muted); font-size: 12px; font-weight: 400; }
+.l-split .next { margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--line-strong); }
+.l-split .next .lbl { display: flex; justify-content: space-between; }
+.l-split .dim { opacity: .35; pointer-events: none; }
+
+/* phone page */
+.l-split .phone { grid-column: 2 / -1; min-height: 0; padding: 20px 24px; overflow: auto; }
+.l-split .phone-lede { max-width: 70ch; margin: 0 0 16px; color: var(--muted); }
+.l-split .shots { display: flex; gap: 20px; overflow-x: auto; }
+.l-split .shots figure { flex: none; margin: 0; text-align: center; }
+.l-split .shots img { display: block; width: 300px; height: auto; margin-bottom: 8px; border: 1px solid var(--line-strong); border-radius: 28px; }
+.l-split .shots figcaption { color: var(--muted); font-size: 13px; }
+
+@media (max-width: 900px) {
+  .l-split { grid-template-columns: 72px 280px minmax(0, 1fr); }
+  .l-split .hero { grid-template-columns: 120px minmax(0, 1fr); }
+}
+
+/* 100vw counts the scrollbar on Windows, so the full-bleed wrapper overshoots by half a scrollbar each side: clip it rather than scroll */
+body:has(.l-split) { overflow-x: clip; }

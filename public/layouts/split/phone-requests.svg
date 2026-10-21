@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+<defs>
+<linearGradient id="g200" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="bar" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#2a6e9e"/><stop offset="1" stop-color="#6cb8e8"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#232323"/>
+<text x="28" y="32" fill="#e8e8e8" font-size="15" font-weight="600">9:41</text>
+<g fill="#e8e8e8"><rect x="306" y="27" width="3" height="5" rx="1"/><rect x="311" y="25" width="3" height="7" rx="1"/><rect x="316" y="23" width="3" height="9" rx="1"/><rect x="321" y="21" width="3" height="11" rx="1"/><rect x="336" y="23" width="21" height="8" rx="2"/><rect x="360" y="25" width="2" height="4" rx="1"/></g>
+<rect x="334" y="21" width="25" height="12" rx="3.5" fill="none" stroke="#e8e8e8"/>
+<path d="M24 66l-8 8 8 8" fill="none" stroke="#6cb8e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="32" y="79" fill="#6cb8e8" font-size="16">Requests</text>
+<rect x="16" y="96" width="72" height="108" rx="6" fill="url(#g200)"/>
+<text x="104" y="124" fill="#e8e8e8" font-size="22" font-weight="700">Severance</text>
+<text x="104" y="146" fill="#969696" font-size="13">2022 · TV Show · Seasons 1, 2</text>
+<circle cx="109" cy="166" r="4.5" fill="#4a9ad0"/><text x="120" y="170" fill="#e8e8e8" font-size="13" font-weight="600">Downloading</text>
+<text x="104" y="192" fill="#969696" font-size="13">Drama · Mystery · 38.4 GB</text>
+<g font-size="13" fill="#e8e8e8" text-anchor="middle">
+<rect x="16" y="220" width="86" height="32" rx="6" fill="#2e2e2e" stroke="#4a4a4a"/><text x="59" y="241">Remove</text>
+<rect x="110" y="220" width="112" height="32" rx="6" fill="#2e2e2e" stroke="#4a4a4a"/><text x="166" y="241">Search again</text>
+<g opacity=".45"><rect x="230" y="220" width="112" height="32" rx="6" fill="#2e2e2e" stroke="#4a4a4a"/><text x="286" y="241">Open in Plex</text></g>
+</g>
+<line x1="16" y1="272.5" x2="374" y2="272.5" stroke="#343434"/>
+<text x="16" y="294" fill="#969696" font-size="11" font-weight="600" letter-spacing="1">STATUS</text>
+<rect x="16" y="304" width="358" height="10" rx="5" fill="#333"/><rect x="16" y="304" width="222" height="10" rx="5" fill="url(#bar)"/>
+<text x="16" y="334" fill="#e8e8e8" font-size="13">Downloading 62%: 23.8 GB of 38.4 GB at 12.4 MB/s,</text>
+<text x="16" y="352" fill="#e8e8e8" font-size="13">about 41 min left.</text>
+<line x1="16" y1="370.5" x2="374" y2="370.5" stroke="#343434"/>
+<text x="16" y="392" fill="#969696" font-size="11" font-weight="600" letter-spacing="1">REQUEST LOG</text>
+<line x1="24" y1="410" x2="24" y2="546" stroke="#343434" stroke-width="2"/>
+<g font-size="14" font-weight="600" fill="#e8e8e8">
+<circle cx="24" cy="410" r="4.5" fill="#5fb04a"/><text x="42" y="414">Requested</text><text x="42" y="431" fill="#969696" font-size="12" font-weight="400">5 h ago · by Sam · Seasons 1, 2</text>
+<circle cx="24" cy="454" r="4.5" fill="#5fb04a"/><text x="42" y="458">Found 3 releases</text><text x="42" y="475" fill="#969696" font-size="12" font-weight="400">Best fit 38.4 GB · 48 seeders</text>
+<circle cx="24" cy="498" r="4.5" fill="#5fb04a"/><text x="42" y="502">Grabbed</text><text x="42" y="519" fill="#969696" font-size="12" font-weight="400">4 h ago · sent to qBittorrent</text>
+<circle cx="24" cy="542" r="8" fill="#4a9ad0" opacity=".25"/><circle cx="24" cy="542" r="4.5" fill="#4a9ad0"/><text x="42" y="546">Downloading 62%</text><text x="42" y="563" fill="#969696" font-size="12" font-weight="400">now · 12.4 MB/s · about 41 min left</text>
+</g>
+<line x1="16" y1="580.5" x2="374" y2="580.5" stroke="#343434"/>
+<text x="16" y="602" fill="#969696" font-size="11" font-weight="600" letter-spacing="1">FILES</text>
+<g font-family="ui-monospace,Consolas,monospace" font-size="11" fill="#e8e8e8">
+<text x="16" y="622">S01E01 Good News About Hell.mkv</text><text x="374" y="622" text-anchor="end">1.9 GB</text>
+<text x="16" y="642">S01E02 Half Loop.mkv</text><text x="374" y="642" text-anchor="end">1.8 GB</text>
+<text x="16" y="662" fill="#969696">S02E01 Hello, Ms. Cobel.mkv</text><text x="374" y="662" text-anchor="end" fill="#969696">2.1 GB</text>
+</g>
+<line x1="16" y1="676.5" x2="374" y2="676.5" stroke="#343434"/>
+<text x="16" y="698" fill="#969696" font-size="11" font-weight="600" letter-spacing="1">DETAILS</text>
+<g font-size="12" fill="#e8e8e8">
+<text x="16" y="718" fill="#969696">Requested by</text><text x="130" y="718">Sam</text>
+<text x="16" y="736" fill="#969696">When</text><text x="130" y="736">5 h ago</text>
+<text x="16" y="754" fill="#969696">Media Type</text><text x="130" y="754">TV Show</text>
+</g>
+<rect y="760" width="390" height="84" fill="#171717"/><line x1="0" y1="760.5" x2="390" y2="760.5" stroke="#343434"/>
+<rect x="115" y="766" width="62" height="54" rx="10" fill="#263340"/>
+<g fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<path transform="translate(37 774)" stroke="#969696" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/>
+<path transform="translate(134 774)" stroke="#6cb8e8" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+<path transform="translate(232 774)" stroke="#969696" d="M3 12h4l3-8 4 16 3-8h4"/>
+<path transform="translate(329 774)" stroke="#969696" d="M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>
+</g>
+<g font-size="11" text-anchor="middle" fill="#969696"><text x="49" y="812">Home</text><text x="146" y="812" fill="#6cb8e8" font-weight="600">Requests</text><text x="244" y="812">Admin</text><text x="341" y="812">Settings</text></g>
+<rect x="135" y="830" width="120" height="5" rx="2.5" fill="#555"/>
+</svg>

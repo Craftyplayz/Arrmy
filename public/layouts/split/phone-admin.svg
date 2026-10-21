@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+<rect width="390" height="844" fill="#1c1c1c"/>
+<text x="28" y="32" fill="#e8e8e8" font-size="15" font-weight="600">9:41</text>
+<g fill="#e8e8e8"><rect x="306" y="27" width="3" height="5" rx="1"/><rect x="311" y="25" width="3" height="7" rx="1"/><rect x="316" y="23" width="3" height="9" rx="1"/><rect x="321" y="21" width="3" height="11" rx="1"/><rect x="336" y="23" width="21" height="8" rx="2"/><rect x="360" y="25" width="2" height="4" rx="1"/></g>
+<rect x="334" y="21" width="25" height="12" rx="3.5" fill="none" stroke="#e8e8e8"/>
+<text x="16" y="82" fill="#e8e8e8" font-size="28" font-weight="700">Admin</text>
+<g font-size="12" text-anchor="middle">
+<rect x="16" y="98" width="40" height="24" rx="12" fill="#263340" stroke="#4a9ad0"/><text x="36" y="114" fill="#e8e8e8">All</text>
+<rect x="62" y="98" width="108" height="24" rx="12" fill="none" stroke="#4a4a4a"/><text x="116" y="114" fill="#969696">Needs fixing · 2</text>
+<rect x="176" y="98" width="104" height="24" rx="12" fill="none" stroke="#4a4a4a"/><text x="228" y="114" fill="#969696">Downloading · 3</text>
+<rect x="286" y="98" width="76" height="24" rx="12" fill="none" stroke="#4a4a4a"/><text x="324" y="114" fill="#969696">Services</text>
+</g>
+<g fill="#969696" font-size="11" font-weight="600" letter-spacing="1"><text x="16" y="152">NEEDS FIXING</text><text x="374" y="152" text-anchor="end">2</text></g>
+<g font-size="15" font-weight="600" fill="#e8e8e8">
+<text x="16" y="184">Past Lives</text><text x="16" y="204" fill="#969696" font-size="13" font-weight="400">No release found in 4 days · searched 6 times</text><circle cx="362" cy="188" r="4.5" fill="#d64c4c"/><line x1="16" y1="216.5" x2="374" y2="216.5" stroke="#343434"/>
+<text x="16" y="240">Shōgun S01E09</text><text x="16" y="260" fill="#969696" font-size="13" font-weight="400">Import failed: a file with another name exists</text><circle cx="362" cy="244" r="4.5" fill="#d64c4c"/><line x1="16" y1="272.5" x2="374" y2="272.5" stroke="#343434"/>
+</g>
+<g fill="#969696" font-size="11" font-weight="600" letter-spacing="1"><text x="16" y="300">DOWNLOADING</text><text x="374" y="300" text-anchor="end">3</text></g>
+<g font-size="15" font-weight="600" fill="#e8e8e8">
+<text x="16" y="332">Severance S02</text><text x="16" y="352" fill="#969696" font-size="13" font-weight="400">12.4 MB/s · 48 seeders · 41 min left</text><rect x="16" y="360" width="330" height="3" rx="1.5" fill="#333"/><rect x="16" y="360" width="205" height="3" rx="1.5" fill="#4a9ad0"/><circle cx="362" cy="340" r="4.5" fill="#4a9ad0"/><line x1="16" y1="372.5" x2="374" y2="372.5" stroke="#343434"/>
+<text x="16" y="394">Slow Horses S04E03</text><text x="16" y="414" fill="#969696" font-size="13" font-weight="400">3.1 MB/s · 7 seeders · 2 h 10 min left</text><rect x="16" y="422" width="330" height="3" rx="1.5" fill="#333"/><rect x="16" y="422" width="145" height="3" rx="1.5" fill="#4a9ad0"/><circle cx="362" cy="402" r="4.5" fill="#4a9ad0"/><line x1="16" y1="434.5" x2="374" y2="434.5" stroke="#343434"/>
+<text x="16" y="456">Project Hail Mary (Ray Porter)</text><text x="16" y="476" fill="#969696" font-size="13" font-weight="400">0.4 MB/s · 2 seeders · 18 min left</text><rect x="16" y="484" width="330" height="3" rx="1.5" fill="#333"/><rect x="16" y="484" width="59" height="3" rx="1.5" fill="#4a9ad0"/><circle cx="362" cy="464" r="4.5" fill="#4a9ad0"/><line x1="16" y1="496.5" x2="374" y2="496.5" stroke="#343434"/>
+</g>
+<g fill="#969696" font-size="11" font-weight="600" letter-spacing="1"><text x="16" y="524">SERVICES</text><text x="374" y="524" text-anchor="end">5 OF 6 UP</text></g>
+<g font-size="14" font-weight="600" fill="#e8e8e8">
+<text x="16" y="553">Radarr</text><text x="346" y="553" fill="#969696" font-size="12" font-weight="400" text-anchor="end">v5.14.0</text><circle cx="362" cy="548" r="4.5" fill="#5fb04a"/><line x1="16" y1="566.5" x2="374" y2="566.5" stroke="#343434"/>
+<text x="16" y="591">Sonarr</text><text x="346" y="591" fill="#969696" font-size="12" font-weight="400" text-anchor="end">v4.0.11</text><circle cx="362" cy="586" r="4.5" fill="#5fb04a"/><line x1="16" y1="604.5" x2="374" y2="604.5" stroke="#343434"/>
+<text x="16" y="629">Prowlarr</text><text x="346" y="629" fill="#969696" font-size="12" font-weight="400" text-anchor="end">v1.28.2</text><circle cx="362" cy="624" r="4.5" fill="#5fb04a"/><line x1="16" y1="642.5" x2="374" y2="642.5" stroke="#343434"/>
+<text x="16" y="667">qBittorrent</text><text x="346" y="667" fill="#969696" font-size="12" font-weight="400" text-anchor="end">v5.0.3</text><circle cx="362" cy="662" r="4.5" fill="#5fb04a"/><line x1="16" y1="680.5" x2="374" y2="680.5" stroke="#343434"/>
+<text x="16" y="705">LazyLibrarian</text><text x="346" y="705" fill="#d64c4c" font-size="12" font-weight="400" text-anchor="end">Not responding</text><circle cx="362" cy="700" r="4.5" fill="#d64c4c"/><line x1="16" y1="718.5" x2="374" y2="718.5" stroke="#343434"/>
+<text x="16" y="743">Plex</text><text x="346" y="743" fill="#969696" font-size="12" font-weight="400" text-anchor="end">v1.41.3</text><circle cx="362" cy="738" r="4.5" fill="#5fb04a"/>
+</g>
+<rect y="760" width="390" height="84" fill="#171717"/><line x1="0" y1="760.5" x2="390" y2="760.5" stroke="#343434"/>
+<rect x="213" y="766" width="62" height="54" rx="10" fill="#263340"/>
+<g fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<path transform="translate(37 774)" stroke="#969696" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/>
+<path transform="translate(134 774)" stroke="#969696" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+<path transform="translate(232 774)" stroke="#6cb8e8" d="M3 12h4l3-8 4 16 3-8h4"/>
+<path transform="translate(329 774)" stroke="#969696" d="M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>
+</g>
+<g font-size="11" text-anchor="middle" fill="#969696"><text x="49" y="812">Home</text><text x="146" y="812">Requests</text><text x="244" y="812" fill="#6cb8e8" font-weight="600">Admin</text><text x="341" y="812">Settings</text></g>
+<rect x="135" y="830" width="120" height="5" rx="2.5" fill="#555"/>
+</svg>

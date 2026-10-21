@@ -1,0 +1,193 @@
+/* Shelf mockup: covers standing on wooden planks, warm charcoal and amber. Every rule is scoped to .l-shelf so
+   nothing leaks into the real site or the other mockups. The site's own tokens are redefined here, so the shared
+   .btn and .badge classes come out amber on their own. */
+.l-shelf {
+  --bg: #1b1512; --card: #27201a; --card2: #322922; --sunken: #120d0a; --line: #3f3228; --line-strong: #5c4a3a;
+  --text: #f0e6d4; --muted: #a8988a; --accent: #e0aa4a; --accent-soft: #3a2a12;
+  --btn: #9a6a26; --btn-line: #d9a441; --btn-hover: #b07a2c; --btn2: #3a2e25; --btn2-hover: #4a3b2f; --link: #e8bf66;
+  --ok-bg: #2e4a22; --ok-line: #5a9a3e; --danger-bg: #4a2222; --danger-line: #9a3a3a;
+  --cw: 132px; --ch: 198px;
+  width: 100vw; max-width: none; min-height: 80vh; margin: -16px 0 0 calc(50% - 50vw);
+  background: radial-gradient(70% 320px at 50% 0, #2e241b, transparent), var(--bg);
+  color: var(--text);
+}
+.l-shelf .body { max-width: 1240px; margin: 0 auto; padding: 26px 24px 10px; }
+.l-shelf h1 { margin: 0 0 4px; font-size: 26px; color: #f7e3b5; }
+.l-shelf h1 small { margin-left: 8px; color: var(--muted); font-size: 16px; font-weight: 400; }
+.l-shelf .lede { margin: 0 0 22px; color: var(--muted); }
+.l-shelf .body h2 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 2px 14px; font-size: 17px; color: #f3dca4; }
+.l-shelf .body h2 small { color: var(--muted); font-size: 13px; font-weight: 400; }
+
+/* ---------- top bar: plaque, wooden tabs, search slot ---------- */
+.l-shelf .top { display: flex; align-items: flex-end; gap: 14px; padding: 14px 28px 0; background: linear-gradient(#2c2017, #1f1711); }
+.l-shelf .brand {
+  margin: 0 8px 10px 0; padding: 5px 14px; border: 1px solid #ebc470; border-radius: 4px;
+  background: linear-gradient(#cf9a42, #8a5f22); color: #1f1407;
+  font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), 0 2px 5px rgb(0 0 0 / .6);
+}
+.l-shelf .brand small { margin-left: 8px; font-size: 11px; font-weight: 600; letter-spacing: .02em; text-transform: none; opacity: .8; }
+.l-shelf .tabs { display: flex; gap: 4px; }
+.l-shelf .tab {
+  padding: 9px 18px 11px; border: 1px solid #5c4330; border-bottom: 0; border-radius: 7px 7px 0 0;
+  background: linear-gradient(#4a3424, #352417); color: #cdb99c; font: inherit; font-size: 14px; font-weight: 600;
+  text-decoration: none; cursor: pointer; box-shadow: inset 0 1px 0 rgb(255 255 255 / .12);
+}
+.l-shelf .tab:hover { color: #ffe3a8; text-decoration: none; }
+.l-shelf .tab.is-active { margin: -3px 0 -2px; padding-bottom: 13px; background: linear-gradient(#a3703d, #6b4526); border-color: #c0914a; color: #fff1cf; }
+.l-shelf .slot { display: flex; align-items: center; gap: 14px; margin: 0 0 12px auto; }
+.l-shelf .field {
+  padding: 7px 12px; border: 1px solid #6a4f36; border-radius: 4px; background: var(--sunken);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / .6); color: var(--text); font: inherit; font-size: 13px;
+}
+.l-shelf .slot .field { width: 240px; }
+.l-shelf .who { display: flex; align-items: center; gap: 7px; color: #cdb99c; font-size: 13px; }
+.l-shelf .avatar {
+  display: inline-flex; flex: none; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%;
+  color: #fff; font-size: 12px; font-style: normal; font-weight: 700; box-shadow: 0 1px 3px rgb(0 0 0 / .6);
+}
+.l-shelf .avatar.s { width: 18px; height: 18px; font-size: 10px; }
+.l-shelf .l-note { margin: 0; padding: 4px 28px 14px; color: var(--muted); font-size: 12px; text-align: right; }
+
+/* ---------- planks and covers ---------- */
+/* a plank is 16px of wood plus the shadow it throws on the wall below; the row's pseudo-elements are the plank's
+   ends, so it runs the full width whatever is on it */
+.l-shelf .plank, .l-shelf .row::before, .l-shelf .row::after {
+  content: ''; position: relative; z-index: 9; flex: none; height: 36px;
+  background:
+    repeating-linear-gradient(90deg, rgb(0 0 0 / .07) 0 2px, transparent 2px 9px) 0 0 / 100% 16px no-repeat,
+    linear-gradient(#b07c45, #7d512b 30%, #5a3418 65%, #3a200f 92%, #241207) 0 0 / 100% 16px no-repeat,
+    linear-gradient(rgb(0 0 0 / .6), rgb(0 0 0 / 0)) 0 16px / 100% 20px no-repeat;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .25);
+}
+.l-shelf .row::before { flex: 0 0 14px; margin-top: calc(var(--ch) + 18px); }
+.l-shelf .row::after { flex: 1 0 14px; margin-top: calc(var(--ch) + 18px); }
+.l-shelf .row { display: flex; align-items: flex-start; padding-top: 12px; overflow-x: auto; scrollbar-width: thin; }
+.l-shelf .item { display: flex; flex: none; flex-direction: column; align-items: center; padding: 0 11px; }
+.l-shelf .item .plank { align-self: stretch; margin: 0 -11px; }
+.l-shelf .cover { position: relative; flex: none; width: var(--cw); height: var(--ch); margin-bottom: 18px; border-radius: 3px; box-shadow: 0 8px 12px -6px rgb(0 0 0 / .9); }
+.l-shelf .cover::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(transparent 55%, rgb(0 0 0 / .72)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .18); }
+.l-shelf .cover.dim::before { background: linear-gradient(rgb(20 12 8 / .55), rgb(20 12 8 / .82)); }
+/* the reflection on the plank: the cover's own gradient, squashed and faded */
+.l-shelf .cover::after { content: ''; position: absolute; top: 100%; right: 0; left: 0; height: 20px; background: inherit; opacity: .35; -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent); }
+.l-shelf .cover > b { position: absolute; right: 8px; bottom: 8px; left: 8px; color: #fff; font-size: 12px; line-height: 1.25; text-shadow: 0 1px 2px #000; }
+.l-shelf .corner { position: absolute; top: 0; right: 0; width: 96px; height: 96px; overflow: hidden; border-radius: 0 3px 0 0; font-style: normal; }
+.l-shelf .ribbon {
+  position: absolute; top: 24px; right: -36px; width: 140px; padding: 3px 0; transform: rotate(45deg);
+  color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-align: center; text-transform: uppercase;
+  box-shadow: 0 1px 3px rgb(0 0 0 / .6);
+}
+.l-shelf .st-available { background: #3f7a2e; }
+.l-shelf .st-downloading { background: #2f6aa8; }
+.l-shelf .st-importing { background: #b8892a; color: #1f1407; }
+.l-shelf .st-requested { background: #5f5a55; }
+.l-shelf .st-stuck { background: #9a3a3a; }
+.l-shelf .pill-st { justify-self: start; padding: 2px 9px; border-radius: 999px; color: #fff; font-size: 11px; font-weight: 700; }
+.l-shelf .tag { position: absolute; top: 10px; left: -5px; padding: 2px 9px 2px 8px; border-radius: 0 3px 3px 0; color: #fff; font-size: 11px; font-weight: 700; box-shadow: 0 2px 3px rgb(0 0 0 / .6); }
+.l-shelf .tag.red { background: #b83a3a; }
+.l-shelf .tag.green { background: #3f8a2e; }
+.l-shelf .new {
+  position: absolute; top: -8px; right: -8px; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%;
+  transform: rotate(12deg); background: radial-gradient(circle at 35% 30%, #ffd98a, #d9a441 55%, #a8732a); color: #1f1407;
+  font-size: 10px; font-style: normal; font-weight: 800; text-transform: uppercase; box-shadow: 0 2px 4px rgb(0 0 0 / .6);
+}
+.l-shelf .strip { position: absolute; right: 0; bottom: 0; left: 0; height: 7px; overflow: hidden; border-radius: 0 0 3px 3px; background: rgb(0 0 0 / .65); }
+.l-shelf .strip i { display: block; height: 100%; background: #4a9ad0; }
+.l-shelf .strip.gold i { background: #e0aa4a; }
+.l-shelf .cap { display: grid; gap: 2px; width: var(--cw); margin-top: 8px; font-size: 12px; }
+.l-shelf .cap.wide { width: 210px; }
+.l-shelf .cap > b { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.l-shelf .cap > span { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+.l-shelf .cap .wrap { white-space: normal; }
+.l-shelf .cap .who { margin-top: 2px; }
+.l-shelf .cap .btn { justify-self: start; margin-top: 4px; }
+.l-shelf .shelf { margin: 0 0 26px; }
+/* audiobooks are thicker: a spine on the left and the page edge on the right */
+.l-shelf .books { --cw: 150px; --ch: 150px; }
+.l-shelf .cover.book { border-left: 14px solid rgb(0 0 0 / .4); border-radius: 2px 6px 6px 2px; }
+.l-shelf .cover.book::before { background: linear-gradient(transparent 55%, rgb(0 0 0 / .6)), linear-gradient(90deg, rgb(255 255 255 / .12), transparent 10%, transparent 92%, #e9dcc2 92%, #b8a98a 96%, #e9dcc2); }
+
+/* ---------- Home: the cover-flow row and the search slot ---------- */
+.l-shelf .hero { margin: 0 0 30px; }
+.l-shelf .flow { display: flex; align-items: flex-end; justify-content: center; padding: 36px 0 0; perspective: 1100px; }
+.l-shelf .flow .cover { width: 150px; height: 225px; margin: 0 -28px 20px; transform-origin: 50% 100%; }
+.l-shelf .flow .cover > b { font-size: 13px; }
+.l-shelf .flow .cover:nth-child(1), .l-shelf .flow .cover:nth-child(7) { z-index: 1; }
+.l-shelf .flow .cover:nth-child(2), .l-shelf .flow .cover:nth-child(6) { z-index: 2; }
+.l-shelf .flow .cover:nth-child(3), .l-shelf .flow .cover:nth-child(5) { z-index: 3; }
+.l-shelf .flow .cover:nth-child(-n+3) { transform: rotateY(48deg); }
+.l-shelf .flow .cover:nth-child(n+5) { transform: rotateY(-48deg); }
+.l-shelf .flow .cover:nth-child(4) { z-index: 5; margin: 0 36px 20px; transform: scale(1.22); box-shadow: 0 24px 30px -10px #000; }
+.l-shelf .star { max-width: 680px; margin: 22px auto 0; text-align: center; }
+.l-shelf .star h1 { font-size: 24px; }
+.l-shelf .star .meta { margin: 0 0 8px; color: var(--accent); font-size: 13px; }
+.l-shelf .star p { margin: 0 0 14px; color: #d8ccb8; }
+.l-shelf .search { display: flex; align-items: flex-end; gap: 14px; margin: 0 14px 10px; border-bottom: 2px solid #5c4330; }
+.l-shelf .search .tab { padding: 6px 14px 8px; font-size: 13px; }
+.l-shelf .search .tab.is-active { margin: 0; padding-bottom: 8px; }
+.l-shelf .search .field { width: 340px; margin-bottom: 6px; }
+
+/* ---------- Requests: the filter tags ---------- */
+.l-shelf .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+.l-shelf .chip { padding: 4px 12px; border: 1px solid #6a4f36; border-radius: 999px; background: var(--card2); color: #cdb99c; font: inherit; font-size: 13px; cursor: pointer; }
+.l-shelf .chip.is-active { background: linear-gradient(#cf9a42, #8a5f22); border-color: #ebc470; color: #1f1407; font-weight: 700; }
+.l-shelf .chip i { margin-left: 4px; font-style: normal; opacity: .7; }
+.l-shelf .filters .sep { width: 1px; margin: 0 4px; background: #5c4330; }
+
+/* ---------- Admin: plaques, gauges, readers ---------- */
+.l-shelf .plaques { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 26px; }
+.l-shelf .plaque {
+  display: flex; align-items: center; gap: 10px; padding: 8px 14px; border: 1px solid #ebc470; border-radius: 4px;
+  background: linear-gradient(#c9933a, #8a5f22); color: #1f1407; font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), 0 2px 5px rgb(0 0 0 / .6);
+}
+.l-shelf .plaque b { font-size: 20px; line-height: 1; }
+.l-shelf .plaque small { font-weight: 500; opacity: .75; }
+.l-shelf .lamp { width: 11px; height: 11px; border-radius: 50%; background: currentColor; box-shadow: 0 0 7px currentColor, inset 0 -1px 2px rgb(0 0 0 / .4); }
+.l-shelf .lamp.on { color: #58e06a; }
+.l-shelf .lamp.off { color: #ff5c5c; }
+.l-shelf .gauges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 0 0 26px; }
+.l-shelf .gauge { padding: 12px 16px 14px; border-radius: 6px; background: linear-gradient(#7d512b, #4a2b15); box-shadow: inset 0 1px 0 rgb(255 255 255 / .2), 0 6px 12px -4px #000; }
+.l-shelf .gauge h3 { display: flex; justify-content: space-between; margin: 0 0 8px; font-size: 14px; color: #f3dca4; }
+.l-shelf .gauge h3 span { color: #d8c4a0; font-weight: 400; }
+.l-shelf .gauge .bar { height: 16px; overflow: hidden; border-radius: 8px; background: #1c1008; box-shadow: inset 0 2px 4px #000; }
+.l-shelf .gauge .bar i { display: block; height: 100%; border-radius: 8px; background: linear-gradient(#f0c870, #c48a2e 60%, #a8732a); box-shadow: inset 0 -2px 0 rgb(0 0 0 / .25); }
+.l-shelf .gauge small { display: block; margin-top: 6px; color: #d8c4a0; font-size: 12px; }
+.l-shelf .readers { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin: 0 0 26px; }
+.l-shelf .reader { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+.l-shelf .reader .avatar { width: 40px; height: 40px; font-size: 17px; }
+.l-shelf .reader .grow { flex: 1; }
+.l-shelf .reader b { display: block; }
+.l-shelf .reader small { color: var(--muted); font-size: 13px; }
+
+/* ---------- Settings: index cards pinned to the wall ---------- */
+.l-shelf .desk-head { display: flex; align-items: center; justify-content: space-between; }
+.l-shelf .desk { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 34px 30px; padding: 16px 6px 30px; }
+.l-shelf .index {
+  position: relative; padding: 24px 20px 18px; border-radius: 3px; color: #2a1f14;
+  background: repeating-linear-gradient(transparent 0 25px, rgb(120 90 60 / .22) 25px 26px) 0 48px / 100% 100% no-repeat, linear-gradient(#f8f0da, #ecdfbf);
+  box-shadow: 0 12px 20px -8px rgb(0 0 0 / .9); transform: rotate(-1.2deg);
+}
+.l-shelf .index:nth-child(2n) { transform: rotate(1deg); }
+.l-shelf .index:nth-child(3n) { transform: rotate(-.4deg); }
+.l-shelf .pin { position: absolute; top: -9px; left: 50%; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff9a8a, #c0281e 55%, #6a100a); box-shadow: 0 3px 5px rgb(0 0 0 / .6); }
+.l-shelf .index h2 { margin: 0 0 12px; padding-bottom: 6px; border-bottom: 2px solid #c8503f; color: #3a2416; font-size: 17px; }
+.l-shelf .index label { display: block; margin: 0 0 10px; font-size: 13px; font-weight: 600; }
+.l-shelf .index .in { display: block; width: 100%; margin-top: 3px; padding: 6px 10px; border: 1px solid #b8a688; border-radius: 3px; background: rgb(255 255 255 / .55); color: #2a1f14; font: inherit; font-size: 14px; }
+.l-shelf .index .help { margin: -4px 0 12px; color: #6e5a46; font-size: 12px; }
+.l-shelf .index .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.l-shelf .index .chip { border-color: #b8a688; background: #e6d6b0; color: #3a2416; cursor: default; }
+.l-shelf .index .check { display: flex; align-items: center; gap: 8px; }
+.l-shelf .stamp {
+  padding: 10px 22px; border: 3px double #c0281e; border-radius: 6px; background: transparent; color: #c0281e;
+  font: inherit; font-size: 16px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; transform: rotate(-4deg); cursor: pointer;
+}
+
+/* ---------- Phone: the four pictures ---------- */
+.l-shelf .phones { display: flex; gap: 28px; padding: 10px 6px 20px; overflow-x: auto; }
+.l-shelf .phones figure { flex: none; margin: 0; text-align: center; }
+.l-shelf .phones img { display: block; border: 8px solid #0c0906; border-radius: 34px; box-shadow: 0 18px 30px rgb(0 0 0 / .7); }
+.l-shelf .phones figcaption { margin-top: 12px; color: #f3dca4; font-weight: 600; }
+
+/* 100vw counts the scrollbar on Windows, so the full-bleed wrapper overshoots by half a scrollbar each side: clip it rather than scroll */
+body:has(.l-shelf) { overflow-x: clip; }

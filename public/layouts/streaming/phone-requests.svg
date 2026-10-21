@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+<defs>
+<linearGradient id="g30" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="g200" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="g10" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#433c19"/></linearGradient>
+<linearGradient id="g220" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3057a6"/><stop offset="1" stop-color="#271943"/></linearGradient>
+<linearGradient id="g350" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a63044"/><stop offset="1" stop-color="#432e19"/></linearGradient>
+<linearGradient id="g140" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#30a657"/><stop offset="1" stop-color="#194343"/></linearGradient>
+<linearGradient id="g260" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5730a6"/><stop offset="1" stop-color="#431943"/></linearGradient>
+<linearGradient id="g300" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a630a6"/><stop offset="1" stop-color="#431927"/></linearGradient>
+<linearGradient id="g20" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a65730"/><stop offset="1" stop-color="#434319"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#0f0f12"/>
+<text x="28" y="35" fill="#f2f2f2" font-size="15" font-weight="700">9:41</text>
+<rect x="318" y="30" width="3" height="5" rx="1" fill="#f2f2f2"/><rect x="323" y="28" width="3" height="7" rx="1" fill="#f2f2f2"/><rect x="328" y="26" width="3" height="9" rx="1" fill="#f2f2f2"/><rect x="333" y="24" width="3" height="11" rx="1" fill="#f2f2f2"/>
+<rect x="344" y="24" width="24" height="12" rx="3" fill="none" stroke="#f2f2f2" stroke-width="1.5"/><rect x="346" y="26" width="17" height="8" rx="2" fill="#f2f2f2"/>
+<text x="20" y="84" fill="#f2f2f2" font-size="28" font-weight="800" letter-spacing="-.5">Requests</text>
+<circle cx="354" cy="74" r="16" fill="url(#g200)"/><text x="354" y="79" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">C</text>
+<rect x="20" y="104" width="46" height="30" rx="15" fill="#f2f2f2"/><text x="43" y="123" fill="#111" font-size="12" font-weight="700" text-anchor="middle">All</text>
+<rect x="74" y="104" width="60" height="30" rx="15" fill="none" stroke="#fff" stroke-opacity=".14"/><text x="104" y="123" fill="#a0a0a8" font-size="12" font-weight="600" text-anchor="middle">Movies</text>
+<rect x="142" y="104" width="74" height="30" rx="15" fill="none" stroke="#fff" stroke-opacity=".14"/><text x="179" y="123" fill="#a0a0a8" font-size="12" font-weight="600" text-anchor="middle">TV Shows</text>
+<rect x="224" y="104" width="84" height="30" rx="15" fill="none" stroke="#fff" stroke-opacity=".14"/><text x="266" y="123" fill="#a0a0a8" font-size="12" font-weight="600" text-anchor="middle">Audiobooks</text>
+<rect x="316" y="104" width="54" height="30" rx="15" fill="none" stroke="#fff" stroke-opacity=".14"/><text x="343" y="123" fill="#a0a0a8" font-size="12" font-weight="600" text-anchor="middle">Stuck</text>
+<rect x="20" y="152" width="110" height="165" rx="8" fill="url(#g30)"/>
+<rect x="62" y="160" width="62" height="18" rx="9" fill="#1e6b35"/><text x="93" y="173" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Available</text>
+<text x="20" y="333" fill="#f2f2f2" font-size="12" font-weight="600">Dune: Part Two</text><text x="20" y="348" fill="#a0a0a8" font-size="10">Movie · 24.1 GB</text>
+<rect x="140" y="152" width="110" height="165" rx="8" fill="url(#g200)"/>
+<rect x="168" y="160" width="76" height="18" rx="9" fill="#2a5d8f"/><text x="206" y="173" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Downloading</text>
+<text x="148" y="302" fill="#fff" font-size="18" font-weight="800">62%</text>
+<rect x="146" y="306" width="98" height="4" rx="2" fill="#000" fill-opacity=".55"/><rect x="146" y="306" width="61" height="4" rx="2" fill="#4a9ad0"/>
+<text x="140" y="333" fill="#f2f2f2" font-size="12" font-weight="600">Severance</text><text x="140" y="348" fill="#a0a0a8" font-size="10">Seasons 1, 2 · 38.4 GB</text>
+<rect x="260" y="152" width="110" height="165" rx="8" fill="url(#g10)"/>
+<rect x="298" y="160" width="66" height="18" rx="9" fill="#44444c"/><text x="331" y="173" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Requested</text>
+<text x="260" y="333" fill="#f2f2f2" font-size="12" font-weight="600">The Bear</text><text x="260" y="348" fill="#a0a0a8" font-size="10">Season 3</text>
+<rect x="20" y="362" width="110" height="165" rx="8" fill="url(#g220)"/>
+<rect x="62" y="370" width="62" height="18" rx="9" fill="#1e6b35"/><text x="93" y="383" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Available</text>
+<text x="20" y="543" fill="#f2f2f2" font-size="12" font-weight="600">Arrival</text><text x="20" y="558" fill="#a0a0a8" font-size="10">Movie · 14.8 GB</text>
+<rect x="140" y="362" width="110" height="165" rx="8" fill="url(#g350)"/>
+<rect x="180" y="370" width="64" height="18" rx="9" fill="#8a6a1c"/><text x="212" y="383" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Importing</text>
+<text x="148" y="512" fill="#fff" font-size="18" font-weight="800">96%</text>
+<rect x="146" y="516" width="98" height="4" rx="2" fill="#000" fill-opacity=".55"/><rect x="146" y="516" width="94" height="4" rx="2" fill="#e5a00d"/>
+<text x="140" y="543" fill="#f2f2f2" font-size="12" font-weight="600">Shōgun</text><text x="140" y="558" fill="#a0a0a8" font-size="10">Season 1 · 29.2 GB</text>
+<rect x="260" y="362" width="110" height="165" rx="8" fill="url(#g140)"/>
+<rect x="288" y="370" width="76" height="18" rx="9" fill="#2a5d8f"/><text x="326" y="383" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Downloading</text>
+<text x="268" y="512" fill="#fff" font-size="18" font-weight="800">18%</text>
+<rect x="266" y="516" width="98" height="4" rx="2" fill="#000" fill-opacity=".55"/><rect x="266" y="516" width="18" height="4" rx="2" fill="#4a9ad0"/>
+<text x="260" y="543" fill="#f2f2f2" font-size="12" font-weight="600">Project Hail Mary</text><text x="260" y="558" fill="#a0a0a8" font-size="10">Audiobook · 0.5 GB</text>
+<rect x="20" y="572" width="110" height="165" rx="8" fill="url(#g260)"/>
+<rect x="62" y="580" width="62" height="18" rx="9" fill="#1e6b35"/><text x="93" y="593" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Available</text>
+<text x="20" y="753" fill="#f2f2f2" font-size="12" font-weight="600">Andor</text>
+<rect x="140" y="572" width="110" height="165" rx="8" fill="url(#g300)"/><rect x="140" y="572" width="110" height="165" rx="8" fill="#8a2e2e" fill-opacity=".4"/>
+<rect x="198" y="580" width="46" height="18" rx="9" fill="#8a2e2e"/><text x="221" y="593" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Stuck</text>
+<text x="148" y="722" fill="#fff" font-size="14" font-weight="800">Nothing found</text>
+<text x="140" y="753" fill="#f2f2f2" font-size="12" font-weight="600">Past Lives</text>
+<rect x="260" y="572" width="110" height="165" rx="8" fill="url(#g20)"/>
+<rect x="302" y="580" width="62" height="18" rx="9" fill="#1e6b35"/><text x="333" y="593" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">Available</text>
+<text x="260" y="753" fill="#f2f2f2" font-size="12" font-weight="600">The Martian</text>
+<rect y="760" width="390" height="84" fill="#141418"/><rect y="760" width="390" height="1" fill="#2a2a31"/>
+<path d="M38 790l11-10 11 10v11H38z" fill="#6b6b75"/><text x="49" y="818" fill="#6b6b75" font-size="11" font-weight="600" text-anchor="middle">Home</text>
+<rect x="135" y="781" width="22" height="3.5" rx="1.75" fill="#e5a00d"/><rect x="135" y="788" width="22" height="3.5" rx="1.75" fill="#e5a00d"/><rect x="135" y="795" width="22" height="3.5" rx="1.75" fill="#e5a00d"/><text x="146" y="818" fill="#e5a00d" font-size="11" font-weight="600" text-anchor="middle">Requests</text>
+<circle cx="244" cy="790" r="10" fill="none" stroke="#6b6b75" stroke-width="2.5"/><path d="M244 790l5-5" stroke="#6b6b75" stroke-width="2.5" stroke-linecap="round"/><text x="244" y="818" fill="#6b6b75" font-size="11" font-weight="600" text-anchor="middle">Admin</text>
+<circle cx="341" cy="790" r="9" fill="none" stroke="#6b6b75" stroke-width="3" stroke-dasharray="4 2.5"/><circle cx="341" cy="790" r="3" fill="#6b6b75"/><text x="341" y="818" fill="#6b6b75" font-size="11" font-weight="600" text-anchor="middle">Settings</text>
+<rect x="128" y="832" width="134" height="5" rx="2.5" fill="#f2f2f2"/>
+</svg>

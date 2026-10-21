@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+<rect width="390" height="844" fill="#1c1c1c"/>
+<text x="28" y="32" fill="#e8e8e8" font-size="15" font-weight="600">9:41</text>
+<g fill="#e8e8e8"><rect x="306" y="27" width="3" height="5" rx="1"/><rect x="311" y="25" width="3" height="7" rx="1"/><rect x="316" y="23" width="3" height="9" rx="1"/><rect x="321" y="21" width="3" height="11" rx="1"/><rect x="336" y="23" width="21" height="8" rx="2"/><rect x="360" y="25" width="2" height="4" rx="1"/></g>
+<rect x="334" y="21" width="25" height="12" rx="3.5" fill="none" stroke="#e8e8e8"/>
+<text x="16" y="82" fill="#e8e8e8" font-size="28" font-weight="700">Settings</text>
+<rect x="16" y="98" width="358" height="38" rx="9" fill="#141414" stroke="#4a4a4a"/>
+<path d="M30 112a6 6 0 1 0 8.5 8.5M38.5 120.5l4 4" fill="none" stroke="#969696" stroke-width="1.6" stroke-linecap="round"/>
+<text x="50" y="122" fill="#6a6a6a" font-size="15">Filter settings…</text>
+<g font-size="16" font-weight="600" fill="#e8e8e8">
+<text x="16" y="180">Size Limits</text><text x="16" y="201" fill="#969696" font-size="13" font-weight="400">40 GB · 4 GB/h · 600 MB</text><text x="374" y="194" fill="#6a6a6a" font-size="22" font-weight="400" text-anchor="end">›</text><line x1="16" y1="216.5" x2="374" y2="216.5" stroke="#343434"/>
+<text x="16" y="248">Quality</text><text x="16" y="269" fill="#969696" font-size="13" font-weight="400">HD-1080p · HD-1080p · Any</text><text x="374" y="262" fill="#6a6a6a" font-size="22" font-weight="400" text-anchor="end">›</text><line x1="16" y1="284.5" x2="374" y2="284.5" stroke="#343434"/>
+<text x="16" y="316">Discord</text><text x="16" y="337" fill="#969696" font-size="13" font-weight="400">The Crafty Lounge #arrmy</text><text x="374" y="330" fill="#6a6a6a" font-size="22" font-weight="400" text-anchor="end">›</text><line x1="16" y1="352.5" x2="374" y2="352.5" stroke="#343434"/>
+<text x="16" y="384">Plex</text><text x="16" y="405" fill="#969696" font-size="13" font-weight="400">Crafty Plex · 3 libraries</text><text x="374" y="398" fill="#6a6a6a" font-size="22" font-weight="400" text-anchor="end">›</text><line x1="16" y1="420.5" x2="374" y2="420.5" stroke="#343434"/>
+<text x="16" y="452">Public address</text><text x="16" y="473" fill="#969696" font-size="13" font-weight="400">arrmy.craftyplayz.com</text><text x="374" y="466" fill="#6a6a6a" font-size="22" font-weight="400" text-anchor="end">›</text><line x1="16" y1="488.5" x2="374" y2="488.5" stroke="#343434"/>
+</g>
+<text x="16" y="530" fill="#969696" font-size="11" font-weight="600" letter-spacing="1">SIGNED IN</text>
+<circle cx="36" cy="566" r="20" fill="#3986ac"/><text x="36" y="572" fill="#fff" font-size="17" font-weight="700" text-anchor="middle">C</text>
+<text x="68" y="562" fill="#e8e8e8" font-size="16" font-weight="600">Crafty</text><text x="68" y="581" fill="#969696" font-size="13">Admin · 4 Requests</text>
+<rect x="286" y="550" width="88" height="32" rx="6" fill="#2e2e2e" stroke="#4a4a4a"/><text x="330" y="571" fill="#e8e8e8" font-size="13" text-anchor="middle">Sign out</text>
+<line x1="16" y1="606.5" x2="374" y2="606.5" stroke="#343434"/>
+<text x="16" y="636" fill="#6a6a6a" font-size="12">Arrmy v1.2 · Mockup: nothing here works.</text>
+<rect y="760" width="390" height="84" fill="#171717"/><line x1="0" y1="760.5" x2="390" y2="760.5" stroke="#343434"/>
+<rect x="310" y="766" width="62" height="54" rx="10" fill="#263340"/>
+<g fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<path transform="translate(37 774)" stroke="#969696" d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1z"/>
+<path transform="translate(134 774)" stroke="#969696" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+<path transform="translate(232 774)" stroke="#969696" d="M3 12h4l3-8 4 16 3-8h4"/>
+<path transform="translate(329 774)" stroke="#6cb8e8" d="M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>
+</g>
+<g font-size="11" text-anchor="middle" fill="#969696"><text x="49" y="812">Home</text><text x="146" y="812">Requests</text><text x="244" y="812">Admin</text><text x="341" y="812" fill="#6cb8e8" font-weight="600">Settings</text></g>
+<rect x="135" y="830" width="120" height="5" rx="2.5" fill="#555"/>
+</svg>

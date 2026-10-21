@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<rect width="390" height="844" fill="#faf7f2"/>
+<text x="28" y="38" font-size="15" font-weight="600" fill="#1f1d1a">9:41</text>
+<g fill="#1f1d1a"><rect x="296" y="30" width="3" height="8" rx="1"/><rect x="301" y="28" width="3" height="10" rx="1"/><rect x="306" y="26" width="3" height="12" rx="1"/><rect x="311" y="24" width="3" height="14" rx="1"/><rect x="336" y="28" width="20" height="8" rx="2"/><rect x="359.5" y="30" width="2" height="4" rx="1"/></g>
+<rect x="334" y="26" width="24" height="12" rx="3.5" fill="none" stroke="#1f1d1a"/>
+<rect y="56" width="390" height="48" fill="#fff"/><line x1="0" y1="104.5" x2="390" y2="104.5" stroke="#e6e0d6"/>
+<text x="20" y="87" font-size="19" font-weight="700" fill="#1f1d1a">Arrmy</text>
+<text x="370" y="86" font-size="13" fill="#6b6560" text-anchor="end">Crafty</text>
+
+<text x="20" y="148" font-size="28" font-weight="700" fill="#1f1d1a" letter-spacing="-.5">Admin</text>
+<text x="20" y="172" font-size="13" fill="#6b6560">3 downloading, 1 importing, 1 waiting, 1 stuck</text>
+
+<g font-size="11" font-weight="600" fill="#6b6560" letter-spacing=".8"><text x="20" y="208">NEEDS FIXING <tspan font-weight="400" letter-spacing="0">2</tspan></text><text x="20" y="394">DOWNLOADING NOW <tspan font-weight="400" letter-spacing="0">3</tspan></text><text x="20" y="614">DISKS</text><text x="20" y="706">SERVICES</text></g>
+<g stroke="#e6e0d6"><line x1="20" y1="216.5" x2="370" y2="216.5"/><line x1="20" y1="290.5" x2="370" y2="290.5"/><line x1="20" y1="402.5" x2="370" y2="402.5"/><line x1="20" y1="466.5" x2="370" y2="466.5"/><line x1="20" y1="524.5" x2="370" y2="524.5"/><line x1="20" y1="622.5" x2="370" y2="622.5"/><line x1="20" y1="714.5" x2="370" y2="714.5"/></g>
+
+<g font-size="12" fill="#6b6560">
+<text x="20" y="242" font-size="15" font-weight="600" fill="#1f1d1a">Past Lives</text>
+<text x="20" y="260">No release found in 4 days.</text><text x="20" y="276">Radarr has searched 6 times.</text>
+<rect x="270" y="238" width="100" height="32" rx="16" fill="#fff" stroke="#cfc7ba"/><text x="320" y="258" font-size="12" fill="#1f1d1a" text-anchor="middle">Search again</text>
+
+<text x="20" y="316" font-size="15" font-weight="600" fill="#1f1d1a">Shōgun S01E09</text>
+<text x="20" y="334">Import failed: file already exists</text><text x="20" y="350">with a different name.</text>
+<rect x="270" y="312" width="100" height="32" rx="16" fill="#fff" stroke="#cfc7ba"/><text x="320" y="332" font-size="12" fill="#1f1d1a" text-anchor="middle">Replace file</text>
+
+<text x="20" y="426" font-size="14" font-weight="600" fill="#1f1d1a">Severance S02</text>
+<text x="20" y="443">12.4 MB/s · 41 min left · 48 seeds</text>
+<rect x="20" y="452" width="290" height="3" rx="1.5" fill="#e6e0d6"/><rect x="20" y="452" width="180" height="3" rx="1.5" fill="#1d5c8f"/>
+<text x="370" y="428" font-size="13" text-anchor="end">62%</text>
+
+<text x="20" y="484" font-size="14" font-weight="600" fill="#1f1d1a">Slow Horses S04E03</text>
+<text x="20" y="501">3.1 MB/s · 2 h 10 min left · 7 seeds</text>
+<rect x="20" y="510" width="290" height="3" rx="1.5" fill="#e6e0d6"/><rect x="20" y="510" width="128" height="3" rx="1.5" fill="#1d5c8f"/>
+<text x="370" y="486" font-size="13" text-anchor="end">44%</text>
+
+<text x="20" y="542" font-size="14" font-weight="600" fill="#1f1d1a">Project Hail Mary (Ray Porter)</text>
+<text x="20" y="559">0.4 MB/s · 18 min left · 2 seeds</text>
+<rect x="20" y="568" width="290" height="3" rx="1.5" fill="#e6e0d6"/><rect x="20" y="568" width="52" height="3" rx="1.5" fill="#1d5c8f"/>
+<text x="370" y="544" font-size="13" text-anchor="end">18%</text>
+
+<g font-size="11"><text x="20" y="646" font-size="13" font-weight="600" fill="#1f1d1a">Movies</text><text x="20" y="662">3.2 of 4.0 TB · 80%</text>
+<rect x="20" y="670" width="100" height="3" rx="1.5" fill="#e6e0d6"/><rect x="20" y="670" width="80" height="3" rx="1.5" fill="#1d5c8f"/>
+<text x="140" y="646" font-size="13" font-weight="600" fill="#1f1d1a">TV</text><text x="140" y="662">5.8 of 8.0 TB · 73%</text>
+<rect x="140" y="670" width="100" height="3" rx="1.5" fill="#e6e0d6"/><rect x="140" y="670" width="73" height="3" rx="1.5" fill="#1d5c8f"/>
+<text x="260" y="646" font-size="13" font-weight="600" fill="#1f1d1a">Audiobooks</text><text x="260" y="662">0.12 of 1.0 TB · 12%</text>
+<rect x="260" y="670" width="100" height="3" rx="1.5" fill="#e6e0d6"/><rect x="260" y="670" width="12" height="3" rx="1.5" fill="#1d5c8f"/></g>
+
+<g font-size="13" fill="#1f1d1a"><circle cx="25" cy="734" r="4.5" fill="#5fa772"/><text x="38" y="738">Radarr</text><circle cx="25" cy="758" r="4.5" fill="#5fa772"/><text x="38" y="762">Sonarr</text>
+<circle cx="145" cy="734" r="4.5" fill="#5fa772"/><text x="158" y="738">Prowlarr</text><circle cx="145" cy="758" r="4.5" fill="#5fa772"/><text x="158" y="762">qBittorrent</text>
+<circle cx="265" cy="734" r="4.5" fill="#d9534f"/><text x="278" y="738">LazyLibrarian</text><circle cx="265" cy="758" r="4.5" fill="#5fa772"/><text x="278" y="762">Plex</text></g>
+</g>
+
+<rect y="770" width="390" height="74" fill="#fff"/><line x1="0" y1="770.5" x2="390" y2="770.5" stroke="#e6e0d6"/>
+<g fill="none" stroke="#9a948c" stroke-width="2" stroke-linecap="round">
+<circle cx="47" cy="791" r="7"/><line x1="52" y1="796" x2="57" y2="801"/>
+<path d="M137 786h18M137 793h18M137 800h11"/>
+<path d="M233 795h5l3-8 4 16 3-8h6" stroke="#1d5c8f"/>
+<circle cx="341" cy="793" r="7" stroke-dasharray="3 2.5"/><circle cx="341" cy="793" r="2.5" fill="#9a948c" stroke="none"/>
+</g>
+<g font-size="11" text-anchor="middle" fill="#9a948c"><text x="49" y="822">Home</text><text x="146" y="822">Requests</text><text x="244" y="822" fill="#1d5c8f" font-weight="600">Admin</text><text x="341" y="822">Settings</text></g>
+<rect x="128" y="832" width="134" height="5" rx="2.5" fill="#1f1d1a"/>
+</svg>

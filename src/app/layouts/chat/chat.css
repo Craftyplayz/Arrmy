@@ -1,0 +1,148 @@
+/* Chat feed mockup: a Discord-style channel rail on the left and a message timeline on the right.
+   Every rule starts with .l-chat so nothing leaks into the real site or the other mockups. */
+.l-chat {
+  --bg: #313338; --card: #2b2d31; --card2: #383a40; --sunken: #1e1f22; --line: #3f4147; --line-strong: #4e5058;
+  --text: #dbdee1; --muted: #949ba4; --bright: #f2f3f5; --accent: #5865f2; --link: #00a8fc;
+  --ok: #2dc770; --info: #38b6ff; --gold: #f0b232; --danger: #f23f43; --grey: #a0a4ad;
+  display: flex; width: 100vw; max-width: none; height: calc(100vh - var(--header-h)); margin: -16px 0 0 calc(50% - 50vw);
+  overflow: hidden; background: var(--bg); color: var(--text); font: 15px/1.375 var(--font);
+}
+.l-chat a { color: inherit; text-decoration: none; }
+/* one colour per status or mood; chips, embeds, bars and count tiles all read it */
+.l-chat .t-grey { --tone: var(--grey); }
+.l-chat .t-blue { --tone: var(--info); }
+.l-chat .t-green { --tone: var(--ok); }
+.l-chat .t-gold { --tone: var(--gold); }
+.l-chat .t-red { --tone: var(--danger); }
+.l-chat .t-blurple { --tone: var(--accent); }
+
+/* ---------- the rail: server name, channels, who is signed in ---------- */
+.l-chat .lc-rail { display: flex; flex-direction: column; flex: none; width: 240px; background: var(--card); }
+.l-chat .lc-server { display: flex; align-items: center; gap: 8px; flex: none; height: 48px; padding: 0 16px; box-shadow: 0 1px 0 var(--sunken); color: var(--bright); font-weight: 600; }
+.l-chat .lc-server:hover { background: #35373c; text-decoration: none; }
+.l-chat .lc-server::after { content: ''; width: 7px; height: 7px; margin: -4px 0 0 auto; border: solid #b5bac1; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.l-chat .lc-chans { display: flex; flex-direction: column; padding: 8px 8px 0; }
+.l-chat .lc-cat { margin: 8px 0 2px; padding: 0 8px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+.l-chat .lc-chan { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; padding: 6px 8px; border-radius: 4px; color: var(--muted); font-size: 16px; font-weight: 500; }
+.l-chat .lc-chan:hover { background: #35373c; color: var(--text); text-decoration: none; }
+.l-chat .lc-chan.is-active { background: #404249; color: #fff; }
+.l-chat .lc-hash { color: #80848e; font-size: 1.4em; font-weight: 400; line-height: 1; }
+.l-chat .lc-n { min-width: 16px; margin-left: auto; padding: 0 5px; background: var(--danger); border-radius: 8px; color: #fff; font-size: 12px; font-weight: 700; line-height: 16px; text-align: center; }
+.l-chat .lc-me { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; align-items: center; margin-top: auto; padding: 8px; background: #232428; }
+.l-chat .lc-me b { display: block; color: var(--bright); font-size: 14px; line-height: 1.2; }
+.l-chat .lc-me small { color: var(--muted); font-size: 12px; }
+.l-chat .l-note { grid-column: 1 / -1; margin: 8px 0 0; padding: 4px 8px; background: var(--sunken); border-radius: 4px; color: var(--gold); font-size: 12px; }
+
+/* ---------- the channel: header, pinned bar, the feed ---------- */
+.l-chat .lc-main { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.l-chat .lc-head { display: flex; align-items: center; gap: 8px; flex: none; height: 48px; padding: 0 16px; box-shadow: 0 1px 0 var(--sunken); font-size: 16px; }
+.l-chat .lc-head .lc-hash { font-size: 24px; }
+.l-chat .lc-head b { color: var(--bright); }
+.l-chat .lc-topic { min-width: 0; margin-left: 8px; padding-left: 16px; overflow: hidden; border-left: 1px solid var(--line-strong); color: var(--muted); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.l-chat .lc-members { flex: none; margin-left: auto; color: var(--muted); font-size: 13px; }
+.l-chat .lc-pinned { display: flex; align-items: center; gap: 10px; flex: none; padding: 8px 16px; background: var(--card); box-shadow: 0 1px 0 var(--sunken); font-size: 14px; }
+.l-chat .lc-pinned svg, .l-chat .lc-pin svg { flex: none; width: 14px; height: 14px; fill: var(--muted); }
+.l-chat .lc-pinned b { color: var(--bright); }
+.l-chat .lc-lab { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
+.l-chat .lc-feed { flex: 1; min-height: 0; padding: 16px 0 8px; overflow-y: auto; }
+.l-chat .lc-day { display: flex; align-items: center; gap: 8px; margin: 16px 16px 0; color: var(--muted); font-size: 12px; font-weight: 600; }
+.l-chat .lc-day::before, .l-chat .lc-day::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* ---------- messages ---------- */
+.l-chat .lc-msg { display: grid; grid-template-columns: 40px 1fr; gap: 0 16px; margin-top: 16px; padding: 2px 48px 2px 16px; }
+.l-chat .lc-msg:hover { background: #2e3035; }
+.l-chat .lc-msg.is-pinned { background: rgb(240 178 50 / .06); border-left: 2px solid var(--gold); padding-left: 14px; }
+.l-chat .lc-msg-body { min-width: 0; }
+.l-chat .lc-msg-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.l-chat .lc-msg-head b { color: var(--bright); font-weight: 500; }
+.l-chat .lc-msg-head time { color: var(--muted); font-size: 12px; }
+.l-chat .lc-bot { padding: 0 4px; background: var(--accent); border-radius: 3px; color: #fff; font-size: 10px; font-weight: 600; line-height: 15px; }
+.l-chat .lc-pin { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; color: var(--muted); font-size: 12px; }
+.l-chat .lc-msg p { margin: 0; }
+.l-chat .lc-msg p b { color: var(--bright); }
+.l-chat .lc-mention, .l-chat .lc-cmd { padding: 0 3px; background: rgb(88 101 242 / .3); border-radius: 3px; color: #c9cdfb; font-weight: 500; }
+.l-chat .lc-cmd { font-family: var(--mono); font-size: 13px; }
+.l-chat .lc-av { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 40px; height: 40px; margin-top: 2px; border-radius: 50%; color: #fff; font-size: 18px; font-weight: 600; }
+.l-chat .lc-av-bot { background: var(--accent); }
+.l-chat .lc-av img { width: 65%; height: 65%; }
+.l-chat .lc-av-sm { width: 24px; height: 24px; margin: 0; font-size: 12px; }
+
+/* ---------- embeds: the bot's cards ---------- */
+.l-chat .lc-embed { max-width: 560px; margin-top: 6px; padding: 10px 14px 10px 12px; background: var(--card); border-left: 4px solid var(--tone, var(--grey)); border-radius: 4px; font-size: 14px; }
+.l-chat .lc-embed-h { display: block; margin-bottom: 8px; color: var(--bright); font-size: 15px; font-weight: 600; }
+.l-chat .lc-row { display: flex; gap: 12px; }
+.l-chat .lc-poster { flex: none; width: 48px; height: 72px; border-radius: 4px; }
+.l-chat .lc-poster-sm { width: 32px; height: 48px; border-radius: 3px; }
+.l-chat .lc-embed-body { display: grid; flex: 1; gap: 4px; align-content: start; justify-items: start; min-width: 0; }
+.l-chat .lc-title { color: var(--link); font-weight: 600; }
+.l-chat .lc-meta, .l-chat .lc-foot { color: var(--muted); font-size: 13px; }
+.l-chat .lc-foot { display: block; margin-top: 6px; font-size: 12px; }
+.l-chat .lc-desc { margin: 0 0 8px; font-size: 14px; }
+.l-chat .lc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; background: color-mix(in srgb, var(--tone) 16%, transparent); border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent); border-radius: 999px; color: var(--tone); font-size: 12px; font-weight: 600; }
+.l-chat .lc-chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--tone); }
+.l-chat .lc-progrow { display: flex; align-items: center; gap: 8px; width: 100%; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.l-chat .lc-prog { flex: 1; height: 8px; overflow: hidden; background: var(--sunken); border-radius: 4px; }
+.l-chat .lc-prog i { display: block; height: 100%; background: var(--tone, var(--info)); border-radius: 4px; }
+.l-chat .lc-fields { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.l-chat .lc-fld { display: grid; font-size: 14px; }
+.l-chat .lc-fld small { color: var(--bright); font-size: 12px; font-weight: 600; }
+.l-chat .lc-counts { display: flex; flex-wrap: wrap; gap: 8px; }
+.l-chat .lc-count { display: grid; min-width: 92px; padding: 6px 10px; background: var(--card2); border-top: 3px solid var(--tone); border-radius: 4px; text-align: center; }
+.l-chat .lc-count b { color: var(--bright); font-size: 20px; line-height: 1.2; }
+.l-chat .lc-count small { color: var(--muted); font-size: 12px; }
+.l-chat .lc-disks { display: grid; gap: 8px; margin: 10px 0 4px; }
+.l-chat .lc-disk { display: grid; grid-template-columns: 90px 1fr 110px; gap: 10px; align-items: center; font-size: 13px; }
+.l-chat .lc-disk small { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.l-chat .lc-svc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; }
+.l-chat .lc-svc span { display: flex; align-items: center; gap: 8px; }
+.l-chat .lc-svc small { margin-left: auto; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.l-chat .lc-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--ok); }
+.l-chat .lc-dot.down { background: var(--danger); }
+
+/* search hits: one compact row each */
+.l-chat .lc-res { display: flex; align-items: center; gap: 10px; max-width: 560px; margin-top: 6px; padding: 6px 10px 6px 8px; background: var(--card); border-left: 4px solid var(--accent); border-radius: 4px; }
+.l-chat .lc-grow { display: grid; flex: 1; min-width: 0; }
+.l-chat .lc-grow b { color: var(--bright); font-size: 14px; }
+.l-chat .lc-grow small { color: var(--muted); font-size: 12px; }
+
+/* ---------- buttons, reactions, threads ---------- */
+.l-chat .lc-b { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 16px; background: var(--line-strong); border: 0; border-radius: 3px; color: #fff; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: background var(--fast); }
+.l-chat .lc-b:hover { background: #6d6f78; }
+.l-chat .lc-b.primary { background: var(--accent); }
+.l-chat .lc-b.primary:hover { background: #4752c4; }
+.l-chat .lc-b.ok { background: #23a559; }
+.l-chat .lc-b.ok:hover { background: #1a6e3d; }
+.l-chat .lc-b.danger { background: #da373c; }
+.l-chat .lc-b.danger:hover { background: #a1282c; }
+.l-chat .lc-b.small { height: 26px; padding: 0 10px; font-size: 13px; }
+.l-chat .lc-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.l-chat .lc-acts .lc-cmd { font-size: 12px; }
+.l-chat .lc-reacts { display: flex; gap: 4px; margin-top: 6px; }
+.l-chat .lc-react { padding: 2px 8px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; }
+.l-chat .lc-react:hover { border-color: var(--line-strong); color: var(--text); }
+.l-chat .lc-thread { display: grid; gap: 6px; max-width: 560px; margin-top: 8px; padding: 8px 12px; background: var(--card); border-radius: 4px; }
+.l-chat .lc-thread-h { color: var(--link); font-size: 13px; font-weight: 600; }
+.l-chat .lc-thread > span { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.l-chat .lc-thread time { margin-left: auto; color: var(--muted); font-size: 11px; }
+
+/* ---------- the message box ---------- */
+.l-chat .lc-compose { flex: none; margin: 0 16px 20px; }
+.l-chat .lc-box { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px 0 16px; background: var(--card2); border-radius: 8px; }
+.l-chat .lc-plus { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 24px; height: 24px; background: #b5bac1; border-radius: 50%; color: var(--card2); font-size: 22px; font-weight: 700; line-height: 1; }
+.l-chat .lc-box input { flex: 1; min-width: 0; padding: 11px 0; background: none; border: 0; color: var(--text); font: inherit; outline: none; }
+.l-chat .lc-box input::placeholder { color: #6d6f78; }
+.l-chat .lc-hint { margin: 6px 4px 0; color: var(--muted); font-size: 12px; }
+
+/* ---------- the phone pictures ---------- */
+.l-chat .lc-phones { display: flex; gap: 20px; margin-top: 10px; padding-bottom: 8px; overflow-x: auto; }
+.l-chat .lc-phones figure { flex: none; margin: 0; text-align: center; }
+.l-chat .lc-phones img { display: block; width: 240px; height: auto; border: 1px solid var(--line); border-radius: 20px; }
+.l-chat .lc-phones figcaption { margin-top: 8px; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 900px) {
+  .l-chat .lc-rail { width: 200px; }
+  .l-chat .lc-topic { display: none; }
+}
+
+/* 100vw counts the scrollbar on Windows, so the full-bleed wrapper overshoots by half a scrollbar each side: clip it rather than scroll */
+body:has(.l-chat) { overflow-x: clip; }

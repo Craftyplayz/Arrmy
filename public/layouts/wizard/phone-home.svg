@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+<defs>
+<linearGradient id="a" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a69c30"/><stop offset="1" stop-color="#2a4319"/></linearGradient>
+<linearGradient id="b" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#7f30a6"/><stop offset="1" stop-color="#431935"/></linearGradient>
+<linearGradient id="c" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#3044a6"/><stop offset="1" stop-color="#2e1943"/></linearGradient>
+</defs>
+<rect width="390" height="844" rx="44" fill="#19191c"/>
+<text x="30" y="42" fill="#f3f1ea" font-size="15" font-weight="700">9:41</text>
+<g fill="#f3f1ea"><rect x="306" y="36" width="3" height="5" rx="1"/><rect x="311" y="33" width="3" height="8" rx="1"/><rect x="316" y="30" width="3" height="11" rx="1"/><rect x="321" y="27" width="3" height="14" rx="1"/></g>
+<rect x="334" y="28" width="26" height="13" rx="4" fill="none" stroke="#f3f1ea" stroke-width="1.5"/><rect x="336.5" y="30.5" width="19" height="8" rx="2" fill="#f3f1ea"/>
+<circle cx="36" cy="80" r="6" fill="#f59e3c"/><text x="50" y="86" fill="#f3f1ea" font-size="18" font-weight="800">Arrmy</text>
+<text x="360" y="85" text-anchor="end" fill="#9c9a93" font-size="13">Crafty</text>
+<circle cx="30" cy="126" r="5" fill="#f59e3c"/><circle cx="46" cy="126" r="5" fill="#f59e3c"/><circle cx="62" cy="126" r="5" fill="#4b4b54"/><circle cx="78" cy="126" r="5" fill="#4b4b54"/>
+<text x="94" y="131" fill="#9c9a93" font-size="12" font-weight="700" letter-spacing="1">STEP 2 OF 4</text>
+<text x="24" y="180" fill="#f3f1ea" font-size="36" font-weight="800">Is it one of</text>
+<text x="24" y="220" fill="#f3f1ea" font-size="36" font-weight="800">these?</text>
+<text x="24" y="250" fill="#9c9a93" font-size="15">Tap the one you mean.</text>
+<rect x="24" y="274" width="342" height="134" rx="18" fill="#3b2a16" stroke="#f59e3c" stroke-width="2"/>
+<rect x="40" y="290" width="68" height="102" rx="8" fill="url(#a)"/>
+<text x="124" y="318" fill="#f3f1ea" font-size="20" font-weight="700">Fallout</text>
+<text x="124" y="338" fill="#9c9a93" font-size="13" font-weight="600">2024 · TV Show · 1 season</text>
+<text x="124" y="362" fill="#9c9a93" font-size="13">Two hundred years after the</text>
+<text x="124" y="380" fill="#9c9a93" font-size="13">apocalypse, a vault dweller…</text>
+<rect x="298" y="288" width="56" height="22" rx="11" fill="#f59e3c"/><text x="326" y="303" text-anchor="middle" fill="#1b1206" font-size="11" font-weight="700">Picked</text>
+<rect x="24" y="420" width="342" height="134" rx="18" fill="#2b2b31" stroke="#34343b"/>
+<rect x="40" y="436" width="68" height="102" rx="8" fill="url(#b)"/>
+<text x="124" y="464" fill="#f3f1ea" font-size="20" font-weight="700">Poor Things</text>
+<text x="124" y="484" fill="#9c9a93" font-size="13" font-weight="600">2023 · Movie · 2h 21m</text>
+<text x="124" y="508" fill="#9c9a93" font-size="13">A young woman brought back to</text>
+<text x="124" y="526" fill="#9c9a93" font-size="13">life by a scientist runs off…</text>
+<rect x="24" y="566" width="342" height="134" rx="18" fill="#2b2b31" stroke="#34343b"/>
+<rect x="40" y="582" width="68" height="102" rx="8" fill="url(#c)"/>
+<text x="124" y="610" fill="#f3f1ea" font-size="20" font-weight="700">Blue Eye Samurai</text>
+<text x="124" y="630" fill="#9c9a93" font-size="13" font-weight="600">2023 · TV Show · 1 season</text>
+<text x="124" y="654" fill="#9c9a93" font-size="13">A mixed-race master of the</text>
+<text x="124" y="672" fill="#9c9a93" font-size="13">sword seeks revenge in Edo…</text>
+<text x="195" y="730" text-anchor="middle" fill="#9c9a93" font-size="13">3 more below</text>
+<rect x="24" y="748" width="342" height="60" rx="30" fill="#f59e3c"/><text x="195" y="785" text-anchor="middle" fill="#1b1206" font-size="19" font-weight="700">Next</text>
+<rect x="135" y="826" width="120" height="5" rx="2.5" fill="#4b4b54"/>
+</svg>

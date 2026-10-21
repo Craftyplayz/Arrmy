@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+<defs>
+<linearGradient id="a" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="b" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="c" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a630a6"/><stop offset="1" stop-color="#431927"/></linearGradient>
+</defs>
+<rect width="390" height="844" rx="44" fill="#19191c"/>
+<text x="30" y="42" fill="#f3f1ea" font-size="15" font-weight="700">9:41</text>
+<g fill="#f3f1ea"><rect x="306" y="36" width="3" height="5" rx="1"/><rect x="311" y="33" width="3" height="8" rx="1"/><rect x="316" y="30" width="3" height="11" rx="1"/><rect x="321" y="27" width="3" height="14" rx="1"/></g>
+<rect x="334" y="28" width="26" height="13" rx="4" fill="none" stroke="#f3f1ea" stroke-width="1.5"/><rect x="336.5" y="30.5" width="19" height="8" rx="2" fill="#f3f1ea"/>
+<circle cx="36" cy="80" r="6" fill="#f59e3c"/><text x="50" y="86" fill="#f3f1ea" font-size="18" font-weight="800">Arrmy</text>
+<text x="360" y="85" text-anchor="end" fill="#9c9a93" font-size="13">Crafty</text>
+<text x="24" y="150" fill="#f3f1ea" font-size="36" font-weight="800">Your Requests</text>
+<rect x="24" y="172" width="46" height="30" rx="15" fill="#3b2a16" stroke="#f59e3c"/><text x="47" y="192" text-anchor="middle" fill="#f59e3c" font-size="13" font-weight="700">All</text>
+<rect x="78" y="172" width="58" height="30" rx="15" fill="#2b2b31" stroke="#34343b"/><text x="107" y="192" text-anchor="middle" fill="#f3f1ea" font-size="13" font-weight="600">Mine</text>
+<rect x="144" y="172" width="70" height="30" rx="15" fill="#2b2b31" stroke="#34343b"/><text x="179" y="192" text-anchor="middle" fill="#f3f1ea" font-size="13" font-weight="600">Movies</text>
+<rect x="222" y="172" width="84" height="30" rx="15" fill="#2b2b31" stroke="#34343b"/><text x="264" y="192" text-anchor="middle" fill="#f3f1ea" font-size="13" font-weight="600">TV Shows</text>
+<rect x="314" y="172" width="96" height="30" rx="15" fill="#2b2b31" stroke="#34343b"/><text x="362" y="192" text-anchor="middle" fill="#f3f1ea" font-size="13" font-weight="600">Audiobooks</text>
+<rect x="24" y="222" width="342" height="156" rx="18" fill="#222226" stroke="#34343b"/>
+<rect x="40" y="238" width="68" height="102" rx="8" fill="url(#a)"/>
+<text x="124" y="262" fill="#f3f1ea" font-size="19" font-weight="700">Dune: Part Two</text>
+<text x="124" y="282" fill="#9c9a93" font-size="13">Movie · 24.1 GB · you, 2 h ago</text>
+<text x="124" y="308" fill="#5fb85a" font-size="14" font-weight="700">Available: open it in Plex</text>
+<rect x="124" y="322" width="226" height="8" rx="4" fill="#5fb85a"/>
+<rect x="124" y="340" width="106" height="26" rx="13" fill="#f59e3c"/><text x="177" y="357" text-anchor="middle" fill="#1b1206" font-size="12" font-weight="700">Open in Plex</text>
+<rect x="24" y="390" width="342" height="156" rx="18" fill="#222226" stroke="#34343b"/>
+<rect x="40" y="406" width="68" height="102" rx="8" fill="url(#b)"/>
+<text x="124" y="430" fill="#f3f1ea" font-size="19" font-weight="700">Severance</text>
+<text x="124" y="450" fill="#9c9a93" font-size="13">TV Show · Seasons 1, 2 · Sam, 5 h ago</text>
+<text x="124" y="476" fill="#4f9de0" font-size="14" font-weight="700">Downloading, about 41 min left</text>
+<rect x="124" y="490" width="226" height="8" rx="4" fill="#121214"/><rect x="124" y="490" width="140" height="8" rx="4" fill="#4f9de0"/>
+<rect x="124" y="508" width="80" height="26" rx="13" fill="none" stroke="#4b4b54"/><text x="164" y="525" text-anchor="middle" fill="#f3f1ea" font-size="12" font-weight="700">Remove</text>
+<rect x="24" y="558" width="342" height="156" rx="18" fill="#222226" stroke="#34343b"/>
+<rect x="40" y="574" width="68" height="102" rx="8" fill="url(#c)"/>
+<text x="124" y="598" fill="#f3f1ea" font-size="19" font-weight="700">Past Lives</text>
+<text x="124" y="618" fill="#9c9a93" font-size="13">Movie · Jo, 4 days ago</text>
+<text x="124" y="640" fill="#e0574f" font-size="14" font-weight="700">Stuck: nothing found yet,</text>
+<text x="124" y="657" fill="#e0574f" font-size="14" font-weight="700">the Admin has been told</text>
+<rect x="124" y="668" width="226" height="8" rx="4" fill="#e0574f"/>
+<rect x="124" y="684" width="88" height="26" rx="13" fill="none" stroke="#4b4b54"/><text x="168" y="701" text-anchor="middle" fill="#f3f1ea" font-size="12" font-weight="700">Ask again</text>
+<text x="195" y="734" text-anchor="middle" fill="#9c9a93" font-size="13">9 more below</text>
+<rect x="24" y="748" width="342" height="60" rx="30" fill="#f59e3c"/><text x="195" y="785" text-anchor="middle" fill="#1b1206" font-size="19" font-weight="700">New Request</text>
+<rect x="135" y="826" width="120" height="5" rx="2.5" fill="#4b4b54"/>
+</svg>

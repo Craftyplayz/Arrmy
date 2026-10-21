@@ -5,8 +5,13 @@
 .mk-jump a:hover { background: var(--card2); }
 .mk-section { margin: 0 0 40px; scroll-margin-top: 16px; }
 .mk-section h2 { margin: 0 0 4px; color: var(--text); font-size: 20px; }
-.mk-how { margin: 0 0 12px; max-width: 70ch; color: var(--muted); }
+.mk-how { margin: 0 0 8px; max-width: 70ch; color: var(--muted); }
+.mk-open { margin: 0 0 12px; }
 .mk-frame { overflow-x: auto; border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--sunken); }
+.mk-more-title { margin: 0 0 12px; color: var(--text); font-size: 20px; scroll-margin-top: 16px; }
+.mk-more { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.mk-more-card h3 { margin: 0 0 6px; font-size: 17px; }
+.mk-more-card .mk-how { margin-bottom: 12px; }
 
 /* shared bits */
 .mk { box-sizing: border-box; min-width: 720px; height: 460px; overflow: hidden; color: var(--text); font: 13px/1.35 var(--font); }

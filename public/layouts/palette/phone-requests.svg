@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<style>.t{fill:#ededf0;font-size:15px;font-weight:500}.s{fill:#8b8b97;font-size:12px}.c{font-size:11px;font-weight:500;text-anchor:middle}.m{fill:#c9c0ff;font-size:12px;font-weight:600;font-family:ui-monospace,Consolas,monospace}.f{fill:none;stroke:#26262e}.on{fill:#2a2650;stroke:#5a4fb8}.tb{fill:#8b8b97;font-size:11px;text-anchor:middle}.i{fill:none;stroke:#8b8b97;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.ia{fill:none;stroke:#c9c0ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}</style>
+<defs>
+<radialGradient id="glow" cx=".5" cy=".25" r=".55"><stop offset="0" stop-color="#8c78ff" stop-opacity=".3"/><stop offset="1" stop-color="#8c78ff" stop-opacity="0"/></radialGradient>
+<linearGradient id="g1" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="g2" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="g3" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#433c19"/></linearGradient>
+<linearGradient id="g4" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#3057a6"/><stop offset="1" stop-color="#271943"/></linearGradient>
+<linearGradient id="g5" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a63044"/><stop offset="1" stop-color="#432e19"/></linearGradient>
+<linearGradient id="g6" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#30a657"/><stop offset="1" stop-color="#194343"/></linearGradient>
+<linearGradient id="g7" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#5730a6"/><stop offset="1" stop-color="#431943"/></linearGradient>
+<linearGradient id="g8" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a630a6"/><stop offset="1" stop-color="#431927"/></linearGradient>
+<linearGradient id="g9" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a65730"/><stop offset="1" stop-color="#434319"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#0a0a0e"/>
+<rect width="390" height="844" fill="url(#glow)"/>
+<g fill="#ededf0"><text x="24" y="33" font-size="15" font-weight="600">9:41</text><rect x="318" y="27" width="3" height="6" rx="1"/><rect x="323" y="25" width="3" height="8" rx="1"/><rect x="328" y="23" width="3" height="10" rx="1"/><rect x="333" y="21" width="3" height="12" rx="1"/><rect x="343" y="22" width="22" height="11" rx="3" fill="none" stroke="#ededf0"/><rect x="345" y="24" width="15" height="7" rx="1.5"/></g>
+<rect x="0" y="56" width="390" height="820" rx="24" fill="#141419" stroke="#26262e"/>
+<rect x="175" y="64" width="40" height="4" rx="2" fill="#3a3a45"/>
+<rect x="16" y="78" width="92" height="24" rx="6" class="on"/><text x="26" y="94" class="m">&gt; requests</text>
+<text x="370" y="95" class="s" text-anchor="end">12 Requests</text>
+<rect x="16" y="112" width="56" height="24" rx="12" class="on"/><text x="44" y="128" fill="#ededf0" class="c">All 12</text>
+<rect x="78" y="112" width="104" height="24" rx="12" class="f"/><text x="130" y="128" fill="#8b8b97" class="c">Downloading 3</text>
+<rect x="188" y="112" width="66" height="24" rx="12" class="f"/><text x="221" y="128" fill="#8b8b97" class="c">Stuck 1</text>
+<rect x="260" y="112" width="88" height="24" rx="12" class="f"/><text x="304" y="128" fill="#8b8b97" class="c">Available 6</text>
+<circle cx="30" cy="172" r="9" fill="url(#g1)"/><text x="50" y="169" class="t">Dune: Part Two</text><text x="50" y="185" class="s">Movie · Crafty · 2 h ago</text>
+<rect x="298" y="162" width="72" height="20" rx="10" fill="#173a26" stroke="#2f7a45"/><text x="334" y="176" fill="#7ee29a" class="c">Available</text>
+<rect x="10" y="204" width="370" height="84" rx="10" fill="#22222b"/>
+<circle cx="30" cy="226" r="9" fill="url(#g2)"/><text x="50" y="223" class="t">Severance</text><text x="50" y="238" class="s">Seasons 1, 2 · Sam · 5 h ago</text>
+<rect x="284" y="216" width="86" height="20" rx="10" fill="#17304a" stroke="#3a628a"/><text x="327" y="230" fill="#8cc8ff" class="c">Downloading</text>
+<rect x="50" y="244" width="236" height="3" rx="1.5" fill="#2a2a33"/><rect x="50" y="244" width="146" height="3" rx="1.5" fill="#9d8cff"/>
+<text x="50" y="275" class="s">Downloading 62% · 38.4 GB · 41 min left</text>
+<rect x="300" y="256" width="70" height="22" rx="6" fill="#3f1d1d" stroke="#8a3a3a"/><text x="335" y="271" fill="#ff9b9b" class="c">Remove</text>
+<circle cx="30" cy="320" r="9" fill="url(#g3)"/><text x="50" y="317" class="t">The Bear</text><text x="50" y="333" class="s">Season 3 · Jo · yesterday</text>
+<rect x="296" y="310" width="74" height="20" rx="10" fill="#22222b" stroke="#3a3a45"/><text x="333" y="324" fill="#bdbdc6" class="c">Requested</text>
+<circle cx="30" cy="374" r="9" fill="url(#g4)"/><text x="50" y="371" class="t">Arrival</text><text x="50" y="387" class="s">Movie · Crafty · yesterday</text>
+<rect x="298" y="364" width="72" height="20" rx="10" fill="#173a26" stroke="#2f7a45"/><text x="334" y="378" fill="#7ee29a" class="c">Available</text>
+<circle cx="30" cy="428" r="9" fill="url(#g5)"/><text x="50" y="425" class="t">Shōgun</text><text x="50" y="440" class="s">Season 1 · Alex · 2 days ago</text>
+<rect x="300" y="418" width="70" height="20" rx="10" fill="#3d3313" stroke="#a8862a"/><text x="335" y="432" fill="#ffd84a" class="c">Importing</text>
+<rect x="50" y="446" width="236" height="3" rx="1.5" fill="#2a2a33"/><rect x="50" y="446" width="227" height="3" rx="1.5" fill="#ffd84a"/>
+<circle cx="30" cy="482" r="9" fill="url(#g6)"/><text x="50" y="479" class="t">Project Hail Mary</text><text x="50" y="494" class="s">Audiobook · Sam · 2 days ago</text>
+<rect x="284" y="472" width="86" height="20" rx="10" fill="#17304a" stroke="#3a628a"/><text x="327" y="486" fill="#8cc8ff" class="c">Downloading</text>
+<rect x="50" y="500" width="236" height="3" rx="1.5" fill="#2a2a33"/><rect x="50" y="500" width="42" height="3" rx="1.5" fill="#9d8cff"/>
+<circle cx="30" cy="536" r="9" fill="url(#g7)"/><text x="50" y="533" class="t">Andor</text><text x="50" y="549" class="s">Seasons 1, 2 · Crafty · 3 days ago</text>
+<rect x="298" y="526" width="72" height="20" rx="10" fill="#173a26" stroke="#2f7a45"/><text x="334" y="540" fill="#7ee29a" class="c">Available</text>
+<circle cx="30" cy="590" r="9" fill="url(#g8)"/><text x="50" y="587" class="t">Past Lives</text><text x="50" y="603" class="s">Movie · Jo · 4 days ago</text>
+<rect x="320" y="580" width="50" height="20" rx="10" fill="#3f1d1d" stroke="#8a3a3a"/><text x="345" y="594" fill="#ff9b9b" class="c">Stuck</text>
+<circle cx="30" cy="644" r="9" fill="url(#g9)"/><text x="50" y="641" class="t">The Martian</text><text x="50" y="657" class="s">Audiobook · Alex · 5 days ago</text>
+<rect x="298" y="634" width="72" height="20" rx="10" fill="#173a26" stroke="#2f7a45"/><text x="334" y="648" fill="#7ee29a" class="c">Available</text>
+<rect x="12" y="722" width="366" height="44" rx="12" fill="#1c1c23" stroke="#2a2a33"/>
+<path d="M27 737a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM36 755l-4.5-4.5" class="i"/>
+<rect x="46" y="732" width="88" height="24" rx="6" class="on"/><text x="55" y="748" class="m">&gt; requests</text>
+<text x="144" y="749" class="s" font-size="15">Filter Requests…</text>
+<rect x="0" y="776" width="390" height="68" fill="#0e0e13"/><path d="M0 776h390" stroke="#26262e"/>
+<circle cx="46" cy="800" r="6" class="i"/><path d="M50.5 804.5l4 4" class="i"/><text x="48" y="830" class="tb">Home</text>
+<path d="M138 795h16M138 801h16M138 807h10" class="ia"/><text x="146" y="830" fill="#c9c0ff" class="tb">Requests</text>
+<path d="M244 793l7 2.5v5c0 4.5-3.5 7-7 8.5-3.5-1.5-7-4-7-8.5v-5z" class="i"/><text x="244" y="830" class="tb">Admin</text>
+<circle cx="342" cy="801" r="6" class="i"/><circle cx="342" cy="801" r="2" class="i"/><text x="342" y="830" class="tb">Settings</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<style>.m{fill:#918ca6}.b{font-weight:600}.w{fill:#fff}.c{fill:#1f1c2a;stroke:#312c42}.f{fill:#121019;stroke:#312c42}.k{fill:#5b4bd6}.v{fill:none;stroke:#918ca6;stroke-width:1.5}</style>
+<defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a394ff"/><stop offset="1" stop-color="#5b4bd6"/></linearGradient></defs>
+<rect width="390" height="844" fill="#17151f"/>
+<g fill="#ebe9f2">
+<text x="24" y="33" font-size="15" class="b">9:41</text>
+<rect x="318" y="27" width="3" height="6" rx="1"/><rect x="323" y="25" width="3" height="8" rx="1"/><rect x="328" y="23" width="3" height="10" rx="1"/><rect x="333" y="21" width="3" height="12" rx="1"/>
+<rect x="342" y="22" width="24" height="12" rx="3" fill="none" stroke="#ebe9f2"/><rect x="344" y="24" width="17" height="8" rx="1.5"/><rect x="367" y="26" width="2" height="4" rx="1"/>
+<rect x="24" y="63" width="20" height="20" rx="6" fill="url(#lg)"/>
+<text x="52" y="78" font-size="16" class="b">Arrmy</text>
+<circle cx="354" cy="73" r="13" fill="#3986ac"/><text x="354" y="77" font-size="12" text-anchor="middle" class="b w">C</text>
+<path d="M0 98.5H390" stroke="#312c42"/>
+
+<text x="16" y="134" font-size="18" class="b">Settings</text>
+
+<rect x="16" y="146" width="358" height="218" rx="10" class="c"/>
+<text x="30" y="170" font-size="15" class="b">Size Limits</text>
+<text x="30" y="188" font-size="10.5" class="m">Applies to everyone's Requests. Empty means no limit.</text>
+<text x="30" y="214" font-size="10.5" class="m">Movie, in GB</text><rect x="30" y="220" width="163" height="36" rx="6" class="f"/><text x="42" y="243" font-size="13">40</text>
+<text x="203" y="214" font-size="10.5" class="m">Episode, in GB per hour</text><rect x="203" y="220" width="161" height="36" rx="6" class="f"/><text x="215" y="243" font-size="13">4</text>
+<text x="30" y="274" font-size="10.5" class="m">Audiobook, in MB</text><rect x="30" y="280" width="334" height="36" rx="6" class="f"/><text x="42" y="303" font-size="13">600</text>
+<path d="M30 328.5H364" stroke="#312c42"/>
+<rect x="30" y="336" width="96" height="26" rx="6" class="k"/><text x="78" y="353" font-size="12" text-anchor="middle" class="b w">Save limits</text>
+<text x="364" y="353" font-size="10.5" text-anchor="end" class="m">Saved 3 days ago</text>
+
+<rect x="16" y="376" width="358" height="160" rx="10" class="c"/>
+<text x="30" y="400" font-size="15" class="b">Quality</text>
+<text x="30" y="418" font-size="10.5" class="m">The profile each Service downloads with.</text>
+<text x="30" y="444" font-size="10.5" class="m">Movies</text><rect x="30" y="450" width="104" height="36" rx="6" class="f"/><text x="40" y="473" font-size="12">HD-1080p</text><path d="M118 466l4 4 4-4" class="v"/>
+<text x="145" y="444" font-size="10.5" class="m">TV Shows</text><rect x="145" y="450" width="104" height="36" rx="6" class="f"/><text x="155" y="473" font-size="12">HD-1080p</text><path d="M233 466l4 4 4-4" class="v"/>
+<text x="260" y="444" font-size="10.5" class="m">Anime</text><rect x="260" y="450" width="104" height="36" rx="6" class="f"/><text x="270" y="473" font-size="12">Any</text><path d="M348 466l4 4 4-4" class="v"/>
+<path d="M30 498.5H364" stroke="#312c42"/>
+<rect x="30" y="506" width="100" height="26" rx="6" class="k"/><text x="80" y="523" font-size="12" text-anchor="middle" class="b w">Save quality</text>
+<text x="364" y="523" font-size="10.5" text-anchor="end" class="m">Saved last week</text>
+
+<rect x="16" y="548" width="358" height="184" rx="10" class="c"/>
+<text x="30" y="572" font-size="15" class="b">Discord</text>
+<text x="30" y="590" font-size="10.5" class="m">Where the bot posts when a Request becomes Available.</text>
+<rect x="30" y="606" width="16" height="16" rx="4" fill="#a394ff"/><path d="M34 614l4 4 6-7" fill="none" stroke="#fff" stroke-width="2"/><text x="54" y="619" font-size="13">Post to Discord</text>
+<text x="30" y="644" font-size="10.5" class="m">Server</text><rect x="30" y="650" width="163" height="36" rx="6" class="f"/><text x="42" y="673" font-size="13">The Crafty Lounge</text>
+<text x="203" y="644" font-size="10.5" class="m">Channel</text><rect x="203" y="650" width="161" height="36" rx="6" class="f"/><text x="215" y="673" font-size="13">#arrmy</text>
+<path d="M30 698.5H364" stroke="#312c42"/>
+<rect x="30" y="704" width="104" height="26" rx="6" class="k"/><text x="82" y="721" font-size="12" text-anchor="middle" class="b w">Save Discord</text>
+<text x="364" y="721" font-size="10.5" text-anchor="end" class="m">Saved yesterday</text>
+
+<rect x="16" y="744" width="358" height="120" rx="10" class="c"/>
+<text x="30" y="768" font-size="15" class="b">Plex</text>
+
+<rect x="0" y="760" width="390" height="84" fill="#121019"/><path d="M0 760.5H390" stroke="#312c42"/>
+<rect x="39" y="772" width="20" height="20" rx="5" fill="#463f5c"/><text x="49" y="812" font-size="10" text-anchor="middle" class="m">Home</text>
+<g fill="#463f5c"><rect x="136" y="772" width="5" height="20" rx="1.5"/><rect x="143.5" y="772" width="5" height="14" rx="1.5"/><rect x="151" y="772" width="5" height="17" rx="1.5"/></g><text x="146" y="812" font-size="10" text-anchor="middle" class="m">Requests</text>
+<circle cx="244" cy="782" r="9" fill="none" stroke="#463f5c" stroke-width="2.5"/><circle cx="244" cy="782" r="3" fill="#463f5c"/><text x="244" y="812" font-size="10" text-anchor="middle" class="m">Admin</text>
+<circle cx="341" cy="782" r="8" fill="none" stroke="#a394ff" stroke-width="2.5" stroke-dasharray="4 3"/><text x="341" y="812" font-size="10" text-anchor="middle" fill="#a394ff" class="b">Settings</text>
+<rect x="128" y="830" width="134" height="5" rx="2.5" fill="#ebe9f2" opacity=".5"/>
+</g>
+</svg>

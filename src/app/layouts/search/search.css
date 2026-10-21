@@ -1,0 +1,167 @@
+/* Mockup C, "Search first": light, airy, one centred column. Everything is under .l-search so nothing leaks
+   into the real site or the other mockups. The tokens are redefined here to a warm light palette. */
+
+.l-search {
+  --bg: #faf7f2;
+  --card: #ffffff;
+  --card2: #f3efe8;
+  --sunken: #f3efe8;
+  --line: #e6e0d6;
+  --line-strong: #cfc7ba;
+  --text: #1f1d1a;
+  --muted: #6b6560;
+  --accent: #1d5c8f;
+  --accent-soft: #e3eef7;
+  --btn: #1d5c8f;
+  --btn-line: #1d5c8f;
+  --btn-hover: #174b75;
+  --btn2: #f3efe8;
+  --btn2-hover: #ebe5db;
+  --link: #1d5c8f;
+  --highlight: #b7791f;
+  --danger-bg: #fbe4e1;
+  --danger-line: #d9534f;
+  --danger-text: #8b1e1e;
+  --info-bg: #e1ecf7;
+  --info-line: #6ea0d0;
+  --info-text: #1d5c8f;
+  --ok-bg: #e1f1e4;
+  --ok-line: #5fa772;
+  --ok-text: #1f6a37;
+  --gold-bg: #fbefd4;
+  --gold-line: #d6a53b;
+  --gold-text: #7a5410;
+  --shadow: 0 2px 12px rgb(60 40 10 / .07);
+  /* full-bleed background without a 100vw box: the shadow paints out to the viewport edges and the clip
+     keeps it to this element's own height, so no horizontal scrollbar appears on Windows. The 48px below
+     covers the page padding (16) and the footer's top margin (32), so the light runs into the footer. */
+  margin: -16px 0 0;
+  background: var(--bg); box-shadow: 0 0 0 100vmax var(--bg); clip-path: inset(0 -100vmax -48px);
+  color: var(--text); font-size: 16px; line-height: 1.5;
+}
+
+/* ---------- chrome ---------- */
+.l-search .ls-top {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; height: 56px; padding: 0 8px;
+  background: var(--card); box-shadow: 0 0 0 100vmax var(--card), 0 1px 0 100vmax var(--line); clip-path: inset(0 -100vmax -1px);
+}
+.l-search .ls-brand { color: var(--text); font-size: 18px; font-weight: 700; letter-spacing: -.01em; text-decoration: none; }
+.l-search .ls-brand:hover { color: var(--accent); text-decoration: none; }
+.l-search .ls-tabs { display: flex; gap: 2px; }
+.l-search .ls-tab { padding: 7px 14px; border-radius: 999px; color: var(--muted); font-size: 15px; font-weight: 500; text-decoration: none; transition: background var(--fast), color var(--fast); }
+.l-search .ls-tab:hover { background: var(--card2); color: var(--text); text-decoration: none; }
+.l-search .ls-tab.is-active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.l-search .ls-who { color: var(--muted); font-size: 14px; text-align: right; }
+.l-search .l-note { margin: 10px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+
+.l-search .ls-col { max-width: 760px; margin: 0 auto; padding: 28px 16px 48px; }
+.l-search .ls-col.wide { max-width: 1248px; }
+
+/* ---------- shared pieces ---------- */
+.l-search .ls-h1 { margin: 0 0 4px; font-size: 34px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+.l-search .ls-sum { margin: 0 0 32px; color: var(--muted); font-size: 17px; }
+.l-search .ls-poster { flex: none; width: 48px; aspect-ratio: 2 / 3; border-radius: 6px; box-shadow: var(--shadow); }
+.l-search .ls-sub { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.l-search .ls-main { flex: 1; min-width: 0; }
+.l-search .ls-main b, .l-search .ls-row > b { font-size: 17px; font-weight: 600; }
+.l-search .ls-row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.l-search .ls-row:last-child { border-bottom: 0; }
+.l-search .ls-line { height: 3px; margin-top: 10px; overflow: hidden; border-radius: 2px; background: var(--line); }
+.l-search .ls-line i { display: block; height: 100%; background: var(--accent); }
+.l-search .ls-line.gold i { background: var(--gold-line); }
+
+.l-search .ls-btn {
+  padding: 9px 18px; border: 1px solid var(--btn-line); border-radius: 999px; background: var(--btn);
+  color: #fff; font: inherit; font-size: 15px; font-weight: 600; line-height: 1.2; white-space: nowrap; cursor: pointer; transition: background var(--fast);
+}
+.l-search .ls-btn:hover { background: var(--btn-hover); }
+.l-search .ls-btn.quiet { border-color: var(--line-strong); background: var(--card); color: var(--text); font-weight: 500; }
+.l-search .ls-btn.quiet:hover { background: var(--card2); }
+.l-search .ls-text-btn { padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; }
+.l-search .ls-text-btn:hover { color: var(--danger-text); }
+
+/* status chips: green Available, blue Downloading, amber Importing, grey Requested, red Stuck */
+.l-search .ls-st { display: inline-block; padding: 3px 11px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.l-search .ls-st.available { background: var(--ok-bg); color: var(--ok-text); }
+.l-search .ls-st.downloading { background: var(--info-bg); color: var(--info-text); }
+.l-search .ls-st.importing { background: var(--gold-bg); color: var(--gold-text); }
+.l-search .ls-st.requested { background: var(--card2); color: var(--muted); }
+.l-search .ls-st.stuck { background: var(--danger-bg); color: var(--danger-text); }
+
+/* ---------- home ---------- */
+.l-search .ls-hero { display: flex; flex-direction: column; align-items: center; padding: 24px 0 8px; }
+.l-search .ls-logo { margin: 0 0 24px; color: var(--accent); font-size: 60px; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.l-search .ls-search { position: relative; width: 100%; max-width: 640px; }
+.l-search .ls-box {
+  width: 100%; padding: 17px 60px 17px 28px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--card); box-shadow: var(--shadow); color: var(--text); font: inherit; font-size: 21px; outline: none; transition: border-color var(--fast), box-shadow var(--fast);
+}
+.l-search .ls-box::placeholder { color: var(--muted); }
+.l-search .ls-box:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.l-search .ls-search svg { position: absolute; top: 50%; right: 24px; width: 22px; height: 22px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.l-search .ls-seg { display: inline-flex; gap: 2px; margin-top: 18px; padding: 4px; border-radius: 999px; background: var(--card2); }
+.l-search .ls-seg button { padding: 7px 16px; border: 0; border-radius: 999px; background: none; color: var(--muted); font: inherit; font-size: 15px; cursor: pointer; }
+.l-search .ls-seg button.on { background: var(--card); box-shadow: var(--shadow); color: var(--text); font-weight: 600; }
+.l-search .ls-count { margin: 36px 0 0; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.l-search .ls-results { margin: 0; padding: 0; list-style: none; }
+.l-search .ls-result { display: flex; align-items: flex-start; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.l-search .ls-result .ls-poster { width: 56px; }
+.l-search .ls-result h3 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: -.01em; line-height: 1.3; }
+.l-search .ls-meta { margin: 0; color: var(--muted); font-size: 14px; }
+.l-search .ls-over { margin: 6px 0 10px; overflow: hidden; color: #3d3935; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.l-search .ls-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.l-search .ls-chip { padding: 2px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--muted); font-size: 12px; }
+.l-search .ls-act { flex: none; align-self: center; min-width: 96px; text-align: right; }
+.l-search .ls-state { font-size: 15px; font-weight: 600; color: var(--muted); }
+.l-search .ls-state.ok { color: var(--ok-text); }
+.l-search .ls-recent { margin-top: 48px; }
+.l-search .ls-recent h2 { margin: 0 0 14px; color: var(--muted); font-size: 14px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.l-search .ls-recent-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.l-search .ls-recent-row .ls-poster { width: 100%; margin-bottom: 8px; }
+.l-search .ls-recent-row b { display: block; overflow: hidden; font-size: 14px; font-weight: 600; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.l-search .ls-recent-row small { color: var(--muted); font-size: 12px; }
+
+/* ---------- requests and admin ---------- */
+.l-search .ls-group { margin: 0 0 36px; }
+.l-search .ls-group h2 { display: flex; align-items: baseline; gap: 8px; margin: 0; padding-bottom: 8px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.l-search .ls-group h2 span { font-weight: 400; letter-spacing: 0; }
+.l-search .ls-side { display: flex; flex: none; flex-direction: column; align-items: flex-end; gap: 8px; }
+.l-search .ls-pct { flex: none; min-width: 44px; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; text-align: right; }
+.l-search .ls-disks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 16px 0 4px; }
+.l-search .ls-disk b { display: block; font-size: 16px; font-weight: 600; }
+.l-search .ls-disk small { color: var(--muted); font-size: 13px; }
+.l-search .ls-disk .ls-line { margin-top: 8px; }
+.l-search .ls-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.l-search .ls-dot.ok { background: var(--ok-line); }
+.l-search .ls-dot.bad { background: var(--danger-line); }
+.l-search .ls-row > .ls-sub { margin: 0 0 0 auto; }
+.l-search .ls-avatar { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 15px; font-weight: 700; }
+.l-search .ls-tag { margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600; vertical-align: 2px; }
+
+/* ---------- settings ---------- */
+.l-search .ls-sec { padding: 28px 0; border-bottom: 1px solid var(--line); }
+.l-search .ls-sec h2 { margin: 0 0 4px; font-size: 21px; font-weight: 650; letter-spacing: -.01em; }
+.l-search .ls-lede { margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+.l-search .ls-field { display: grid; gap: 6px; margin: 0 0 20px; }
+.l-search .ls-field:last-child { margin-bottom: 0; }
+.l-search .ls-field > span { font-size: 15px; font-weight: 600; }
+.l-search .ls-field small { color: var(--muted); font-size: 13px; }
+.l-search .ls-input {
+  width: 100%; max-width: 420px; padding: 10px 14px; border: 1px solid var(--line-strong); border-radius: var(--radius);
+  background: var(--card); color: var(--text); font: inherit; font-size: 16px; outline: none; transition: border-color var(--fast), box-shadow var(--fast);
+}
+.l-search .ls-input.short { max-width: 160px; }
+.l-search .ls-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.l-search .ls-checks { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+.l-search .ls-check { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 15px; cursor: pointer; }
+.l-search .ls-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.l-search .ls-save {
+  position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-top: 8px; padding: 16px 0; border-top: 1px solid var(--line); background: var(--bg);
+}
+
+/* ---------- phone ---------- */
+.l-search .ls-phones { display: flex; gap: 32px; padding: 8px 0 16px; overflow-x: auto; }
+.l-search .ls-phones figure { flex: none; margin: 0; }
+.l-search .ls-phones img { display: block; border: 1px solid var(--line-strong); border-radius: 40px; box-shadow: 0 12px 32px rgb(60 40 10 / .12); }
+.l-search .ls-phones figcaption { margin-top: 12px; color: var(--muted); font-size: 15px; text-align: center; }

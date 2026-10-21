@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<rect width="390" height="844" fill="#1e2329"/>
+<text x="24" y="31" fill="#e6eaef" font-size="15" font-weight="600">9:41</text>
+<g fill="#e6eaef"><rect x="326" y="20" width="4" height="11" rx="1"/><rect x="332" y="16" width="4" height="15" rx="1"/><rect x="338" y="12" width="4" height="19" rx="1"/><rect x="352.5" y="18.5" width="15" height="7" rx="1.5"/><rect x="373" y="19.5" width="2" height="5" rx="1"/></g>
+<rect x="350" y="16" width="22" height="12" rx="3" fill="none" stroke="#e6eaef" stroke-width="1.5"/>
+<rect y="44" width="390" height="56" fill="#171b20"/><path d="M0 100.5h390" stroke="#363d46"/>
+<path d="M20 64h20M20 72h20M20 80h20" stroke="#e6eaef" stroke-width="2" stroke-linecap="round"/>
+<text x="56" y="79" fill="#66c0f4" font-size="19" font-weight="700">Arrmy</text>
+<circle cx="354" cy="72" r="16" fill="#3986ac"/><text x="354" y="77" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">C</text>
+
+<text x="16" y="134" fill="#e6eaef" font-size="20" font-weight="700">Admin</text>
+<text x="374" y="133" fill="#94a0ad" font-size="12" text-anchor="end">Refreshes every 30 s</text>
+
+<g fill="#262c33" stroke="#363d46"><rect x="16" y="150" width="85" height="58" rx="6"/><rect x="107" y="150" width="85" height="58" rx="6"/><rect x="198" y="150" width="85" height="58" rx="6"/><rect x="289" y="150" width="85" height="58" rx="6"/></g>
+<rect x="16" y="154" width="3" height="50" fill="#8a3a3a"/><rect x="107" y="154" width="3" height="50" fill="#8a3a3a"/><rect x="198" y="154" width="3" height="50" fill="#3a628a"/><rect x="289" y="154" width="3" height="50" fill="#4f8a3a"/>
+<g fill="#e6eaef" font-size="20" font-weight="700"><text x="28" y="179">2</text><text x="119" y="179">1</text><text x="210" y="179">3</text><text x="301" y="179">6</text></g>
+<g fill="#94a0ad" font-size="9.5"><text x="28" y="197">Problems</text><text x="119" y="197">Stuck</text><text x="210" y="197">Downloading</text><text x="301" y="197">Available</text></g>
+
+<text x="16" y="238" fill="#e6eaef" font-size="14" font-weight="600">Live downloads</text><text x="126" y="238" fill="#94a0ad" font-size="12">3 · 15.9 MB/s</text>
+<g fill="#262c33" stroke="#363d46"><rect x="16" y="250" width="358" height="56" rx="8"/><rect x="16" y="312" width="358" height="56" rx="8"/><rect x="16" y="374" width="358" height="56" rx="8"/></g>
+<g fill="#e6eaef" font-size="13" font-weight="600"><text x="24" y="270">Severance S02</text><text x="24" y="332">Slow Horses S04E03</text><text x="24" y="394">Project Hail Mary (Ray Porter)</text></g>
+<g fill="#94a0ad" font-size="11"><text x="24" y="286">12.4 MB/s · 41 min left · 48 seeds</text><text x="24" y="348">3.1 MB/s · 2 h 10 min left · 7 seeds</text><text x="24" y="410">0.4 MB/s · 18 min left · 2 seeds</text></g>
+<g fill="#e6eaef" font-size="12" text-anchor="end"><text x="366" y="270">62%</text><text x="366" y="332">44%</text><text x="366" y="394">18%</text></g>
+<g fill="#171b20"><rect x="24" y="294" width="342" height="5" rx="2.5"/><rect x="24" y="356" width="342" height="5" rx="2.5"/><rect x="24" y="418" width="342" height="5" rx="2.5"/></g>
+<g fill="#66c0f4"><rect x="24" y="294" width="212" height="5" rx="2.5"/><rect x="24" y="356" width="150" height="5" rx="2.5"/><rect x="24" y="418" width="62" height="5" rx="2.5"/></g>
+
+<text x="16" y="466" fill="#e6eaef" font-size="14" font-weight="600">Disk usage</text>
+<g fill="#e6eaef" font-size="12"><text x="16" y="492">Movies</text><text x="16" y="518">TV</text><text x="16" y="544">Audiobooks</text></g>
+<g fill="#171b20"><rect x="104" y="484" width="170" height="8" rx="4"/><rect x="104" y="510" width="170" height="8" rx="4"/><rect x="104" y="536" width="170" height="8" rx="4"/></g>
+<g fill="#66c0f4"><rect x="104" y="484" width="136" height="8" rx="4"/><rect x="104" y="510" width="123" height="8" rx="4"/><rect x="104" y="536" width="20" height="8" rx="4"/></g>
+<g fill="#94a0ad" font-size="11" text-anchor="end"><text x="374" y="492">3.2 / 4.0 TB · 80%</text><text x="374" y="518">5.8 / 8.0 TB · 73%</text><text x="374" y="544">0.12 / 1.0 TB · 12%</text></g>
+
+<text x="16" y="590" fill="#e6eaef" font-size="14" font-weight="600">Needs fixing</text><text x="110" y="590" fill="#94a0ad" font-size="12">2</text>
+<g fill="#262c33" stroke="#363d46"><rect x="16" y="602" width="358" height="50" rx="8"/><rect x="16" y="658" width="358" height="50" rx="8"/></g>
+<g fill="#8a3a3a"><rect x="17" y="608" width="3" height="38" rx="1.5"/><rect x="17" y="664" width="3" height="38" rx="1.5"/></g>
+<g fill="#e6eaef" font-size="13" font-weight="600"><text x="30" y="622">Past Lives</text><text x="30" y="678">Shōgun S01E09</text></g>
+<g fill="#94a0ad" font-size="10.5"><text x="30" y="639">No release in 4 days. Searched 6 times.</text><text x="30" y="695">Import failed: file already exists.</text></g>
+<g fill="#2e353d" stroke="#4a535e"><rect x="268" y="613" width="98" height="28" rx="6"/><rect x="268" y="669" width="98" height="28" rx="6"/></g>
+<g fill="#e6eaef" font-size="12" text-anchor="middle"><text x="317" y="631">Search again</text><text x="317" y="687">Replace file</text></g>
+
+<text x="16" y="740" fill="#e6eaef" font-size="14" font-weight="600">Services</text>
+<g fill="#262c33"><rect x="16" y="752" width="114" height="28" rx="6"/><rect x="138" y="752" width="114" height="28" rx="6"/><rect x="260" y="752" width="114" height="28" rx="6"/><rect x="16" y="786" width="114" height="28" rx="6"/><rect x="138" y="786" width="114" height="28" rx="6"/><rect x="260" y="786" width="114" height="28" rx="6"/></g>
+<g fill="#5fb85f"><circle cx="29" cy="766" r="4.5"/><circle cx="151" cy="766" r="4.5"/><circle cx="273" cy="766" r="4.5"/><circle cx="29" cy="800" r="4.5"/><circle cx="273" cy="800" r="4.5"/></g>
+<circle cx="151" cy="800" r="4.5" fill="#e05a5a"/>
+<g fill="#e6eaef" font-size="11.5" font-weight="600"><text x="40" y="770">Radarr</text><text x="162" y="770">Sonarr</text><text x="284" y="770">Prowlarr</text><text x="40" y="804">qBittorrent</text><text x="162" y="804">LazyLibrarian</text><text x="284" y="804">Plex</text></g>
+<g fill="#94a0ad" font-size="9.5" text-anchor="end"><text x="122" y="770">5.14.0</text><text x="244" y="770">4.0.11</text><text x="366" y="770">1.28.2</text><text x="122" y="804">5.0.3</text><text x="366" y="804">1.41.3</text></g>
+<text x="244" y="804" fill="#e08a8a" font-size="9.5" text-anchor="end">down</text>
+</svg>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+<style>text{font-family:ui-monospace,Consolas,Menlo,monospace;font-size:12px;fill:#c9d1c9}.m{fill:#6f7f6f}.a{fill:#5dff8a}.b{fill:#5fb3ff}.y{fill:#ffbf47}.r{fill:#ff5f5f}.g{fill:#8a948a}.k{fill:#0b0d0b}.h{font-weight:700}.d{stroke:#233023;stroke-dasharray:2 3}.D{stroke:#3b4e3b;stroke-dasharray:2 3}.t{fill:#151b15;stroke:#3b4e3b}</style>
+<rect width="390" height="844" fill="#0b0d0b"/>
+<text x="16" y="30" class="h">09:41</text>
+<text x="374" y="30" text-anchor="end" class="m">LTE ▮▮▮▯</text>
+<rect y="44" width="390" height="28" fill="#101410"/>
+<line y1="72" x2="390" y2="72" class="D"/>
+<rect x="100" y="49" width="83" height="18" fill="#5dff8a"/>
+<text y="63"><tspan x="12" class="a h">arrmy</tspan><tspan x="56" class="m">│</tspan><tspan x="72" class="a">[1]</tspan><tspan x="102" class="k h">[2]requests</tspan><tspan x="190" class="a">[3]</tspan><tspan x="220" class="a">[4]</tspan><tspan x="250" class="a">[5]</tspan><tspan x="280" class="m">│</tspan><tspan x="296" class="m">crafty</tspan></text>
+<text y="100"><tspan x="12" class="a h">&gt;</tspan><tspan x="26">filter: status=</tspan><tspan class="a">*</tspan><tspan> type=</tspan><tspan class="a">*</tspan><tspan> by=</tspan><tspan class="a">*</tspan></text>
+<text y="126" class="m"><tspan x="26">ID</tspan><tspan x="56">TITLE</tspan><tspan x="200">STATUS</tspan><tspan x="284">PROGRESS</tspan></text>
+<line x1="12" y1="132" x2="378" y2="132" class="D"/>
+<text y="150"><tspan x="26">101</tspan><tspan x="56">Dune: Part Two</tspan><tspan x="200" class="a">available</tspan><tspan x="284" class="a">[██████]100%</tspan></text>
+<line x1="12" y1="156" x2="378" y2="156" class="d"/>
+<rect x="12" y="158" width="366" height="22" fill="#11331c"/>
+<text y="172" class="a"><tspan x="12" class="h">&gt;</tspan><tspan x="26">102</tspan><tspan x="56">Severance</tspan><tspan x="200" class="b">downloading</tspan><tspan x="284" class="b">[████░░] 62%</tspan></text>
+<text y="194"><tspan x="26">103</tspan><tspan x="56">The Bear</tspan><tspan x="200" class="g">requested</tspan><tspan x="284" class="g">[░░░░░░]  0%</tspan></text>
+<line x1="12" y1="200" x2="378" y2="200" class="d"/>
+<text y="216"><tspan x="26">104</tspan><tspan x="56">Arrival</tspan><tspan x="200" class="a">available</tspan><tspan x="284" class="a">[██████]100%</tspan></text>
+<line x1="12" y1="222" x2="378" y2="222" class="d"/>
+<text y="238"><tspan x="26">105</tspan><tspan x="56">Shōgun</tspan><tspan x="200" class="y">importing</tspan><tspan x="284" class="y">[██████] 96%</tspan></text>
+<line x1="12" y1="244" x2="378" y2="244" class="d"/>
+<text y="260"><tspan x="26">106</tspan><tspan x="56">Project Hail Mary</tspan><tspan x="200" class="b">downloading</tspan><tspan x="284" class="b">[█░░░░░] 18%</tspan></text>
+<line x1="12" y1="266" x2="378" y2="266" class="d"/>
+<text y="282"><tspan x="26">107</tspan><tspan x="56">Andor</tspan><tspan x="200" class="a">available</tspan><tspan x="284" class="a">[██████]100%</tspan></text>
+<line x1="12" y1="288" x2="378" y2="288" class="d"/>
+<text y="304"><tspan x="26">108</tspan><tspan x="56">Past Lives</tspan><tspan x="200" class="r">stuck</tspan><tspan x="284" class="r">[░░░░░░]  0%</tspan></text>
+<line x1="12" y1="310" x2="378" y2="310" class="d"/>
+<text y="326"><tspan x="26">109</tspan><tspan x="56">The Martian</tspan><tspan x="200" class="a">available</tspan><tspan x="284" class="a">[██████]100%</tspan></text>
+<line x1="12" y1="332" x2="378" y2="332" class="d"/>
+<text y="348"><tspan x="26">110</tspan><tspan x="56">Oppenheimer</tspan><tspan x="200" class="a">available</tspan><tspan x="284" class="a">[██████]100%</tspan></text>
+<line x1="12" y1="354" x2="378" y2="354" class="d"/>
+<text y="370"><tspan x="26">111</tspan><tspan x="56">Slow Horses</tspan><tspan x="200" class="b">downloading</tspan><tspan x="284" class="b">[███░░░] 44%</tspan></text>
+<line x1="12" y1="376" x2="378" y2="376" class="d"/>
+<text y="392"><tspan x="26">112</tspan><tspan x="56">Everything Everywh…</tspan><tspan x="200" class="a">available</tspan><tspan x="284" class="a">[██████]100%</tspan></text>
+<line x1="12" y1="398" x2="378" y2="398" class="d"/>
+<text x="12" y="428" class="m">12 requests · <tspan class="b">3 downloading</tspan> · <tspan class="r">1 stuck</tspan></text>
+<text y="458" class="m"><tspan x="12" class="a">[x]</tspan><tspan> remove</tspan><tspan x="104" class="a">[enter]</tspan><tspan> details</tspan><tspan x="226" class="a">[j/k]</tspan><tspan> move</tspan></text>
+<text x="12" y="500" class="a h">SELECTED · 102</text>
+<line x1="12" y1="506" x2="378" y2="506" class="D"/>
+<text y="526"><tspan x="12" class="m">title</tspan><tspan x="120">Severance</tspan></text>
+<text y="548"><tspan x="12" class="m">detail</tspan><tspan x="120">seasons 1, 2 · tv</tspan></text>
+<text y="570"><tspan x="12" class="m">by</tspan><tspan x="120">Sam · 5 h ago</tspan></text>
+<text y="592"><tspan x="12" class="m">size</tspan><tspan x="120">38.4G</tspan></text>
+<text y="614"><tspan x="12" class="m">speed</tspan><tspan x="120">12.4 MB/s · 48 seeds · eta 41 min</tspan></text>
+<rect y="772" width="390" height="72" fill="#101410"/>
+<line y1="772" x2="390" y2="772" class="D"/>
+<rect x="12" y="782" width="114" height="34" class="t"/>
+<text x="69" y="804" text-anchor="middle"><tspan class="a">[x]</tspan> remove</text>
+<rect x="138" y="782" width="114" height="34" class="t"/>
+<text x="195" y="804" text-anchor="middle"><tspan class="a">[/]</tspan> filter</text>
+<rect x="264" y="782" width="114" height="34" class="t"/>
+<text x="321" y="804" text-anchor="middle"><tspan class="a">[s]</tspan> sort</text>
+<rect x="135" y="832" width="120" height="4" rx="2" fill="#3b4e3b"/>
+</svg>

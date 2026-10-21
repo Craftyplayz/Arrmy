@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+<defs>
+<linearGradient id="g1" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#465309"/></linearGradient>
+<linearGradient id="g2" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#090953"/></linearGradient>
+<linearGradient id="g3" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#534609"/></linearGradient>
+<linearGradient id="g4" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#3057a6"/><stop offset="1" stop-color="#220953"/></linearGradient>
+<linearGradient id="g5" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#a63044"/><stop offset="1" stop-color="#532e09"/></linearGradient>
+<linearGradient id="g6" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#30a657"/><stop offset="1" stop-color="#095353"/></linearGradient>
+<linearGradient id="g7" x1="0" y1="0" x2=".6" y2="1"><stop offset="0" stop-color="#5730a6"/><stop offset="1" stop-color="#530953"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#1b1c1f"/>
+<text x="28" y="34" fill="#ececec" font-size="15" font-weight="600">9:41</text>
+<g fill="#ececec"><rect x="300" y="27" width="3" height="5" rx="1"/><rect x="305" y="25" width="3" height="7" rx="1"/><rect x="310" y="23" width="3" height="9" rx="1"/><rect x="315" y="21" width="3" height="11" rx="1"/></g>
+<rect x="336" y="22" width="24" height="11" rx="3" fill="none" stroke="#ececec" stroke-width="1.5"/><rect x="338" y="24" width="18" height="7" rx="1.5" fill="#ececec"/>
+<text x="20" y="80" fill="#ececec" font-size="24" font-weight="700">Requests</text>
+<rect x="232" y="57" width="86" height="30" rx="15" fill="#2e3137" stroke="#4a4e57"/><text x="275" y="77" text-anchor="middle" fill="#ececec" font-size="13">Everyone</text>
+<circle cx="350" cy="72" r="16" fill="#307fa6"/><text x="350" y="77" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">C</text>
+<g font-size="12" fill="#ececec">
+<circle cx="25" cy="106" r="4" fill="#5fa346"/><text x="34" y="110">6 Available</text>
+<circle cx="127" cy="106" r="4" fill="#4f86bd"/><text x="136" y="110">3 Downloading</text>
+<circle cx="251" cy="106" r="4" fill="#a8862a"/><text x="260" y="110">1 Importing</text>
+<circle cx="25" cy="128" r="4" fill="#6a7080"/><text x="34" y="132">1 Requested</text>
+<circle cx="127" cy="128" r="4" fill="#b04a4a"/><text x="136" y="132">1 Stuck</text>
+<text x="251" y="132" fill="#9b9b9b">12 Requests · 211 GB</text>
+</g>
+<g font-size="11" font-weight="600" fill="#66c0f4"><text x="20" y="162">TODAY · WED 21</text></g>
+<rect x="16" y="170" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="170" width="4" height="68" rx="2" fill="#ffb469"/><rect x="30" y="178" width="36" height="52" rx="4" fill="url(#g1)"/>
+<text x="76" y="194" fill="#ececec" font-size="13" font-weight="600">Dune: Part Two <tspan fill="#9b9b9b" font-weight="400">2024</tspan></text><text x="76" y="212" fill="#9b9b9b" font-size="11">Movie · 24.1 GB · Crafty · 2 h ago</text>
+<rect x="284" y="184" width="78" height="22" rx="11" fill="#2d4a24" stroke="#5fa346"/><text x="323" y="199" text-anchor="middle" fill="#ececec" font-size="11">Available</text>
+<rect x="16" y="244" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="244" width="4" height="68" rx="2" fill="#7fb3ff"/><rect x="30" y="252" width="36" height="52" rx="4" fill="url(#g2)"/>
+<text x="76" y="268" fill="#ececec" font-size="13" font-weight="600">Severance <tspan fill="#9b9b9b" font-weight="400">2022</tspan></text><text x="76" y="286" fill="#9b9b9b" font-size="11">TV Show · Seasons 1, 2 · 38.4 GB · Sam</text>
+<rect x="76" y="296" width="190" height="4" rx="2" fill="#141518"/><rect x="76" y="296" width="118" height="4" rx="2" fill="#4f86bd"/>
+<rect x="278" y="258" width="84" height="22" rx="11" fill="#24384a" stroke="#4f86bd"/><text x="320" y="273" text-anchor="middle" fill="#ececec" font-size="11">Downloading</text>
+<g font-size="11" font-weight="600" fill="#9b9b9b"><text x="20" y="334">YESTERDAY · TUE 20</text></g>
+<rect x="16" y="342" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="342" width="4" height="68" rx="2" fill="#7fb3ff"/><rect x="30" y="350" width="36" height="52" rx="4" fill="url(#g3)"/>
+<text x="76" y="366" fill="#ececec" font-size="13" font-weight="600">The Bear <tspan fill="#9b9b9b" font-weight="400">2022</tspan></text><text x="76" y="384" fill="#9b9b9b" font-size="11">TV Show · Season 3 · Jo</text>
+<rect x="284" y="356" width="78" height="22" rx="11" fill="#35383f" stroke="#6a7080"/><text x="323" y="371" text-anchor="middle" fill="#ececec" font-size="11">Requested</text>
+<rect x="16" y="416" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="416" width="4" height="68" rx="2" fill="#ffb469"/><rect x="30" y="424" width="36" height="52" rx="4" fill="url(#g4)"/>
+<text x="76" y="440" fill="#ececec" font-size="13" font-weight="600">Arrival <tspan fill="#9b9b9b" font-weight="400">2016</tspan></text><text x="76" y="458" fill="#9b9b9b" font-size="11">Movie · 14.8 GB · Crafty</text>
+<rect x="284" y="430" width="78" height="22" rx="11" fill="#2d4a24" stroke="#5fa346"/><text x="323" y="445" text-anchor="middle" fill="#ececec" font-size="11">Available</text>
+<g font-size="11" font-weight="600" fill="#9b9b9b"><text x="20" y="506">MON 19 OCT</text></g>
+<rect x="16" y="514" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="514" width="4" height="68" rx="2" fill="#7fb3ff"/><rect x="30" y="522" width="36" height="52" rx="4" fill="url(#g5)"/>
+<text x="76" y="538" fill="#ececec" font-size="13" font-weight="600">Shōgun <tspan fill="#9b9b9b" font-weight="400">2024</tspan></text><text x="76" y="556" fill="#9b9b9b" font-size="11">TV Show · Season 1 · 29.2 GB · Alex</text>
+<rect x="76" y="566" width="190" height="4" rx="2" fill="#141518"/><rect x="76" y="566" width="182" height="4" rx="2" fill="#a8862a"/>
+<rect x="284" y="528" width="78" height="22" rx="11" fill="#4a3d16" stroke="#a8862a"/><text x="323" y="543" text-anchor="middle" fill="#ececec" font-size="11">Importing</text>
+<rect x="16" y="588" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="588" width="4" height="68" rx="2" fill="#6fd6a8"/><rect x="30" y="596" width="36" height="52" rx="4" fill="url(#g6)"/>
+<text x="76" y="612" fill="#ececec" font-size="13" font-weight="600">Project Hail Mary <tspan fill="#9b9b9b" font-weight="400">2021</tspan></text><text x="76" y="630" fill="#9b9b9b" font-size="11">Audiobook · 0.5 GB · Sam</text>
+<rect x="76" y="640" width="190" height="4" rx="2" fill="#141518"/><rect x="76" y="640" width="34" height="4" rx="2" fill="#4f86bd"/>
+<rect x="278" y="602" width="84" height="22" rx="11" fill="#24384a" stroke="#4f86bd"/><text x="320" y="617" text-anchor="middle" fill="#ececec" font-size="11">Downloading</text>
+<g font-size="11" font-weight="600" fill="#9b9b9b"><text x="20" y="678">SUN 18 OCT</text></g>
+<rect x="16" y="686" width="358" height="68" rx="8" fill="#25272b" stroke="#363940"/><rect x="16" y="686" width="4" height="68" rx="2" fill="#7fb3ff"/><rect x="30" y="694" width="36" height="52" rx="4" fill="url(#g7)"/>
+<text x="76" y="710" fill="#ececec" font-size="13" font-weight="600">Andor <tspan fill="#9b9b9b" font-weight="400">2022</tspan></text><text x="76" y="728" fill="#9b9b9b" font-size="11">TV Show · Seasons 1, 2 · 41 GB · Crafty</text>
+<rect x="284" y="700" width="78" height="22" rx="11" fill="#2d4a24" stroke="#5fa346"/><text x="323" y="715" text-anchor="middle" fill="#ececec" font-size="11">Available</text>
+<rect y="764" width="390" height="80" fill="#25272b"/><rect y="764" width="390" height="1" fill="#363940"/>
+<g font-size="10" text-anchor="middle">
+<rect x="38" y="782" width="22" height="20" rx="4" fill="none" stroke="#9b9b9b" stroke-width="1.5"/><rect x="38" y="782" width="22" height="6" rx="2" fill="#9b9b9b"/><text x="49" y="826" fill="#9b9b9b">Home</text>
+<g stroke="#66c0f4" stroke-width="2" stroke-linecap="round"><path d="M136 786h20M136 793h20M136 800h14"/></g><text x="146" y="826" fill="#66c0f4" font-weight="600">Requests</text>
+<circle cx="244" cy="793" r="9" fill="none" stroke="#9b9b9b" stroke-width="2"/><circle cx="244" cy="793" r="3" fill="#9b9b9b"/><text x="244" y="826" fill="#9b9b9b">Admin</text>
+<g stroke="#9b9b9b" stroke-width="2" stroke-linecap="round"><path d="M330 788h22M330 798h22"/></g><circle cx="338" cy="788" r="3" fill="#25272b" stroke="#9b9b9b" stroke-width="2"/><circle cx="346" cy="798" r="3" fill="#25272b" stroke="#9b9b9b" stroke-width="2"/><text x="341" y="826" fill="#9b9b9b">Settings</text>
+</g>
+<rect x="135" y="834" width="120" height="4" rx="2" fill="#ececec" opacity=".5"/>
+</svg>

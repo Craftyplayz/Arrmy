@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+<style>text{font-family:ui-monospace,Consolas,Menlo,monospace;font-size:12px;fill:#c9d1c9}.m{fill:#6f7f6f}.a{fill:#5dff8a}.b{fill:#5fb3ff}.y{fill:#ffbf47}.r{fill:#ff5f5f}.g{fill:#8a948a}.k{fill:#0b0d0b}.h{font-weight:700}.d{stroke:#233023;stroke-dasharray:2 3}.D{stroke:#3b4e3b;stroke-dasharray:2 3}.t{fill:#151b15;stroke:#3b4e3b}</style>
+<rect width="390" height="844" fill="#0b0d0b"/>
+<text x="16" y="30" class="h">09:41</text>
+<text x="374" y="30" text-anchor="end" class="m">LTE ▮▮▮▯</text>
+<rect y="44" width="390" height="28" fill="#101410"/>
+<line y1="72" x2="390" y2="72" class="D"/>
+<rect x="70" y="49" width="54" height="18" fill="#5dff8a"/>
+<text y="63"><tspan x="12" class="a h">arrmy</tspan><tspan x="56" class="m">│</tspan><tspan x="72" class="k h">[1]home</tspan><tspan x="132" class="a">[2]</tspan><tspan x="162" class="a">[3]</tspan><tspan x="192" class="a">[4]</tspan><tspan x="222" class="a">[5]</tspan><tspan x="252" class="m">│</tspan><tspan x="268" class="m">crafty</tspan></text>
+<text y="100"><tspan x="12" class="a h">&gt;</tspan><tspan x="26">search: the</tspan><tspan class="a">█</tspan></text>
+<text y="126" class="m"><tspan x="30">TITLE</tspan><tspan x="160">TYPE</tspan><tspan x="240">YEAR</tspan><tspan x="284">STATE</tspan></text>
+<line x1="12" y1="132" x2="378" y2="132" class="D"/>
+<rect x="12" y="136" width="366" height="22" fill="#11331c"/>
+<text y="150" class="a"><tspan x="12" class="h">&gt;</tspan><tspan x="30">Fallout</tspan><tspan x="160">tv</tspan><tspan x="240">2024</tspan><tspan x="284">—</tspan></text>
+<text y="172"><tspan x="30">Poor Things</tspan><tspan x="160">movie</tspan><tspan x="240">2023</tspan><tspan x="284" class="m">—</tspan></text>
+<line x1="12" y1="178" x2="378" y2="178" class="d"/>
+<text y="194"><tspan x="30">Blue Eye Samurai</tspan><tspan x="160">tv</tspan><tspan x="240">2023</tspan><tspan x="284" class="m">—</tspan></text>
+<line x1="12" y1="200" x2="378" y2="200" class="d"/>
+<text y="216"><tspan x="30">Children of Time</tspan><tspan x="160">audiobook</tspan><tspan x="240">2015</tspan><tspan x="284" class="m">—</tspan></text>
+<line x1="12" y1="222" x2="378" y2="222" class="d"/>
+<text y="238"><tspan x="30">The Bear</tspan><tspan x="160">tv</tspan><tspan x="240">2022</tspan><tspan x="284" class="g">requested</tspan></text>
+<line x1="12" y1="244" x2="378" y2="244" class="d"/>
+<text y="260"><tspan x="30">The Martian</tspan><tspan x="160">audiobook</tspan><tspan x="240">2011</tspan><tspan x="284" class="a">available</tspan></text>
+<line x1="12" y1="266" x2="378" y2="266" class="d"/>
+<text y="296" class="m"><tspan x="12" class="a">[r]</tspan><tspan> request</tspan><tspan x="112" class="a">[enter]</tspan><tspan> details</tspan><tspan x="240" class="a">[⇥]</tspan><tspan> type: </tspan><tspan class="a">all</tspan></text>
+<text x="12" y="336" class="a h">RECENT</text>
+<line x1="12" y1="342" x2="378" y2="342" class="D"/>
+<text y="362"><tspan x="12" class="a">+</tspan><tspan x="26">Dune: Part Two</tspan><tspan x="262" class="m">2024 · movie</tspan></text>
+<line x1="12" y1="368" x2="378" y2="368" class="d"/>
+<text y="384"><tspan x="12" class="a">+</tspan><tspan x="26">Arrival</tspan><tspan x="262" class="m">2016 · movie</tspan></text>
+<line x1="12" y1="390" x2="378" y2="390" class="d"/>
+<text y="406"><tspan x="12" class="a">+</tspan><tspan x="26">Andor</tspan><tspan x="262" class="m">2022 · tv</tspan></text>
+<line x1="12" y1="412" x2="378" y2="412" class="d"/>
+<text y="428"><tspan x="12" class="a">+</tspan><tspan x="26">Oppenheimer</tspan><tspan x="262" class="m">2023 · movie</tspan></text>
+<line x1="12" y1="434" x2="378" y2="434" class="d"/>
+<text y="450"><tspan x="12" class="a">+</tspan><tspan x="26">Everything Everywhere All…</tspan><tspan x="262" class="m">2022 · movie</tspan></text>
+<line x1="12" y1="456" x2="378" y2="456" class="d"/>
+<text y="472"><tspan x="12" class="a">+</tspan><tspan x="26">The Martian</tspan><tspan x="262" class="m">2011 · audiobook</tspan></text>
+<line x1="12" y1="478" x2="378" y2="478" class="d"/>
+<text x="12" y="518" class="a h">TRENDING</text>
+<line x1="12" y1="524" x2="378" y2="524" class="D"/>
+<text y="544"><tspan x="12" class="m">1</tspan><tspan x="26">Fallout</tspan><tspan x="262" class="m">tv · 8.4</tspan></text>
+<line x1="12" y1="550" x2="378" y2="550" class="d"/>
+<text y="566"><tspan x="12" class="m">2</tspan><tspan x="26">Blue Eye Samurai</tspan><tspan x="262" class="m">tv · 8.7</tspan></text>
+<line x1="12" y1="572" x2="378" y2="572" class="d"/>
+<text y="588"><tspan x="12" class="m">3</tspan><tspan x="26">Oppenheimer</tspan><tspan x="262" class="m">movie · 8.3</tspan></text>
+<line x1="12" y1="594" x2="378" y2="594" class="d"/>
+<text y="610"><tspan x="12" class="m">4</tspan><tspan x="26">Poor Things</tspan><tspan x="262" class="m">movie · 7.9</tspan></text>
+<line x1="12" y1="616" x2="378" y2="616" class="d"/>
+<text y="638"><tspan x="12" class="m">5</tspan><tspan x="26">Shōgun</tspan><tspan x="262" class="m">tv · 8.7</tspan></text>
+<line x1="12" y1="644" x2="378" y2="644" class="d"/>
+<rect y="772" width="390" height="72" fill="#101410"/>
+<line y1="772" x2="390" y2="772" class="D"/>
+<rect x="12" y="782" width="114" height="34" class="t"/>
+<text x="69" y="804" text-anchor="middle"><tspan class="a">[/]</tspan> search</text>
+<rect x="138" y="782" width="114" height="34" class="t"/>
+<text x="195" y="804" text-anchor="middle"><tspan class="a">[r]</tspan> request</text>
+<rect x="264" y="782" width="114" height="34" class="t"/>
+<text x="321" y="804" text-anchor="middle"><tspan class="a">[⇥]</tspan> type</text>
+<rect x="135" y="832" width="120" height="4" rx="2" fill="#3b4e3b"/>
+</svg>

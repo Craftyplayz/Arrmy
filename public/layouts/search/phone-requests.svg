@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<defs>
+<linearGradient id="g200" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="g350" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a63044"/><stop offset="1" stop-color="#432e19"/></linearGradient>
+<linearGradient id="g140" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#30a657"/><stop offset="1" stop-color="#194343"/></linearGradient>
+<linearGradient id="g90" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#6ba630"/><stop offset="1" stop-color="#194320"/></linearGradient>
+<linearGradient id="g10" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#433c19"/></linearGradient>
+<linearGradient id="g300" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a630a6"/><stop offset="1" stop-color="#431927"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#faf7f2"/>
+<text x="28" y="38" font-size="15" font-weight="600" fill="#1f1d1a">9:41</text>
+<g fill="#1f1d1a"><rect x="296" y="30" width="3" height="8" rx="1"/><rect x="301" y="28" width="3" height="10" rx="1"/><rect x="306" y="26" width="3" height="12" rx="1"/><rect x="311" y="24" width="3" height="14" rx="1"/><rect x="336" y="28" width="20" height="8" rx="2"/><rect x="359.5" y="30" width="2" height="4" rx="1"/></g>
+<rect x="334" y="26" width="24" height="12" rx="3.5" fill="none" stroke="#1f1d1a"/>
+<rect y="56" width="390" height="48" fill="#fff"/><line x1="0" y1="104.5" x2="390" y2="104.5" stroke="#e6e0d6"/>
+<text x="20" y="87" font-size="19" font-weight="700" fill="#1f1d1a">Arrmy</text>
+<text x="370" y="86" font-size="13" fill="#6b6560" text-anchor="end">Crafty</text>
+
+<text x="20" y="148" font-size="28" font-weight="700" fill="#1f1d1a" letter-spacing="-.5">Requests</text>
+<text x="20" y="172" font-size="14" fill="#6b6560">12 Requests, 3 downloading</text>
+
+<g font-size="11" font-weight="600" fill="#6b6560" letter-spacing=".8"><text x="20" y="208">DOWNLOADING &amp; IMPORTING <tspan font-weight="400" letter-spacing="0">4</tspan></text><text x="20" y="560">REQUESTED <tspan font-weight="400" letter-spacing="0">1</tspan></text><text x="20" y="698">STUCK <tspan font-weight="400" letter-spacing="0">1</tspan></text></g>
+<g stroke="#e6e0d6"><line x1="20" y1="216.5" x2="370" y2="216.5"/><line x1="20" y1="298.5" x2="370" y2="298.5"/><line x1="20" y1="374.5" x2="370" y2="374.5"/><line x1="20" y1="450.5" x2="370" y2="450.5"/><line x1="20" y1="568.5" x2="370" y2="568.5"/><line x1="20" y1="706.5" x2="370" y2="706.5"/></g>
+
+<g font-size="12" fill="#6b6560">
+<rect x="20" y="226" width="40" height="60" rx="5" fill="url(#g200)"/>
+<text x="72" y="244" font-size="15" font-weight="600" fill="#1f1d1a">Severance</text>
+<text x="72" y="262">Seasons 1, 2 · Sam, 5 h ago</text>
+<rect x="72" y="272" width="190" height="3" rx="1.5" fill="#e6e0d6"/><rect x="72" y="272" width="118" height="3" rx="1.5" fill="#1d5c8f"/>
+<rect x="266" y="236" width="104" height="22" rx="11" fill="#e1ecf7"/><text x="318" y="251" font-size="11" font-weight="600" fill="#1d5c8f" text-anchor="middle">Downloading 62%</text>
+<text x="370" y="282" font-size="11" text-anchor="end" text-decoration="underline">Remove</text>
+
+<rect x="20" y="302" width="40" height="60" rx="5" fill="url(#g350)"/>
+<text x="72" y="320" font-size="15" font-weight="600" fill="#1f1d1a">Shōgun</text>
+<text x="72" y="338">Season 1 · Alex, 2 days ago</text>
+<rect x="72" y="348" width="190" height="3" rx="1.5" fill="#e6e0d6"/><rect x="72" y="348" width="182" height="3" rx="1.5" fill="#d6a53b"/>
+<rect x="274" y="312" width="96" height="22" rx="11" fill="#fbefd4"/><text x="322" y="327" font-size="11" font-weight="600" fill="#7a5410" text-anchor="middle">Importing 96%</text>
+<text x="370" y="358" font-size="11" text-anchor="end" text-decoration="underline">Remove</text>
+
+<rect x="20" y="378" width="40" height="60" rx="5" fill="url(#g140)"/>
+<text x="72" y="396" font-size="15" font-weight="600" fill="#1f1d1a">Project Hail Mary</text>
+<text x="72" y="414">Audiobook · Sam, 2 days ago</text>
+<rect x="72" y="424" width="190" height="3" rx="1.5" fill="#e6e0d6"/><rect x="72" y="424" width="34" height="3" rx="1.5" fill="#1d5c8f"/>
+<rect x="266" y="388" width="104" height="22" rx="11" fill="#e1ecf7"/><text x="318" y="403" font-size="11" font-weight="600" fill="#1d5c8f" text-anchor="middle">Downloading 18%</text>
+<text x="370" y="434" font-size="11" text-anchor="end" text-decoration="underline">Remove</text>
+
+<rect x="20" y="454" width="40" height="60" rx="5" fill="url(#g90)"/>
+<text x="72" y="472" font-size="15" font-weight="600" fill="#1f1d1a">Slow Horses</text>
+<text x="72" y="490">Season 4 · Sam, last week</text>
+<rect x="72" y="500" width="190" height="3" rx="1.5" fill="#e6e0d6"/><rect x="72" y="500" width="84" height="3" rx="1.5" fill="#1d5c8f"/>
+<rect x="266" y="464" width="104" height="22" rx="11" fill="#e1ecf7"/><text x="318" y="479" font-size="11" font-weight="600" fill="#1d5c8f" text-anchor="middle">Downloading 44%</text>
+<text x="370" y="510" font-size="11" text-anchor="end" text-decoration="underline">Remove</text>
+
+<rect x="20" y="578" width="40" height="60" rx="5" fill="url(#g10)"/>
+<text x="72" y="596" font-size="15" font-weight="600" fill="#1f1d1a">The Bear</text>
+<text x="72" y="614">Season 3 · Jo, yesterday</text>
+<rect x="296" y="588" width="74" height="22" rx="11" fill="#f3efe8"/><text x="333" y="603" font-size="11" font-weight="600" text-anchor="middle">Requested</text>
+<text x="370" y="634" font-size="11" text-anchor="end" text-decoration="underline">Remove</text>
+
+<rect x="20" y="716" width="40" height="60" rx="5" fill="url(#g300)"/>
+<text x="72" y="734" font-size="15" font-weight="600" fill="#1f1d1a">Past Lives</text>
+<text x="72" y="752">Movie · Jo, 4 days ago</text>
+<rect x="318" y="726" width="52" height="22" rx="11" fill="#fbe4e1"/><text x="344" y="741" font-size="11" font-weight="600" fill="#8b1e1e" text-anchor="middle">Stuck</text>
+</g>
+
+<rect y="770" width="390" height="74" fill="#fff"/><line x1="0" y1="770.5" x2="390" y2="770.5" stroke="#e6e0d6"/>
+<g fill="none" stroke="#9a948c" stroke-width="2" stroke-linecap="round">
+<circle cx="47" cy="791" r="7"/><line x1="52" y1="796" x2="57" y2="801"/>
+<path d="M137 786h18M137 793h18M137 800h11" stroke="#1d5c8f"/>
+<path d="M233 795h5l3-8 4 16 3-8h6"/>
+<circle cx="341" cy="793" r="7" stroke-dasharray="3 2.5"/><circle cx="341" cy="793" r="2.5" fill="#9a948c" stroke="none"/>
+</g>
+<g font-size="11" text-anchor="middle" fill="#9a948c"><text x="49" y="822">Home</text><text x="146" y="822" fill="#1d5c8f" font-weight="600">Requests</text><text x="244" y="822">Admin</text><text x="341" y="822">Settings</text></g>
+<rect x="128" y="832" width="134" height="5" rx="2.5" fill="#1f1d1a"/>
+</svg>

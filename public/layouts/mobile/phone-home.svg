@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<defs>
+<linearGradient id="g55" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a69c30"/><stop offset="1" stop-color="#2a4319"/></linearGradient>
+<linearGradient id="g10" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#433c19"/></linearGradient>
+<linearGradient id="g20" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a65730"/><stop offset="1" stop-color="#434319"/></linearGradient>
+<linearGradient id="g230" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#3044a6"/><stop offset="1" stop-color="#2e1943"/></linearGradient>
+<linearGradient id="g40" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#a67f30"/><stop offset="1" stop-color="#354319"/></linearGradient>
+<linearGradient id="g280" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#7f30a6"/><stop offset="1" stop-color="#431935"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#0e0f14"/>
+<text x="32" y="40" font-size="15" font-weight="600" fill="#f3f3f7">9:41</text>
+<g fill="#f3f3f7"><rect x="296" y="32" width="3" height="8" rx="1"/><rect x="301" y="30" width="3" height="10" rx="1"/><rect x="306" y="28" width="3" height="12" rx="1"/><rect x="311" y="26" width="3" height="14" rx="1"/><rect x="336" y="30" width="19" height="8" rx="2"/><rect x="359.5" y="32" width="2" height="4" rx="1"/><circle cx="324" cy="39" r="1.5"/></g>
+<path d="M318 33a9 9 0 0 1 12 0M321 36.5a5 5 0 0 1 6 0" fill="none" stroke="#f3f3f7" stroke-width="2" stroke-linecap="round"/>
+<rect x="334" y="28" width="24" height="12" rx="3.5" fill="none" stroke="#f3f3f7"/>
+<text x="24" y="74" font-size="14" font-weight="700" fill="#f3f3f7">Arrmy</text>
+<text x="332" y="74" font-size="13" fill="#8f919f" text-anchor="end">Crafty</text>
+<circle cx="352" cy="70" r="13" fill="#3488b2"/><text x="352" y="74" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">C</text>
+<text x="195" y="98" font-size="12" fill="#8f919f" text-anchor="middle" opacity=".75">↓ Pull down to refresh</text>
+
+<text x="20" y="148" font-size="34" font-weight="800" fill="#f3f3f7" letter-spacing="-.6">Search</text>
+<rect x="16" y="168" width="358" height="48" rx="14" fill="#23242d"/>
+<circle cx="40" cy="191" r="7" fill="none" stroke="#8f919f" stroke-width="2"/><line x1="45" y1="196" x2="50" y2="201" stroke="#8f919f" stroke-width="2" stroke-linecap="round"/>
+<text x="62" y="198" font-size="17" fill="#f3f3f7">the</text>
+<rect x="16" y="228" width="358" height="48" rx="12" fill="#23242d"/>
+<rect x="19" y="231" width="86" height="42" rx="9" fill="#383a47"/>
+<g font-size="13" font-weight="600" text-anchor="middle" fill="#8f919f"><text x="62" y="257" fill="#f3f3f7">All</text><text x="151" y="257">Movie</text><text x="239" y="257">TV Show</text><text x="328" y="257">Audiobook</text></g>
+
+<rect x="16" y="292" width="358" height="267" rx="18" fill="#1a1b22"/>
+<rect x="32" y="302" width="46" height="69" rx="8" fill="url(#g55)"/>
+<text x="90" y="330" font-size="16" font-weight="600" fill="#f3f3f7">Fallout</text><text x="90" y="350" font-size="13" fill="#8f919f">2024 · TV Show</text>
+<rect x="270" y="316" width="88" height="40" rx="20" fill="#8b6dff"/><text x="314" y="341" font-size="14" font-weight="600" fill="#fff" text-anchor="middle">Request</text>
+<line x1="90" y1="381.5" x2="374" y2="381.5" stroke="#2b2d37"/>
+<rect x="32" y="391" width="46" height="69" rx="8" fill="url(#g10)"/>
+<text x="90" y="419" font-size="16" font-weight="600" fill="#f3f3f7">The Bear</text><text x="90" y="439" font-size="13" fill="#8f919f">2022 · TV Show</text>
+<rect x="274" y="413" width="84" height="24" rx="12" fill="#2a2b35"/><text x="316" y="429" font-size="12" font-weight="600" fill="#8f919f" text-anchor="middle">Requested</text>
+<line x1="90" y1="470.5" x2="374" y2="470.5" stroke="#2b2d37"/>
+<rect x="32" y="480" width="46" height="69" rx="8" fill="url(#g20)"/>
+<text x="90" y="508" font-size="16" font-weight="600" fill="#f3f3f7">The Martian</text><text x="90" y="528" font-size="13" fill="#8f919f">2011 · Audiobook</text>
+<rect x="274" y="502" width="84" height="24" rx="12" fill="#16301f"/><text x="316" y="518" font-size="12" font-weight="600" fill="#5fd38a" text-anchor="middle">Available</text>
+
+<text x="20" y="592" font-size="20" font-weight="700" fill="#f3f3f7">Trending</text><text x="114" y="592" font-size="13" font-weight="500" fill="#8f919f">this week</text>
+<rect x="16" y="602" width="96" height="144" rx="12" fill="url(#g55)"/>
+<rect x="124" y="602" width="96" height="144" rx="12" fill="url(#g230)"/>
+<rect x="232" y="602" width="96" height="144" rx="12" fill="url(#g40)"/>
+<rect x="340" y="602" width="96" height="144" rx="12" fill="url(#g280)"/>
+<g font-size="12" font-weight="600" fill="#f3f3f7"><text x="16" y="762">Fallout</text><text x="124" y="762">Blue Eye Samur…</text><text x="232" y="762">Oppenheimer</text><text x="340" y="762">Poor Things</text></g>
+
+<rect x="316" y="708" width="56" height="56" rx="18" fill="#8b6dff" opacity=".35"/>
+<rect x="314" y="700" width="56" height="56" rx="18" fill="#8b6dff"/><text x="342" y="739" font-size="34" fill="#fff" text-anchor="middle">+</text>
+
+<rect y="764" width="390" height="80" fill="#121318"/><line x1="0" y1="764.5" x2="390" y2="764.5" stroke="#2b2d37"/>
+<g fill="none" stroke="#8f919f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path transform="translate(33,776)" stroke="#8b6dff" d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+<path transform="translate(108,776)" d="M3 13l2-8h14l2 8v6H3zM3 13h5l2 3h4l2-3h5"/>
+<path transform="translate(183,776)" d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/>
+<path transform="translate(258,776)" d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>
+<path transform="translate(333,776)" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM10 18h4"/>
+</g>
+<g font-size="11" font-weight="500" text-anchor="middle" fill="#8f919f"><text x="45" y="816" fill="#8b6dff">Home</text><text x="120" y="816">Requests</text><text x="195" y="816">Admin</text><text x="270" y="816">Settings</text><text x="345" y="816">Phone</text></g>
+<rect x="128" y="830" width="134" height="5" rx="2.5" fill="#f3f3f7"/>
+</svg>

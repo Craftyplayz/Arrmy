@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" fill="#eef2ff">
+<defs>
+<linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1a2550"/><stop offset=".45" stop-color="#0b1020"/><stop offset="1" stop-color="#070a16"/></linearGradient>
+<linearGradient id="av" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3d9fd6"/><stop offset="1" stop-color="#2a3f80"/></linearGradient>
+<linearGradient id="avS" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#d6873d"/><stop offset="1" stop-color="#805a2a"/></linearGradient>
+<linearGradient id="avJ" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3dd67a"/><stop offset="1" stop-color="#2a8070"/></linearGradient>
+<linearGradient id="avA" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#d63dd6"/><stop offset="1" stop-color="#802a4a"/></linearGradient>
+<linearGradient id="p1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a66b30"/><stop offset="1" stop-color="#3c4319"/></linearGradient>
+<linearGradient id="p2" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+<linearGradient id="p3" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a64430"/><stop offset="1" stop-color="#433c19"/></linearGradient>
+<linearGradient id="p5" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a63044"/><stop offset="1" stop-color="#432e19"/></linearGradient>
+<linearGradient id="p8" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a630a6"/><stop offset="1" stop-color="#431927"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="url(#bg)"/>
+<text x="24" y="36" font-size="15" font-weight="700">9:41</text>
+<g><rect x="306" y="27" width="3" height="5" rx="1"/><rect x="311" y="25" width="3" height="7" rx="1"/><rect x="316" y="23" width="3" height="9" rx="1"/><rect x="321" y="21" width="3" height="11" rx="1"/></g>
+<rect x="336" y="23" width="26" height="12" rx="3.5" fill="none" stroke="#eef2ff" stroke-opacity=".6"/><rect x="338" y="25" width="19" height="8" rx="2"/><rect x="363" y="27" width="2" height="4" rx="1" fill-opacity=".6"/>
+<rect x="20" y="60" width="104" height="48" rx="24" fill="#161f3a" stroke="#2a3659"/>
+<circle cx="44" cy="84" r="9" fill="#5ec8ff"/><text x="60" y="90" font-size="18" font-weight="800">Arrmy</text>
+<rect x="134" y="60" width="134" height="48" rx="24" fill="#161f3a" stroke="#2a3659"/>
+<circle cx="158" cy="83" r="6" fill="none" stroke="#97a3c2" stroke-width="2"/><path d="m163 88 4 4" stroke="#97a3c2" stroke-width="2" stroke-linecap="round"/><text x="176" y="89" font-size="14" fill="#97a3c2">Search</text>
+<rect x="278" y="60" width="92" height="48" rx="24" fill="#161f3a" stroke="#2a3659"/>
+<circle cx="300" cy="84" r="15" fill="url(#av)"/><text x="300" y="89" font-size="14" font-weight="800" text-anchor="middle">C</text><text x="320" y="89" font-size="13" font-weight="700">Crafty</text>
+<rect x="20" y="124" width="84" height="40" rx="20" fill="#5ec8ff"/><text x="36" y="149" font-size="14" font-weight="700" fill="#06111f">All</text><rect x="62" y="132" width="30" height="24" rx="12" fill="#06111f" fill-opacity=".18"/><text x="77" y="148" font-size="12" font-weight="800" text-anchor="middle" fill="#06111f">12</text>
+<rect x="112" y="124" width="138" height="40" rx="20" fill="#141d36" stroke="#263351"/><text x="128" y="149" font-size="14" font-weight="700">Downloading</text><rect x="214" y="132" width="24" height="24" rx="12" fill="#000" fill-opacity=".3"/><text x="226" y="148" font-size="12" font-weight="800" text-anchor="middle">3</text>
+<rect x="258" y="124" width="86" height="40" rx="20" fill="#141d36" stroke="#263351"/><text x="274" y="149" font-size="14" font-weight="700">Stuck</text><rect x="308" y="132" width="24" height="24" rx="12" fill="#000" fill-opacity=".3"/><text x="320" y="148" font-size="12" font-weight="800" text-anchor="middle">1</text>
+<rect x="352" y="124" width="110" height="40" rx="20" fill="#141d36" stroke="#263351"/><text x="368" y="149" font-size="14" font-weight="700">Available</text>
+<rect x="20" y="180" width="350" height="126" rx="22" fill="#141d36" stroke="#263351"/>
+<rect x="34" y="193" width="66" height="100" rx="10" fill="url(#p1)"/>
+<text x="114" y="212" font-size="17" font-weight="800">Dune: Part Two</text><text x="114" y="230" font-size="12" fill="#97a3c2">2024 · Movie · 24.1 GB in Plex</text>
+<rect x="114" y="238" width="80" height="24" rx="12" fill="#1b4a2a" stroke="#4fb05a"/><circle cx="128" cy="250" r="3.5" fill="#9be89b"/><text x="137" y="254" font-size="11" font-weight="700" fill="#9be89b">Available</text>
+<circle cx="121" cy="272" r="7" fill="url(#av)"/><text x="134" y="276" font-size="12" font-weight="600" fill="#97a3c2">Crafty · 2 h ago</text>
+<rect x="20" y="318" width="350" height="126" rx="22" fill="#141d36" stroke="#263351"/>
+<rect x="34" y="331" width="66" height="100" rx="10" fill="url(#p2)"/>
+<text x="114" y="350" font-size="17" font-weight="800">Severance</text><text x="114" y="368" font-size="12" fill="#97a3c2">2022 · TV Show · Seasons 1, 2</text>
+<rect x="114" y="376" width="98" height="24" rx="12" fill="#17395a" stroke="#4a9ad0"/><circle cx="128" cy="388" r="3.5" fill="#9fd4ff"/><text x="137" y="392" font-size="11" font-weight="700" fill="#9fd4ff">Downloading</text>
+<circle cx="121" cy="410" r="7" fill="url(#avS)"/><text x="134" y="414" font-size="12" font-weight="600" fill="#97a3c2">Sam · 5 h ago</text><text x="354" y="414" font-size="12" font-weight="800" text-anchor="end" fill="#9fd4ff">62% · 38.4 GB</text>
+<rect x="114" y="422" width="240" height="8" rx="4" fill="#eef2ff" fill-opacity=".1"/><rect x="114" y="422" width="149" height="8" rx="4" fill="#5ec8ff"/>
+<rect x="20" y="456" width="350" height="126" rx="22" fill="#141d36" stroke="#263351"/>
+<rect x="34" y="469" width="66" height="100" rx="10" fill="url(#p3)"/>
+<text x="114" y="488" font-size="17" font-weight="800">The Bear</text><text x="114" y="506" font-size="12" fill="#97a3c2">2022 · TV Show · Season 3</text>
+<rect x="114" y="514" width="86" height="24" rx="12" fill="#222b45" stroke="#3a4668"/><circle cx="128" cy="526" r="3.5" fill="#97a3c2"/><text x="137" y="530" font-size="11" font-weight="700" fill="#97a3c2">Requested</text>
+<circle cx="121" cy="548" r="7" fill="url(#avJ)"/><text x="134" y="552" font-size="12" font-weight="600" fill="#97a3c2">Jo · yesterday</text><text x="354" y="552" font-size="12" font-weight="600" text-anchor="end" fill="#97a3c2">Waiting for a release</text>
+<rect x="17" y="591" width="356" height="132" rx="25" fill="none" stroke="#d85656" stroke-opacity=".35" stroke-width="6"/>
+<rect x="20" y="594" width="350" height="126" rx="22" fill="#141d36" stroke="#d85656"/>
+<rect x="34" y="607" width="66" height="100" rx="10" fill="url(#p8)"/>
+<text x="114" y="626" font-size="17" font-weight="800">Past Lives</text><text x="114" y="644" font-size="12" fill="#97a3c2">2023 · Movie · Movie</text>
+<rect x="114" y="652" width="64" height="24" rx="12" fill="#4a2024" stroke="#d85656"/><circle cx="128" cy="664" r="3.5" fill="#ff9c9c"/><text x="137" y="668" font-size="11" font-weight="700" fill="#ff9c9c">Stuck</text>
+<circle cx="121" cy="686" r="7" fill="url(#avJ)"/><text x="134" y="690" font-size="12" font-weight="600" fill="#97a3c2">Jo · 4 days ago</text>
+<text x="114" y="708" font-size="11" font-weight="600" fill="#ffd0d0">No release found in 4 days. Searched 6 times.</text>
+<rect x="20" y="732" width="350" height="126" rx="22" fill="#141d36" stroke="#263351"/>
+<rect x="34" y="745" width="66" height="100" rx="10" fill="url(#p5)"/>
+<text x="114" y="764" font-size="17" font-weight="800">Shōgun</text>
+<rect y="764" width="390" height="80" fill="#0a0e1d"/><rect y="764" width="390" height="1" fill="#2a3659"/>
+<path d="M49 779l-10 9v10h7v-7h6v7h7v-10z" fill="#97a3c2"/><text x="49" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#97a3c2">Home</text>
+<rect x="111" y="774" width="70" height="44" rx="22" fill="#5ec8ff" fill-opacity=".16"/>
+<g fill="#5ec8ff"><rect x="137" y="781" width="18" height="3" rx="1.5"/><rect x="137" y="788" width="18" height="3" rx="1.5"/><rect x="137" y="795" width="11" height="3" rx="1.5"/></g><text x="146" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#5ec8ff">Requests</text>
+<path d="M244 779l9 3v7c0 5-4 8-9 10-5-2-9-5-9-10v-7z" fill="#97a3c2"/><text x="244" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#97a3c2">Admin</text>
+<circle cx="341" cy="789" r="6" fill="none" stroke="#97a3c2" stroke-width="3"/><path d="M341 778v3M341 797v3M330 789h3M349 789h3" stroke="#97a3c2" stroke-width="3" stroke-linecap="round"/><text x="341" y="813" font-size="10" font-weight="700" text-anchor="middle" fill="#97a3c2">Settings</text>
+<rect x="130" y="832" width="130" height="5" rx="2.5" fill="#eef2ff" fill-opacity=".8"/>
+</svg>

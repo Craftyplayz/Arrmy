@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+<defs>
+<linearGradient id="g200" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#307fa6"/><stop offset="1" stop-color="#191943"/></linearGradient>
+</defs>
+<rect width="390" height="844" fill="#0f0f12"/>
+<text x="28" y="35" fill="#f2f2f2" font-size="15" font-weight="700">9:41</text>
+<rect x="318" y="30" width="3" height="5" rx="1" fill="#f2f2f2"/><rect x="323" y="28" width="3" height="7" rx="1" fill="#f2f2f2"/><rect x="328" y="26" width="3" height="9" rx="1" fill="#f2f2f2"/><rect x="333" y="24" width="3" height="11" rx="1" fill="#f2f2f2"/>
+<rect x="344" y="24" width="24" height="12" rx="3" fill="none" stroke="#f2f2f2" stroke-width="1.5"/><rect x="346" y="26" width="17" height="8" rx="2" fill="#f2f2f2"/>
+<text x="20" y="84" fill="#f2f2f2" font-size="28" font-weight="800" letter-spacing="-.5">Settings</text>
+<circle cx="354" cy="74" r="16" fill="url(#g200)"/><text x="354" y="79" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">C</text>
+<text x="20" y="116" fill="#a0a0a8" font-size="11" font-weight="600" letter-spacing="1">SIZE LIMITS</text>
+<rect x="20" y="124" width="350" height="150" rx="12" fill="#1a1a1f"/>
+<text x="36" y="154" fill="#f2f2f2" font-size="14" font-weight="500">Movie</text>
+<rect x="274" y="134" width="80" height="30" rx="8" fill="#0a0a0c" stroke="#2a2a31"/><text x="344" y="154" fill="#f2f2f2" font-size="13" text-anchor="end">40 GB</text>
+<rect x="36" y="174" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="204" fill="#f2f2f2" font-size="14" font-weight="500">Episode, per hour</text>
+<rect x="274" y="184" width="80" height="30" rx="8" fill="#0a0a0c" stroke="#2a2a31"/><text x="344" y="204" fill="#f2f2f2" font-size="13" text-anchor="end">4 GB</text>
+<rect x="36" y="224" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="254" fill="#f2f2f2" font-size="14" font-weight="500">Audiobook</text>
+<rect x="274" y="234" width="80" height="30" rx="8" fill="#0a0a0c" stroke="#2a2a31"/><text x="344" y="254" fill="#f2f2f2" font-size="13" text-anchor="end">600 MB</text>
+<text x="20" y="300" fill="#a0a0a8" font-size="11" font-weight="600" letter-spacing="1">QUALITY</text>
+<rect x="20" y="308" width="350" height="150" rx="12" fill="#1a1a1f"/>
+<text x="36" y="338" fill="#f2f2f2" font-size="14" font-weight="500">Movies</text><text x="354" y="338" fill="#a0a0a8" font-size="13" text-anchor="end">HD-1080p  ›</text>
+<rect x="36" y="358" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="388" fill="#f2f2f2" font-size="14" font-weight="500">TV Shows</text><text x="354" y="388" fill="#a0a0a8" font-size="13" text-anchor="end">HD-1080p  ›</text>
+<rect x="36" y="408" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="438" fill="#f2f2f2" font-size="14" font-weight="500">Anime</text><text x="354" y="438" fill="#a0a0a8" font-size="13" text-anchor="end">Any  ›</text>
+<text x="20" y="484" fill="#a0a0a8" font-size="11" font-weight="600" letter-spacing="1">DISCORD</text>
+<rect x="20" y="492" width="350" height="150" rx="12" fill="#1a1a1f"/>
+<text x="36" y="522" fill="#f2f2f2" font-size="14" font-weight="500">Post to Discord</text>
+<rect x="310" y="505" width="44" height="24" rx="12" fill="#e5a00d"/><circle cx="343" cy="517" r="10" fill="#fff"/>
+<rect x="36" y="542" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="572" fill="#f2f2f2" font-size="14" font-weight="500">Server</text><text x="354" y="572" fill="#a0a0a8" font-size="13" text-anchor="end">The Crafty Lounge</text>
+<rect x="36" y="592" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="622" fill="#f2f2f2" font-size="14" font-weight="500">Channel</text><text x="354" y="622" fill="#a0a0a8" font-size="13" text-anchor="end">#arrmy</text>
+<text x="20" y="668" fill="#a0a0a8" font-size="11" font-weight="600" letter-spacing="1">PLEX</text>
+<rect x="20" y="676" width="350" height="150" rx="12" fill="#1a1a1f"/>
+<text x="36" y="706" fill="#f2f2f2" font-size="14" font-weight="500">Server</text><text x="354" y="706" fill="#a0a0a8" font-size="13" text-anchor="end">Crafty Plex</text>
+<rect x="36" y="726" width="318" height="1" fill="#2a2a31"/>
+<text x="36" y="756" fill="#f2f2f2" font-size="14" font-weight="500">Libraries</text>
+<rect x="164" y="740" width="54" height="22" rx="11" fill="#232329"/><text x="191" y="755" fill="#f2f2f2" font-size="11" text-anchor="middle">Movies</text>
+<rect x="224" y="740" width="66" height="22" rx="11" fill="#232329"/><text x="257" y="755" fill="#f2f2f2" font-size="11" text-anchor="middle">TV Shows</text>
+<rect x="296" y="740" width="74" height="22" rx="11" fill="#232329"/><text x="333" y="755" fill="#f2f2f2" font-size="11" text-anchor="middle">Audiobooks</text>
+<rect y="760" width="390" height="84" fill="#141418"/><rect y="760" width="390" height="1" fill="#2a2a31"/>
+<path d="M38 790l11-10 11 10v11H38z" fill="#6b6b75"/><text x="49" y="818" fill="#6b6b75" font-size="11" font-weight="600" text-anchor="middle">Home</text>
+<rect x="135" y="781" width="22" height="3.5" rx="1.75" fill="#6b6b75"/><rect x="135" y="788" width="22" height="3.5" rx="1.75" fill="#6b6b75"/><rect x="135" y="795" width="22" height="3.5" rx="1.75" fill="#6b6b75"/><text x="146" y="818" fill="#6b6b75" font-size="11" font-weight="600" text-anchor="middle">Requests</text>
+<circle cx="244" cy="790" r="10" fill="none" stroke="#6b6b75" stroke-width="2.5"/><path d="M244 790l5-5" stroke="#6b6b75" stroke-width="2.5" stroke-linecap="round"/><text x="244" y="818" fill="#6b6b75" font-size="11" font-weight="600" text-anchor="middle">Admin</text>
+<circle cx="341" cy="790" r="9" fill="none" stroke="#e5a00d" stroke-width="3" stroke-dasharray="4 2.5"/><circle cx="341" cy="790" r="3" fill="#e5a00d"/><text x="341" y="818" fill="#e5a00d" font-size="11" font-weight="600" text-anchor="middle">Settings</text>
+<rect x="128" y="832" width="134" height="5" rx="2.5" fill="#f2f2f2"/>
+</svg>

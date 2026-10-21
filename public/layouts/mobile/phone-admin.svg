@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+<rect width="390" height="844" fill="#0e0f14"/>
+<text x="32" y="40" font-size="15" font-weight="600" fill="#f3f3f7">9:41</text>
+<g fill="#f3f3f7"><rect x="296" y="32" width="3" height="8" rx="1"/><rect x="301" y="30" width="3" height="10" rx="1"/><rect x="306" y="28" width="3" height="12" rx="1"/><rect x="311" y="26" width="3" height="14" rx="1"/><rect x="336" y="30" width="19" height="8" rx="2"/><rect x="359.5" y="32" width="2" height="4" rx="1"/><circle cx="324" cy="39" r="1.5"/></g>
+<path d="M318 33a9 9 0 0 1 12 0M321 36.5a5 5 0 0 1 6 0" fill="none" stroke="#f3f3f7" stroke-width="2" stroke-linecap="round"/>
+<rect x="334" y="28" width="24" height="12" rx="3.5" fill="none" stroke="#f3f3f7"/>
+<text x="24" y="74" font-size="14" font-weight="700" fill="#f3f3f7">Arrmy</text>
+<text x="332" y="74" font-size="13" fill="#8f919f" text-anchor="end">Crafty</text>
+<circle cx="352" cy="70" r="13" fill="#3488b2"/><text x="352" y="74" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">C</text>
+<text x="195" y="98" font-size="12" fill="#8f919f" text-anchor="middle" opacity=".75">↓ Pull down to refresh</text>
+
+<text x="20" y="148" font-size="34" font-weight="800" fill="#f3f3f7" letter-spacing="-.6">Admin</text>
+<g fill="#1a1b22"><rect x="16" y="166" width="83.5" height="66" rx="14"/><rect x="107.5" y="166" width="83.5" height="66" rx="14"/><rect x="199" y="166" width="83.5" height="66" rx="14"/><rect x="290.5" y="166" width="83.5" height="66" rx="14"/></g>
+<g font-size="26" font-weight="800" text-anchor="middle" letter-spacing="-.5"><text x="57.75" y="200" fill="#ff8a8e">1</text><text x="149.25" y="200" fill="#7cb3ff">3</text><text x="240.75" y="200" fill="#ffd166">1</text><text x="332.25" y="200" fill="#5fd38a">6</text></g>
+<g font-size="10" font-weight="600" text-anchor="middle" fill="#8f919f" letter-spacing=".3"><text x="57.75" y="219">STUCK</text><text x="149.25" y="219">DOWNLOADING</text><text x="240.75" y="219">IMPORTING</text><text x="332.25" y="219">AVAILABLE</text></g>
+
+<text x="20" y="270" font-size="20" font-weight="700" fill="#f3f3f7">Needs fixing</text><text x="150" y="270" font-size="13" font-weight="500" fill="#8f919f">2</text>
+<rect x="16" y="282" width="358" height="164" rx="18" fill="#1a1b22"/>
+<text x="32" y="310" font-size="16" font-weight="600" fill="#f3f3f7">Past Lives</text>
+<g font-size="13" fill="#8f919f"><text x="32" y="329">No release found in 4 days.</text><text x="32" y="346">Radarr has searched 6 times.</text></g>
+<rect x="246" y="303" width="112" height="40" rx="20" fill="#2a2250"/><text x="302" y="328" font-size="14" font-weight="600" fill="#b9a6ff" text-anchor="middle">Search again</text>
+<line x1="32" y1="364.5" x2="374" y2="364.5" stroke="#2b2d37"/>
+<text x="32" y="392" font-size="16" font-weight="600" fill="#f3f3f7">Shōgun S01E09</text>
+<g font-size="13" fill="#8f919f"><text x="32" y="411">Import failed: file already exists</text><text x="32" y="428">with a different name.</text></g>
+<rect x="254" y="385" width="104" height="40" rx="20" fill="#2a2250"/><text x="306" y="410" font-size="14" font-weight="600" fill="#b9a6ff" text-anchor="middle">Replace file</text>
+
+<text x="20" y="482" font-size="20" font-weight="700" fill="#f3f3f7">Downloading</text><text x="152" y="482" font-size="13" font-weight="500" fill="#8f919f">3</text>
+<rect x="16" y="494" width="358" height="210" rx="18" fill="#1a1b22"/>
+<text x="32" y="520" font-size="16" font-weight="600" fill="#f3f3f7">Severance S02</text>
+<text x="32" y="539" font-size="13" fill="#8f919f">12.4 MB/s · 41 min left · 48 seeds</text>
+<rect x="32" y="548" width="250" height="5" rx="2.5" fill="#2a2b35"/><rect x="32" y="548" width="155" height="5" rx="2.5" fill="#3b82f6"/>
+<rect x="306" y="517" width="52" height="24" rx="12" fill="#182a3d"/><text x="332" y="533" font-size="12" font-weight="600" fill="#7cb3ff" text-anchor="middle">62%</text>
+<line x1="32" y1="564.5" x2="374" y2="564.5" stroke="#2b2d37"/>
+<text x="32" y="590" font-size="16" font-weight="600" fill="#f3f3f7">Slow Horses S04E03</text>
+<text x="32" y="609" font-size="13" fill="#8f919f">3.1 MB/s · 2 h 10 min left · 7 seeds</text>
+<rect x="32" y="618" width="250" height="5" rx="2.5" fill="#2a2b35"/><rect x="32" y="618" width="110" height="5" rx="2.5" fill="#3b82f6"/>
+<rect x="306" y="587" width="52" height="24" rx="12" fill="#182a3d"/><text x="332" y="603" font-size="12" font-weight="600" fill="#7cb3ff" text-anchor="middle">44%</text>
+<line x1="32" y1="634.5" x2="374" y2="634.5" stroke="#2b2d37"/>
+<text x="32" y="660" font-size="16" font-weight="600" fill="#f3f3f7">Project Hail Mary (Ray Porter)</text>
+<text x="32" y="679" font-size="13" fill="#8f919f">0.4 MB/s · 18 min left · 2 seeds</text>
+<rect x="32" y="688" width="250" height="5" rx="2.5" fill="#2a2b35"/><rect x="32" y="688" width="45" height="5" rx="2.5" fill="#3b82f6"/>
+<rect x="306" y="657" width="52" height="24" rx="12" fill="#182a3d"/><text x="332" y="673" font-size="12" font-weight="600" fill="#7cb3ff" text-anchor="middle">18%</text>
+
+<text x="20" y="738" font-size="20" font-weight="700" fill="#f3f3f7">Disks</text>
+<rect x="16" y="748" width="358" height="170" rx="18" fill="#1a1b22"/>
+
+<rect y="764" width="390" height="80" fill="#121318"/><line x1="0" y1="764.5" x2="390" y2="764.5" stroke="#2b2d37"/>
+<g fill="none" stroke="#8f919f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<path transform="translate(33,776)" d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>
+<path transform="translate(108,776)" d="M3 13l2-8h14l2 8v6H3zM3 13h5l2 3h4l2-3h5"/>
+<path transform="translate(183,776)" stroke="#8b6dff" d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/>
+<path transform="translate(258,776)" d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>
+<path transform="translate(333,776)" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM10 18h4"/>
+</g>
+<g font-size="11" font-weight="500" text-anchor="middle" fill="#8f919f"><text x="45" y="816">Home</text><text x="120" y="816">Requests</text><text x="195" y="816" fill="#8b6dff">Admin</text><text x="270" y="816">Settings</text><text x="345" y="816">Phone</text></g>
+<rect x="128" y="830" width="134" height="5" rx="2.5" fill="#f3f3f7"/>
+</svg>
