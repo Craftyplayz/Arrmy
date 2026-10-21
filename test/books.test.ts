@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { audiobookStatus, bestEdition, cleanEdition, coverUrl, editionId, editionOf, fromOpenLibrary, isEdition, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
+import { audiobookStatus, bestEdition, cleanEdition, coverUrl, editionId, isbn10, editionOf, fromOpenLibrary, isEdition, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
 
 const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary', AuthorName: 'Andy Weir', ...over })
 
@@ -109,4 +109,10 @@ test('Editions: ids and folder names', () => {
   assert.equal(cleanEdition('   '), '')
   assert.equal(safeName('../..'), 'Unknown')
   assert.equal(safeName('Dune: Part One'), 'Dune Part One')
+})
+
+test('isbn10: the 978- ISBN-13 as an ISBN-10, with its check digit', () => {
+  assert.equal(isbn10('9780545790352'), '0545790352')
+  assert.equal(isbn10('9780306406157'), '0306406152')
+  assert.equal(isbn10('9791234567896'), undefined, '979- has no ISBN-10')
 })

@@ -166,3 +166,12 @@ export function unwantAgain(removed: Removed, books: LLBook[], requested: Set<st
   }
   return { unwant, keep }
 }
+
+/** The ISBN-10 of a 978- ISBN-13 (Amazon's cover addresses use it), else undefined. */
+export function isbn10(isbn13: string) {
+  if (!/^978\d{10}$/.test(isbn13)) return undefined
+  const body = isbn13.slice(3, 12)
+  const sum = [...body].reduce((n, d, i) => n + Number(d) * (10 - i), 0)
+  const check = (11 - (sum % 11)) % 11
+  return body + (check === 10 ? 'X' : check)
+}
