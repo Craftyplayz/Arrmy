@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { audiobookStatus, bestEdition, cleanEdition, coverUrl, editionId, isbn10, editionOf, fromOpenLibrary, isEdition, titleVariants, seriesOf, isPack, editionCandidates, packFiles, commonDir, searchText, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
+import { audiobookStatus, isWorkId, bestEdition, cleanEdition, coverUrl, editionId, isbn10, editionOf, fromOpenLibrary, isEdition, titleVariants, seriesOf, isPack, editionCandidates, packFiles, commonDir, searchText, rankBooks, safeName, sameBook, unwantAgain } from '../src/lib/bookrules.ts'
 
 const book = (over: object) => ({ BookID: 'OL1W', BookName: 'Project Hail Mary', AuthorName: 'Andy Weir', ...over })
 
@@ -150,4 +150,9 @@ test('Edition search: retitled books, packs by the narrator, the order to try, a
     searchText({ at: now - 7_200_000, found: 17, singles: 2, seeded: 0, packs: 0 }, 'Jim Dale', now),
     'Searched 2 h ago: 17 releases found; 2 of this book with Jim Dale, none with seeders.',
   )
+})
+
+test('isWorkId: OpenLibrary work ids only', () => {
+  assert.ok(isWorkId('OL21385222W') && isWorkId('OL82563W'))
+  assert.ok(!isWorkId('OL21385222W~jim dale') && !isWorkId('OL123A') && !isWorkId('123'))
 })

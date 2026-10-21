@@ -248,3 +248,6 @@ export function isbn10(isbn13: string) {
   const check = (11 - (sum % 11)) % 11
   return body + (check === 10 ? 'X' : check)
 }
+
+/** An OpenLibrary work id, which is what a book's BookID is (OL21385222W). */
+export const isWorkId = (id: string) => /^OL\d+W$/.test(id)

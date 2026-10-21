@@ -3,6 +3,7 @@
 import {
   audiobookStatus,
   coverUrl,
+  isWorkId,
   editionOf,
   fromOpenLibrary,
   rankBooks,
@@ -163,7 +164,7 @@ const authorOf = async (work: OpenLibraryWorkRecord) => {
 }
 
 export async function lookupBook(bookId: string, edition?: string) {
-  if (!/^OLd+W$/.test(bookId)) return
+  if (!isWorkId(bookId)) return
   const [work, ratings] = await Promise.all([
     olGet<OpenLibraryWorkRecord>(`/works/${bookId}.json`),
     olGet<{ summary?: { average?: number } }>(`/works/${bookId}/ratings.json`).catch(() => undefined),
