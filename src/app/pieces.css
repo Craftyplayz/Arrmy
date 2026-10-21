@@ -105,3 +105,8 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 /* a download's poster in the Admin view */
 .ar-dl-art { flex: none; width: 36px; height: 54px; object-fit: cover; border-radius: 4px; }
 @media (prefers-reduced-motion: no-preference) { .progress i { transition: width 0.6s linear; } }
+
+/* the Request Log's every-release list: wraps inside its row and scrolls instead of widening the page */
+.rows > .rowi { min-width: 0; }
+.ar-releases { max-height: 360px; overflow-y: auto; margin-top: 6px; }
+.ar-releases small { display: block; white-space: normal; overflow-wrap: anywhere; padding: 2px 0; }

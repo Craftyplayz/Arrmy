@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { existsSync } from 'node:fs'
 import { editionOf } from '@/lib/bookrules'
 import { getRequest, logFor, logItem, seasonsOf } from '@/lib/db'
-import { buildSteps, logText, releaseText, took, type Grabbed } from '@/lib/logrules'
+import { buildSteps, logText, releaseText, took, utc, type Grabbed } from '@/lib/logrules'
 import { torrentFile } from '@/lib/requestlog'
 import { requireUser } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
@@ -30,7 +30,7 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
   const { steps, total } = buildSteps({ id: request.id, created_at: request.created_at, username: request.username, seasons: seasonsOf(request), app }, events)
   const running = steps.some((s) => s.end === undefined)
   // .torrent copies, Admin only: one per grab whose file was saved.
-  const torrents = admin ? events.filter((e) => e.kind === 'grabbed').map((e) => (JSON.parse(e.detail) as Grabbed).downloadId).filter((h) => existsSync(torrentFile(h))) : []
+  const torrents = admin ? events.filter((e) => e.kind === 'grabbed' && utc(e.at) >= utc(request.created_at) - 60_000).map((e) => (JSON.parse(e.detail) as Grabbed).downloadId).filter((h) => existsSync(torrentFile(h))) : []
 
   return (
     <>
@@ -61,11 +61,13 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
               {admin && s.releases && (
                 <details>
                   <summary className="ar-sub">Every release ({s.releases.length})</summary>
-                  {s.releases.map((r, j) => (
-                    <small className={`ar-sub ar-name${r.rejections.length ? ' muted' : ''}`} key={j} title={r.rejections.join('\n')}>
-                      {releaseText(r)}
-                    </small>
-                  ))}
+                  <div className="ar-releases">
+                    {s.releases.map((r, j) => (
+                      <small className="ar-sub" key={j}>
+                        {releaseText(r)}
+                      </small>
+                    ))}
+                  </div>
                 </details>
               )}
             </div>
