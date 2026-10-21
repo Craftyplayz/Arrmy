@@ -4,6 +4,7 @@ import { getLimits } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { saveLimits } from '../actions'
 import { SubmitButton } from '../submit-button'
+import { Hero } from '../ui'
 
 export const metadata: Metadata = { title: 'Settings' }
 
@@ -15,9 +16,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <h1 className="page-title">Settings</h1>
-      <p className="page-lede">Size Limits apply to everyone's Requests. Leave a box empty for no limit.</p>
-      <section className="card form-card">
+      <Hero title="Settings" lede="Size Limits apply to everyone's Requests. Leave a box empty for no limit." />
+      <section className="ar-panel form-card">
         <h2>Size Limits</h2>
         <form action={saveLimits} className="form">
           {saved && <p className="ok">Saved, and applied to Radarr and Sonarr.</p>}

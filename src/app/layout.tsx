@@ -11,15 +11,14 @@ export const metadata: Metadata = {
   title: { default: 'Arrmy', template: '%s · Arrmy' },
   description: 'Request movies, TV shows and audiobooks for the family Plex server',
 }
-export const viewport: Viewport = { themeColor: '#202020', colorScheme: 'dark' }
+export const viewport: Viewport = { themeColor: '#171b20', colorScheme: 'dark' }
 
-/** The header links: the only list of them. The last field marks Admin-only pages. */
-const NAV: [href: string, label: string, adminOnly: boolean][] = [
-  ['/', 'Search', false],
-  ['/requests', 'Requests', false],
-  ['/admin', 'Admin', true],
-  ['/settings', 'Settings', true],
-  ['/layouts', 'Layouts', true],
+/** The sidebar links: the only list of them. `adminOnly` marks Admin-only pages; `icon` is a 24x24 stroke path. */
+const NAV: [href: string, label: string, adminOnly: boolean, icon: string][] = [
+  ['/', 'Search', false, 'M11 4a7 7 0 1 0 0 14 7 7 0 1 0 0-14zM20 20l-3.5-3.5'],
+  ['/requests', 'Requests', false, 'M4 6h16M4 12h16M4 18h10'],
+  ['/admin', 'Admin', true, 'M3 12h4l3-8 4 16 3-8h4'],
+  ['/settings', 'Settings', true, 'M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'],
 ]
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,35 +26,41 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const version = process.env.ARRMY_VERSION // baked into the image: 1.1.0-rc.30, or `latest`
   return (
     <html lang="en-GB">
-      <body>
+      <body className="shell">
         {user && (
-          <header className="site-header">
-            <div className="sh-inner">
-              <Link href="/" className="sh-brand">
-                <img src="/icon.svg" alt="" width={24} height={24} />
-                Arrmy
-              </Link>
-              <Nav links={NAV.filter(([, , adminOnly]) => !adminOnly || user.is_admin).map(([href, label]) => [href, label])} />
-              <form action={signOut} className="sh-user">
-                <span>{user.username}</span>
-                <button className="btn small">Sign out</button>
-              </form>
-            </div>
-          </header>
+          <aside className="side">
+            <Link href="/" className="side-brand">
+              <img src="/icon.svg" alt="" width={26} height={26} />
+              Arrmy
+            </Link>
+            <Nav links={NAV.filter(([, , adminOnly]) => !adminOnly || user.is_admin).map(([href, label, , icon]) => [href, label, icon])} />
+            <form action={signOut} className="side-user">
+              <span className="side-avatar" aria-hidden="true">
+                {user.username[0]?.toUpperCase()}
+              </span>
+              <span className="side-who">
+                <b>{user.username}</b>
+                <small>{user.is_admin ? 'Admin' : 'Requester'}</small>
+              </span>
+              <button className="btn small">Sign out</button>
+            </form>
+          </aside>
         )}
-        <main className="page ar" id="main">
-          {children}
-        </main>
-        <footer className="site-footer">
-          <p className="sf-meta">Movie and show details from TMDB and TheTVDB, book details from OpenLibrary.</p>
-          {version && (
-            <p className="sf-meta">
-              <a href={`https://github.com/Craftyplayz/Arrmy/releases/${version === 'latest' ? '' : `tag/v${version}`}`} target="_blank" rel="noreferrer">
-                Arrmy {version === 'latest' ? 'latest build' : `v${version}`}
-              </a>
-            </p>
-          )}
-        </footer>
+        <div className="shell-main">
+          <main className="page ar" id="main">
+            {children}
+          </main>
+          <footer className="site-footer">
+            <p className="sf-meta">Movie and show details from TMDB and TheTVDB, book details from OpenLibrary.</p>
+            {version && (
+              <p className="sf-meta">
+                <a href={`https://github.com/Craftyplayz/Arrmy/releases/${version === 'latest' ? '' : `tag/v${version}`}`} target="_blank" rel="noreferrer">
+                  Arrmy {version === 'latest' ? 'latest build' : `v${version}`}
+                </a>
+              </p>
+            )}
+          </footer>
+        </div>
       </body>
     </html>
   )

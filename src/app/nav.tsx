@@ -3,15 +3,20 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-/** The header links. A client component only because the layout can't see which page is open. */
-export function Nav({ links }: { links: [href: string, label: string][] }) {
+/** The sidebar links. A client component only because the layout can't see which page is open. */
+export function Nav({ links }: { links: [href: string, label: string, icon: string][] }) {
   const path = usePathname()
+  // a Request's own page still counts as Requests
+  const current = (href: string) => (href === '/' ? path === '/' : path.startsWith(href))
   return (
-    <nav className="sh-nav" aria-label="Main">
-      <ul className="sh-list">
-        {links.map(([href, label]) => (
-          <li key={href} className={path === href ? 'sh-item is-active' : 'sh-item'}>
-            <Link className="sh-top" href={href} aria-current={path === href ? 'page' : undefined}>
+    <nav className="side-nav" aria-label="Main">
+      <ul className="side-list">
+        {links.map(([href, label, icon]) => (
+          <li key={href}>
+            <Link href={href} aria-current={current(href) ? 'page' : undefined}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={icon} />
+              </svg>
               {label}
             </Link>
           </li>

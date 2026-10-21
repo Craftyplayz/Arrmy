@@ -7,7 +7,7 @@ import { requireUser } from '@/lib/session'
 import { requestAudiobook, requestMovie, requestTv } from './actions'
 import { AutoRefresh } from './auto-refresh'
 import { SubmitButton } from './submit-button'
-import { Badge, Cover, Hero } from './ui'
+import { Badge } from './ui'
 
 export const metadata: Metadata = { title: 'Search' }
 
@@ -16,6 +16,7 @@ const TABS: [MediaType, string][] = [
   ['tv', 'TV Shows'],
   ['audiobook', 'Audiobooks'],
 ]
+const TYPE_NAMES = { movie: 'Movie', tv: 'TV Show', audiobook: 'Audiobook' }
 /** Who answers the search, the field's label, and an example for its placeholder. */
 const LABELS = {
   movie: ['Radarr', 'Search movies', 'Dune'],
@@ -45,62 +46,99 @@ export default async function SearchPage({
   }
 
   return (
-    <>
-      <Hero title="Search" lede="Find a movie, show or audiobook and request it.">
-        <nav className="ar-tabs" aria-label="Media types">
+    <div className="ar-find">
+      <div className="ar-find-hero">
+        <h1 className="ar-logo">Arrmy</h1>
+        <Form action="/" className="ar-find-box">
+          <input type="hidden" name="type" value={type} />
+          <input
+            className="field"
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder={LABELS[type][2]}
+            aria-label={LABELS[type][1]}
+            autoFocus
+          />
+          <button aria-label="Search" title="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <path d="M11 4a7 7 0 1 0 0 14 7 7 0 1 0 0-14zM20 20l-3.5-3.5" />
+            </svg>
+          </button>
+        </Form>
+        <nav className="ar-seg" aria-label="Media Types">
           {TABS.map(([t, label]) => (
             <Link key={t} href={`/?type=${t}&q=${encodeURIComponent(q)}`} aria-current={t === type ? 'page' : undefined}>
               {label}
             </Link>
           ))}
         </nav>
-      </Hero>
-      <Form action="/" className="bar ar-bar">
-        <input type="hidden" name="type" value={type} />
-        <input
-          className="field"
-          type="search"
-          name="q"
-          defaultValue={q}
-          placeholder={LABELS[type][2]}
-          aria-label={LABELS[type][1]}
-          autoFocus
-        />
-        <button className="btn primary">Search</button>
-      </Form>
+      </div>
       {error && <p className="err">{error}</p>}
       {params.notice && <p className="err">{params.notice}</p>}
       {results?.some((r) => r.status?.label === 'Downloading') && <AutoRefresh seconds={5} />}
-      {results?.length === 0 && <p className="muted">Nothing found for “{q}”.</p>}
+      {results?.length === 0 && <p className="ar-count">Nothing found for “{q}”.</p>}
       {results && results.length > 0 && (
         <>
-          <h2 className="ar-h">
-            Results <span className="n">{results.length}</span>
-          </h2>
+          <p className="ar-count">
+            {results.length} {results.length === 1 ? 'result' : 'results'} for “{q}”
+          </p>
           {/* keyed on the notice, so a refused Request closes its drawer and the notice above shows */}
-          <ul className="ar-caps" key={params.notice}>
+          <ul className="ar-results" key={params.notice}>
             {results.map((r, i) => (
-              <Cover
-                key={r.id}
-                id={`${type}-${r.id}`}
-                title={r.title}
-                sub={r.year ? String(r.year) : undefined}
-                poster={r.poster}
-                status={r.status ?? undefined}
-                eager={i < 6}
-              >
+              <Result key={r.id} r={r} type={type} q={q} eager={i < 6} />
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  )
+}
+
+/** One search result: poster, title, a line of overview, its status, and what can still be requested. */
+function Result({ r, type, q, eager }: { r: SearchResult; type: MediaType; q: string; eager: boolean }) {
+  // TV: seasons not yet requested; Audiobooks: another Edition can always be asked for
+  const more = type === 'tv' ? r.seasons.some((n) => !r.requestedSeasons.includes(n)) : type === 'audiobook'
+  const drawer = `d-${type}-${r.id}`
+  return (
+    <li className="ar-result">
+      {r.poster ? (
+        <img className="ar-result-poster" src={r.poster} alt="" width={56} height={84} loading={eager ? undefined : 'lazy'} decoding="async" />
+      ) : (
+        <span className="ar-result-poster" />
+      )}
+      <div className="grow">
+        <h3>{r.title}</h3>
+        <p className="ar-result-meta">{[r.year, TYPE_NAMES[type]].filter(Boolean).join(' · ')}</p>
+        {r.overview && <p className="ar-result-over">{r.overview}</p>}
+      </div>
+      <div className="ar-result-act">
+        {r.status && <Badge status={r.status} />}
+        {type === 'movie' ? (
+          <RequestButton r={r} action={requestMovie} />
+        ) : (
+          more && (
+            <>
+              <button className={r.status ? 'btn small' : 'btn primary'} popoverTarget={drawer}>
+                {!r.status ? 'Request' : type === 'tv' ? 'More seasons' : 'Another edition'}
+              </button>
+              <aside className="drawer" id={drawer} popover="auto" aria-label={r.title}>
+                <button className="close" popoverTarget={drawer} popoverTargetAction="hide" aria-label="Close" title="Close">
+                  &times;
+                </button>
+                <h2>{r.title}</h2>
                 <div className="badges">
                   {r.year && <span className="pill">{r.year}</span>}
                   {r.status && <Badge status={r.status} />}
                 </div>
                 {r.overview && <p>{r.overview}</p>}
-                {type === 'tv' ? <TvAction r={r} q={q} /> : type === 'audiobook' ? <AudiobookAction r={r} /> : <RequestButton r={r} action={requestMovie} />}
-              </Cover>
-            ))}
-          </ul>
-        </>
-      )}
-    </>
+                {type === 'tv' ? <TvAction r={r} q={q} /> : <AudiobookAction r={r} />}
+              </aside>
+            </>
+          )
+        )}
+      </div>
+    </li>
   )
 }
 

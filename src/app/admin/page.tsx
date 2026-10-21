@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { adminOverview, liveDownloads, type LiveDownload, type Problem } from '@/lib/admin'
 import { requestDetails } from '@/lib/arr'
@@ -10,11 +11,10 @@ import { fixProblem } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
 import { Downloads } from '../downloads'
 import { SubmitButton } from '../submit-button'
-import { Hero, num, Ring } from '../ui'
+import { Hero, num, size } from '../ui'
 
 export const metadata: Metadata = { title: 'Admin' }
 
-const size = (bytes: number) => (bytes >= 1e12 ? `${(bytes / 1e12).toFixed(2)} TB` : `${(bytes / 1e9).toFixed(1)} GB`)
 const speed = (bytesPerSecond: number) => `${(bytesPerSecond / 1048576).toFixed(1)} MB/s`
 
 const LEDE = "What needs fixing, what's downloading and how full the disks are."
@@ -77,71 +77,91 @@ export default async function AdminPage() {
         <Stat value={num(library.shows)} label="Shows">
           {`${num(library.episodes)} episodes · ${size(library.showBytes)}`}
         </Stat>
-        {disks.media && <DiskStat label="Media disk" disk={disks.media} />}
-        {disks.settings && <DiskStat label="Settings disk" disk={disks.settings} />}
       </div>
 
-      {problems.length > 0 && (
-        <>
-          <h2 className="ar-h" id="problems">
-            Problems <span className="n">{num(problems.length)}</span>
-          </h2>
-          <div className="rows">
-            {problems.map((p) => (
-              <ProblemRow key={`${p.service}-${p.kind}-${p.hash ?? p.ids.join('-')}`} p={p} badge={p.kind} warn />
-            ))}
-          </div>
-        </>
-      )}
-
-      {(stuck.items.length > 0 || stuck.offline || stuck.indexerNote) && (
-        <>
-          <h2 className="ar-h" id="stuck">
-            Stuck <span className="n">{num(stuck.items.length)}</span>
-          </h2>
-          {stuck.offline && <p className="err">qBittorrent has no connection, so nothing can download. Check the VPN (gluetun) in Portainer.</p>}
-          {stuck.indexerNote && <p className="ar-sub">{stuck.indexerNote}</p>}
-          <div className="rows">
-            {stuck.items.map((s) => (
-              <ProblemRow key={`${s.service}-${s.hash ?? s.ids.join('-')}-${s.title}`} p={s} badge={s.reason} warn={WARN.has(s.reason)} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {downloads.length > 0 && (
-        <>
-          <h2 className="ar-h" id="downloading">
-            Downloading <span className="n">{num(downloads.length)}</span>
-          </h2>
-          <Downloads initial={downloads} />
-        </>
-      )}
-
-      {ranked.length > 0 && (
-        <>
-          <h2 className="ar-h">Requests by person</h2>
-          <div className="ar-ranks">
-            {ranked.map(([name, p], i) => (
-              <div className="ar-rank" key={name}>
-                <span className="ar-rank-n">{i + 1}</span>
-                <span className="grow">
-                  <b>{name}</b>
-                  <span className="ar-rank-bar">
-                    <i style={{ width: `${Math.round((p.bytes / most) * 100)}%` }} />
-                  </span>
-                </span>
-                <span className="ar-rank-val">
-                  {size(p.bytes)}
-                  <small>
-                    {num(p.count)} {p.count === 1 ? 'Request' : 'Requests'}
-                  </small>
-                </span>
+      <div className="ar-two">
+        <div>
+          {problems.length > 0 && (
+            <section className="ar-panel" id="problems">
+              <h2>
+                Problems <span className="n">{num(problems.length)}</span>
+              </h2>
+              <div className="rows">
+                {problems.map((p) => (
+                  <ProblemRow key={`${p.service}-${p.kind}-${p.hash ?? p.ids.join('-')}`} p={p} badge={p.kind} warn />
+                ))}
               </div>
-            ))}
-          </div>
-        </>
-      )}
+            </section>
+          )}
+
+          {(stuck.items.length > 0 || stuck.offline || stuck.indexerNote) && (
+            <section className="ar-panel" id="stuck">
+              <h2>
+                Stuck <span className="n">{num(stuck.items.length)}</span>
+              </h2>
+              {stuck.offline && <p className="err">qBittorrent has no connection, so nothing can download. Check the VPN (gluetun) in Portainer.</p>}
+              {stuck.indexerNote && <p className="ar-sub">{stuck.indexerNote}</p>}
+              <div className="rows">
+                {stuck.items.map((s) => (
+                  <ProblemRow key={`${s.service}-${s.hash ?? s.ids.join('-')}-${s.title}`} p={s} badge={s.reason} warn={WARN.has(s.reason)} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="ar-panel" id="downloading">
+            <h2>
+              Downloading <span className="n">{num(downloads.length)}</span>
+            </h2>
+            <Downloads initial={downloads} />
+          </section>
+        </div>
+
+        <div>
+          {(disks.media || disks.settings) && (
+            <section className="ar-panel">
+              <h2>Disks</h2>
+              {disks.media && <DiskBar label="Media disk" disk={disks.media} />}
+              {disks.settings && <DiskBar label="Settings disk" disk={disks.settings} />}
+            </section>
+          )}
+
+          {ranked.length > 0 && (
+            <section className="ar-panel">
+              <h2>Requests by person</h2>
+              <div className="ar-ranks">
+                {ranked.map(([name, p], i) => (
+                  <div className="ar-rank" key={name}>
+                    <span className="ar-rank-n">{i + 1}</span>
+                    <span className="grow">
+                      <b>{name}</b>
+                      <span className="ar-rank-bar">
+                        <i style={{ width: `${Math.round((p.bytes / most) * 100)}%` }} />
+                      </span>
+                    </span>
+                    <span className="ar-rank-val">
+                      {size(p.bytes)}
+                      <small>
+                        {num(p.count)} {p.count === 1 ? 'Request' : 'Requests'}
+                      </small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section className="ar-panel">
+            <h2>Layouts</h2>
+            <p className="ar-sub">Fifteen mockups of other ways Arrmy could look, for a future redesign. Nothing on them works.</p>
+            <div className="actions">
+              <Link className="btn small" href="/layouts">
+                Open the layouts
+              </Link>
+            </div>
+          </section>
+        </div>
+      </div>
     </>
   )
 }
@@ -196,16 +216,16 @@ function Stat({ href, value, label, children }: { href?: string; value: string; 
 }
 
 /** Turns red under 10% free. */
-function DiskStat({ label, disk }: { label: string; disk: { freeSpace: number; totalSpace: number } }) {
+function DiskBar({ label, disk }: { label: string; disk: { freeSpace: number; totalSpace: number } }) {
   const used = disk.totalSpace ? Math.round(((disk.totalSpace - disk.freeSpace) / disk.totalSpace) * 100) : 0
   const low = disk.freeSpace < disk.totalSpace * 0.1
   return (
-    <div className={low ? 'ar-stat ar-stat-ring warn' : 'ar-stat ar-stat-ring'}>
-      <Ring p={used} label={`${label} ${used}% used`} />
-      <span>
-        {label}
-        <small>{low ? `Only ${size(disk.freeSpace)} free` : `${size(disk.freeSpace)} free of ${size(disk.totalSpace)}`}</small>
-      </span>
+    <div className={low ? 'ar-disk warn' : 'ar-disk'}>
+      <span>{label}</span>
+      <div className="progress" role="progressbar" aria-label={`${label} used`} aria-valuenow={used} aria-valuemin={0} aria-valuemax={100}>
+        <i style={{ width: `${used}%` }} />
+      </div>
+      <small>{low ? `Only ${size(disk.freeSpace)} free · ${used}% used` : `${size(disk.freeSpace)} free of ${size(disk.totalSpace)} · ${used}% used`}</small>
     </div>
   )
 }

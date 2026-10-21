@@ -3,8 +3,8 @@
 
 /* the hidden attribute loses to flex/grid display */
 .ar [hidden] { display: none !important; }
-/* card-links: .page a would paint all their text link-blue */
-.ar :is(a.ar-stat, button.ar-cap) { color: var(--text); text-decoration: none; }
+/* a card-link: .page a would paint all its text link-blue */
+.ar a.ar-stat { color: var(--text); text-decoration: none; }
 
 .ar-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 28px 0 12px; font-size: 20px; }
 .ar-h .n { color: var(--muted); font-size: 14px; font-weight: 400; }
@@ -13,22 +13,6 @@
 .ar-h3 + .rows { margin-bottom: 16px; }
 .ar-more { margin-left: auto; font-size: 14px; font-weight: 400; }
 
-/* ---------- hero (art-led pages) ---------- */
-.ar-hero { position: relative; isolation: isolate; overflow: hidden; margin-bottom: 20px; background: var(--sunken); border: 1px solid var(--line); border-radius: var(--radius-lg); }
-.ar-hero-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
-.ar-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(0 0 0 / .85), rgb(0 0 0 / .4) 65%, rgb(0 0 0 / .2)), linear-gradient(0deg, rgb(0 0 0 / .6), transparent 50%); }
-.ar-hero-body { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; min-height: clamp(150px, 20vw, 240px); padding: clamp(24px, 5vw, 48px) 20px 16px; }
-.ar-hero-body .grow { flex: 1 1 280px; min-width: 0; }
-/* Arrmy: a hero without art has nothing to show, so it shrinks to its text */
-.ar-hero:not(:has(> .ar-hero-bg)) .ar-hero-body { min-height: 0; padding-top: 20px; }
-.ar-hero .page-title { margin: 0; text-shadow: 0 2px 12px rgb(0 0 0 / .6); overflow-wrap: anywhere; }
-.ar-hero .page-lede { max-width: 62ch; margin: 6px 0 0; color: var(--text); opacity: .85; }
-
-.ar-tabs { display: flex; gap: 4px; padding: 0 12px; overflow-x: auto; background: rgb(0 0 0 / .45); border-top: 1px solid rgb(255 255 255 / .08); scrollbar-width: none; }
-.ar .ar-tabs a { padding: 12px 12px 10px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: color var(--fast), border-color var(--fast); }
-.ar .ar-tabs a:hover { color: var(--text); }
-.ar .ar-tabs a[aria-current] { border-color: var(--accent); color: var(--text); }
-
 /* ---------- headline numbers ---------- */
 .ar-stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px; margin-bottom: 20px; }
 .ar-stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); color: var(--text); text-decoration: none; transition: border-color var(--fast), transform var(--fast); }
@@ -36,31 +20,6 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-stat > b { font-size: clamp(22px, 3vw, 28px); font-weight: 700; line-height: 1.15; }
 .ar-stat > span { color: var(--muted); font-size: 13px; }
 .ar-stat > small, .ar-stat > span > small { color: var(--accent); font-size: 12px; }
-.ar-stat-ring { flex-direction: row; align-items: center; gap: 12px; }
-.ar-stat-ring .ar-ring { --size: 56px; }
-.ar-stat-ring .ar-ring b { font-size: 15px; }
-.ar-stat-ring > span > small { display: block; }
-/* a disk under 10% free */
-.ar-stat.warn { background: var(--danger-bg); border-color: var(--danger-line); }
-.ar-stat.warn small { color: var(--text); }
-
-/* completion ring; --p is 0-100 */
-.ar-ring { --size: 40px; display: inline-grid; flex: none; place-items: center; width: var(--size); height: var(--size); border-radius: 50%; background: radial-gradient(closest-side, var(--sunken) 74%, transparent 76%), conic-gradient(var(--accent) calc(var(--p) * 1%), rgb(255 255 255 / .15) 0); }
-.ar-ring b { color: var(--text); font-size: 12px; font-weight: 700; white-space: nowrap; }
-.ar-ring small { font-size: 9px; }
-
-/* ---------- posters ---------- */
-.ar-caps { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 28vw, 168px), 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
-.ar-cap { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; margin: 0; padding: 0; overflow: hidden; background: var(--card2); border: 0; border-radius: var(--radius); box-shadow: 0 2px 6px rgb(0 0 0 / .4); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: transform var(--base) ease-out, box-shadow var(--base) ease-out; }
-.ar-cap img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform var(--base) ease-out; }
-.ar-cap:hover, .ar-cap:focus-visible { box-shadow: var(--lift), 0 0 0 2px var(--accent); transform: translateY(-3px); }
-.ar-cap:hover img { transform: scale(1.03); }
-.ar-cap .ar-ring { position: absolute; top: 8px; right: 8px; --size: 38px; box-shadow: 0 2px 6px rgb(0 0 0 / .5); }
-/* status label on the art: a badge, which is opaque, so it reads over any picture */
-.ar-cap .badge { position: absolute; top: 8px; left: 8px; margin: 0; }
-.ar-cap-info { position: absolute; right: -1px; bottom: -1px; left: -1px; display: flex; flex-direction: column; padding: 32px 10px 8px; background: linear-gradient(transparent, rgb(0 0 0 / .92)); }
-.ar-cap-info b { overflow: hidden; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.ar-cap-info small { overflow: hidden; color: var(--text); font-size: 12px; opacity: .75; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Request page: the title beside its log ---------- */
 .ar-request { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 24px; align-items: start; }
@@ -83,8 +42,64 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-rank-val { font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
 .ar-rank-val small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
 
-/* ---------- toolbar ---------- */
-.ar-bar .field { flex: 1 1 200px; }
+/* ---------- dashboard panels and tables (the "Sidebar dashboard" layout) ---------- */
+.ar-panel { min-width: 0; margin: 0 0 14px; padding: 12px 14px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
+.ar-panel > h2 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+.ar-panel > h2 .n { color: var(--muted); font-size: 13px; font-weight: 400; }
+.ar-panel > .rows:last-child, .ar-panel > .ar-ranks:last-child { margin-bottom: 0; }
+.ar-two { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 14px; align-items: start; }
+@media (max-width: 1100px) { .ar-two { grid-template-columns: minmax(0, 1fr); } }
+
+/* a table scrolls sideways inside its panel rather than widening the page */
+.ar-scroll { overflow-x: auto; }
+.ar-tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ar-tbl th { padding: 6px 8px; border-bottom: 1px solid var(--line-strong); color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+.ar-tbl td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.ar-tbl tbody tr:last-child td { border-bottom: 0; }
+.ar-tbl tbody tr:hover { background: var(--card2); }
+.ar-tbl .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ar-tbl small { display: block; color: var(--muted); font-size: 12px; }
+.ar .ar-t { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); }
+.ar-t b { display: block; overflow: hidden; max-width: 340px; text-overflow: ellipsis; white-space: nowrap; }
+.ar-thumb { flex: none; width: 28px; height: 42px; object-fit: cover; background: var(--card2); border-radius: 3px; }
+.ar-tbl .progress { width: 100px; margin-top: 4px; }
+/* phones keep the title and the status; the rest is on the Request's own page */
+@media (max-width: 760px) { .ar-tbl .wide { display: none; } .ar-t b { max-width: 52vw; } }
+
+/* a disk's fill as a bar */
+.ar-disk { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: center; gap: 4px 10px; padding: 5px 0; font-size: 14px; }
+.ar-disk small { grid-column: 2; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.ar-disk.warn .progress i { background: var(--danger-line); }
+.ar-disk.warn small { color: var(--text); }
+
+/* ---------- Search: one centred column (the "Search first" layout) ---------- */
+.ar-find { max-width: 760px; margin: 0 auto; }
+.ar-find-hero { display: flex; flex-direction: column; align-items: center; padding: clamp(12px, 5vw, 40px) 0 8px; }
+.ar-logo { margin: 0 0 24px; color: var(--accent); font-size: clamp(42px, 9vw, 60px); font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.ar-find-box { position: relative; width: 100%; max-width: 640px; }
+.ar-find-box .field { width: 100%; padding: 15px 60px 15px 24px; background: var(--card); border-radius: 999px; font-size: clamp(17px, 2.4vw, 20px); box-shadow: 0 2px 12px rgb(0 0 0 / .25); }
+/* the soft ring is the focus mark here, so the page-wide outline would only double it */
+.ar-find-box .field:focus, .ar-find-box .field:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--accent-soft); }
+.ar-find-box button { position: absolute; top: 50%; right: 8px; display: grid; place-items: center; width: 42px; height: 42px; padding: 0; background: var(--btn); border: 0; border-radius: 50%; color: #fff; cursor: pointer; transform: translateY(-50%); }
+.ar-find-box button:hover { background: var(--btn-hover); }
+.ar-find-box svg { width: 20px; height: 20px; }
+.ar-seg { display: inline-flex; gap: 2px; margin-top: 16px; padding: 4px; background: var(--sunken); border: 1px solid var(--line); border-radius: 999px; }
+.ar .ar-seg a { padding: 7px 16px; border-radius: 999px; color: var(--muted); font-size: 15px; text-decoration: none; }
+.ar .ar-seg a:hover { color: var(--text); }
+.ar .ar-seg a[aria-current] { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+.ar-count { margin: 32px 0 0; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.ar-results { margin: 0; padding: 0; list-style: none; }
+.ar-result { display: flex; align-items: flex-start; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.ar-result-poster { flex: none; width: 56px; height: 84px; object-fit: cover; background: var(--card2); border-radius: 6px; }
+.ar-result .grow { flex: 1; min-width: 0; }
+.ar-result h3 { margin: 0; font-size: 19px; line-height: 1.3; }
+.ar-result-meta { margin: 0; color: var(--muted); font-size: 14px; }
+.ar-result-over { display: -webkit-box; margin: 6px 0 0; overflow: hidden; color: var(--text); font-size: 15px; opacity: .8; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.ar-result-act { display: flex; flex: none; flex-direction: column; align-items: flex-end; align-self: center; gap: 8px; }
+@media (max-width: 520px) {
+    .ar-result { flex-wrap: wrap; }
+    .ar-result-act { flex-direction: row; flex-basis: 100%; justify-content: flex-end; }
+}
 
 /* ---------- Arrmy only ---------- */
 /* drawers open as native popovers, so they need no client JS; the UA popover styles are undone here */

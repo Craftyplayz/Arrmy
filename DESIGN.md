@@ -22,10 +22,13 @@ How every page in Arrmy looks and is built. This is a copy of the Crafty Playz d
 
 | Page | File | Kind | Layout |
 |---|---|---|---|
-| Search | `src/app/page.tsx` | Art-led | Hero with Movies / TV Shows / Audiobooks tabs → sticky `.bar` with the search field → poster grid. Each poster opens a drawer with the overview, status, season picker and the Request button |
-| Requests | `src/app/requests/page.tsx` | Art-led | Hero → poster grid with status on each poster. Each poster opens a drawer with the details, Edit seasons and Remove |
-| Admin | `src/app/admin/page.tsx` | Art-led, mostly numbers | Hero → stat cards (Problems, Downloading, Movies, Shows, disks) → sections: Problems, Downloading, Requests by person (ranked list) |
-| Settings | `src/app/settings/page.tsx` | Plain form | Title → one muted line → `.form-card` |
+| Search | `src/app/page.tsx` | Search first (`.ar-find`) | One centred column: big wordmark → round search field → Movies / TV Shows / Audiobooks segmented control → a list of results (poster, title, year · Media Type, overview, status, Request). TV and Audiobooks open a drawer with the season picker or Edition field |
+| Requests | `src/app/requests/page.tsx` | Dashboard | `Hero` heading row → one `.ar-panel` with an `.ar-tbl` table (title, Media Type, who, when, size, status). A row opens the Request's own page; phones keep only title and status |
+| Admin | `src/app/admin/page.tsx` | Dashboard | `Hero` heading row → stat cards → `.ar-two`: Problems, Stuck, Downloading on the left; Disks, Requests by person, Layouts on the right |
+| Settings | `src/app/settings/page.tsx` | Plain form | `Hero` heading row → `.ar-panel.form-card` |
+| Layouts | `src/app/layouts/` | Mockups | Fifteen static redesign mockups on made-up data, linked from Admin. Each brings its own chrome, so the sidebar hides there |
+
+Every signed-in page sits beside the sidebar (`.side` in `src/app/layout.tsx`); on phones it becomes a top bar and a bottom tab bar. The colours are the bluer greys of the "Sidebar dashboard" mockup.
 | Sign in | `src/app/login/page.tsx` | Plain | Title → one muted line → one primary button |
 
 ## Principles in priority order
@@ -45,70 +48,51 @@ Arrmy is one level deep, so it has no breadcrumbs; the header's current link sho
 
 These are the Steam pieces from the site's `games-steam.css`, copied into `src/app/pieces.css` with `steam-` renamed to `ar-`. The layout wraps every page in `<main className="page ar">`, so the link and `[hidden]` fixes under Traps apply everywhere.
 
-### Hero
+### Heading row
 
-Every art-led page opens with one: art behind, a black scrim so the text reads, the title and one line inside, and tabs along the bottom when the page has views. Without art it falls back to `--sunken` and shrinks to its text. Arrmy's heroes have no art for now (`Hero` in `src/app/ui.tsx`) and no identity chip; who is signed in is in the header.
+Every page except Search opens with `Hero` from `src/app/ui.tsx`: the title, one muted line beside it, and any buttons on the right. No art, no tabs; who is signed in is in the sidebar.
 
 ```tsx
-<header className="ar-hero">
-  {art && <img className="ar-hero-bg" src={art} alt="" fetchPriority="high" decoding="async" />}
-  <div className="ar-hero-body">
-    <div className="grow">
-      <h1 className="page-title">Search</h1>
-      <p className="page-lede">Find a movie, show or audiobook and request it.</p>
-    </div>
-  </div>
-  <nav className="ar-tabs" aria-label="Media types">
-    <Link href="/?type=movie" aria-current="page">Movies</Link>
-    <Link href="/?type=tv">TV Shows</Link>
-    <Link href="/?type=audiobook">Audiobooks</Link>
-  </nav>
+<header className="ar-head">
+  <h1 className="page-title">Admin</h1>
+  <p className="page-lede">What needs fixing, what's downloading and how full the disks are.</p>
+  <div className="actions">{/* optional buttons */}</div>
 </header>
 ```
 
 ### Stat cards
 
-The 3 to 6 headline numbers, straight under the hero. Each is its own card and links to where the number comes from. Rounded numbers keep the exact value in `title`. A percentage gets the ring.
+The 3 to 6 headline numbers, straight under the heading row. Each is its own card and links to where the number comes from. Rounded numbers keep the exact value in `title`.
 
 ```tsx
 <div className="ar-stats-row">
   <a className="ar-stat" href="#problems"><b>2</b><span>Problems</span><small>1 failed download</small></a>
   <div className="ar-stat"><b title="1,204 movies, 3,412.7 GB">1,204</b><span>Movies</span><small>3.41 TB</small></div>
-  <div className="ar-stat ar-stat-ring">
-    <span className="ar-ring" style={{ '--p': 64 } as React.CSSProperties} role="img" aria-label="Media disk 64% used"><b>64<small>%</small></b></span>
-    <span>Media disk used</span>
-  </div>
 </div>
 ```
 
-### Section heading and covers
+### Panels and tables
 
-Sections of art sit on the page, not in a card: a 20px heading with a muted count or a "See all" link, then the grid. Covers are 2:3 art with the name on a scrim; more detail shows on hover and in the drawer. A Downloading cover carries the ring with its percentage; other statuses are a small label on the art.
-
-Use `Cover` from `src/app/ui.tsx`: it draws the poster as a button that opens its drawer (see Drawer), with the status badge or ring on the art.
+Dashboard sections are `.ar-panel`s: a 15px heading with a muted count, then rows, a table or a ranked list. Two columns of them sit in `.ar-two` (one column under 1100px). A table goes in `.ar-tbl` inside a panel that also has `.ar-scroll`; cells marked `.wide` hide on phones.
 
 ```tsx
-<h2 className="ar-h">Results <span className="n">8</span></h2>
-<ul className="ar-caps">
-  <Cover id="movie-438631" title="Dune" sub="2021" poster={poster} status={status} eager={i < 6}>
-    <p>{overview}</p>
-    {/* the drawer's content: details, then the one primary button */}
-  </Cover>
-</ul>
+<section className="ar-panel ar-scroll">
+  <table className="ar-tbl">
+    <thead><tr><th>Title</th><th className="wide num">Size</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><Link className="ar-t" href="/requests/12"><img className="ar-thumb" src={poster} alt="" width={28} height={42} /><span><b>Dune</b><small>2021</small></span></Link></td>
+        <td className="wide num">24.1 GB</td>
+        <td><Badge status={status} /></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
 ```
 
-It renders:
+### Search results
 
-```tsx
-<li>
-  <button className="ar-cap" popoverTarget="d-movie-438631">
-    <img src={poster} alt="" width={300} height={450} loading="lazy" decoding="async" />
-    <span className="ar-ring" style={{ '--p': 35 } as React.CSSProperties} role="img" aria-label="Downloading 35%"><b>35<small>%</small></b></span>
-    <span className="ar-cap-info"><b>Dune</b><small>2021</small></span>
-  </button>
-  <aside className="drawer" id="d-movie-438631" popover="auto" aria-label="Dune">…</aside>
-</li>
-```
+The Search page is one centred `.ar-find` column: `.ar-logo`, the `.ar-find-box` form, the `.ar-seg` Media Type links, then `.ar-results`. Each `.ar-result` is a poster, the title over year · Media Type and two lines of overview, and on the right its status badge and the Request button (or the button that opens its drawer).
 
 ### Ranked list
 
@@ -164,9 +148,9 @@ A page with art swaps the title and lede for a hero (see Page anatomy). Never wr
 
 | File | What's in it |
 |---|---|
-| `src/app/globals.css` | Tokens, the header, the footer, `.page`, focus ring, reduced motion. Copied from the site's `global.css` |
+| `src/app/globals.css` | Tokens, the sidebar, the footer, `.page`, the heading row, focus ring, reduced motion. Started as the site's `global.css` |
 | `src/app/components.css` | Buttons, cards, badges, tiles, rows, forms, tables, messages, drawer, dialog. Copied from the site's `components.css` |
-| `src/app/pieces.css` | Hero, stat cards, rings, covers, ranked list. Copied from the site's `games-steam.css` as `ar-` |
+| `src/app/pieces.css` | Stat cards, panels and tables, Search results, ranked list, Request page. Started as the site's `games-steam.css`, renamed `ar-` |
 
 Keep the copied parts as close to the site's files as possible, so changes there can be copied over.
 
@@ -247,14 +231,13 @@ Do
 
 - Build mobile-first at 320px, then let it grow.
 - Grids that choose their own columns, with `min(100%, …)` so one column never overflows: `repeat(auto-fill, minmax(min(100%, 340px), 1fr))`. Use `auto-fit` when a few items should stretch to fill the row (stat cards).
-- Covers: `minmax(clamp(120px, 28vw, 168px), 1fr)`, so phones get 2 or 3 across.
 - `aspect-ratio` on every art card (2 / 3 covers) so the grid never jumps.
 - `flex-wrap: wrap` on every toolbar, button row and hero body.
 - `clamp()` for headings, hero height and repeated UI sizes.
 - `min-width: 0` on grid and flex children that hold text, plus ellipsis on long names.
 - Panels sized `width: min(460px, 100vw)`, so they're full-screen on phones.
 - Images get `width`/`height` attributes and `height: auto`, so nothing jumps while loading.
-- Wide data (tables, code): wrap only that block in `overflow-x: auto`. Hero tabs scroll sideways on their own.
+- Wide data (tables, code): wrap only that block in `overflow-x: auto`.
 - Tap targets at least 40px tall on touch.
 
 Don't
@@ -566,7 +549,7 @@ Never: entrance or scroll-reveal animations, staggered cards, animating width/he
 ### Speed
 
 - [ ] Server components by default; client components only where the browser must act
-- [ ] Hero art high priority; covers past the first screen lazy; big lists chunked
+- [ ] Posters past the first screen lazy; big lists chunked
 
 ### Behaviour
 
