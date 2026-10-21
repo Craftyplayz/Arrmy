@@ -16,7 +16,7 @@ x-after-init: &after-init
 services:
   # Runs once per deploy: creates the /data folders, qBittorrent's login and LazyLibrarian's settings, then exits.
   init:
-    image: ghcr.io/craftyplayz/arrmy:latest
+    image: ghcr.io/craftyplayz/arrmy:1.1.0-rc.38
     user: root
     command: [node, init.mjs]
     environment:
@@ -29,7 +29,7 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}:/config
 
   arrmy:
-    image: ghcr.io/craftyplayz/arrmy:latest
+    image: ghcr.io/craftyplayz/arrmy:1.1.0-rc.38
     restart: unless-stopped
     user: "${PUID}:${PGID}"
     environment:
