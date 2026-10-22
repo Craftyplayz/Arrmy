@@ -4,26 +4,29 @@ import { redirect } from 'next/navigation'
 import { Fragment } from 'react'
 import { adminOverview, liveDownloads, type LiveDownload, type Problem } from '@/lib/admin'
 import { requestDetails } from '@/lib/arr'
-import { listRequests } from '@/lib/db'
+import { getLimits, listRequests } from '@/lib/db'
 import type { Stuck } from '@/lib/problems'
 import { requireUser } from '@/lib/session'
+import { savedTorrents } from '@/lib/requestlog'
 import { stuckRequests } from '@/lib/stuck'
 import { watchOverview } from '@/lib/tautulli'
-import { fixProblem } from '../actions'
+import { fixProblem, saveLimits } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
 import { Downloads } from '../downloads'
 import { SubmitButton } from '../submit-button'
 import { Hero, num, size } from '../ui'
+import { TorrentFiles } from './torrent-files'
 
 export const metadata: Metadata = { title: 'Admin' }
 
 const speed = (bytesPerSecond: number) => `${(bytesPerSecond / 1048576).toFixed(1)} MB/s`
 
-const LEDE = "What needs fixing, what's downloading and how full the disks are."
+const LEDE = "What needs fixing, what's downloading, how full the disks are, and the Size Limits."
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const user = await requireUser()
   if (!user.is_admin) redirect('/')
+  const { saved } = await searchParams
 
   let overview: Awaited<ReturnType<typeof adminOverview>> | undefined
   let downloads: LiveDownload[] = []
@@ -55,6 +58,7 @@ export default async function AdminPage() {
     const p = people.get(r.username) ?? { count: 0, bytes: 0 }
     people.set(r.username, { count: p.count + 1, bytes: p.bytes + (details?.[i].bytes ?? 0) })
   })
+  const torrents = savedTorrents()
   const ranked = [...people].sort((a, b) => b[1].bytes - a[1].bytes)
   const most = ranked[0]?.[1].bytes || 1
 
@@ -124,6 +128,14 @@ export default async function AdminPage() {
             <Downloads initial={downloads} />
           </section>
 
+          <section className="ar-panel" id="torrents">
+            <h2>
+              .torrent files <span className="n">{num(torrents.length)}</span>
+            </h2>
+            <p className="ar-sub">A copy of every release Arrmy has grabbed, kept after the torrent and its Request are gone.</p>
+            <TorrentFiles files={torrents} />
+          </section>
+
           {watch && watch.unwatched.length > 0 && (
             <section className="ar-panel" id="unwatched">
               <h2>
@@ -181,6 +193,8 @@ export default async function AdminPage() {
               </div>
             </section>
           )}
+
+          <SizeLimits saved={!!saved} />
 
           <section className="ar-panel">
             <h2>Watched in the last 30 days</h2>
@@ -297,5 +311,42 @@ function DiskBar({ label, disk }: { label: string; disk: { freeSpace: number; to
       </div>
       <small>{low ? `Only ${size(disk.freeSpace)} free · ${used}% used` : `${size(disk.freeSpace)} free of ${size(disk.totalSpace)} · ${used}% used`}</small>
     </div>
+  )
+}
+
+/** Size Limits apply to everyone's Requests; saving pushes them to Radarr and Sonarr. */
+function SizeLimits({ saved }: { saved: boolean }) {
+  const limits = getLimits()
+  return (
+    <section className="ar-panel" id="limits">
+      <h2>Size Limits</h2>
+      <form action={saveLimits} className="form">
+        {saved && <p className="ok">Saved, and applied to Radarr and Sonarr.</p>}
+        <p className="ar-sub">They apply to everyone&apos;s Requests. Leave a box empty for no limit.</p>
+        <label>
+          Movie, in GB (optional)
+          <input className="field" name="movieGb" type="number" inputMode="decimal" min="0" max="10000" step="0.1" defaultValue={limits.movieGb || ''} />
+          <small>The biggest movie file Radarr may download.</small>
+        </label>
+        <label>
+          Episode, in GB per hour (optional)
+          <input className="field" name="episodeGb" type="number" inputMode="decimal" min="0" max="10000" step="0.1" defaultValue={limits.episodeGb || ''} />
+          <small>For a 1-hour episode; a 30-minute episode gets half. Season packs are judged per episode.</small>
+        </label>
+        <label>
+          Show, in GB (optional)
+          <input className="field" name="showGb" type="number" inputMode="numeric" min="0" max="10000" step="1" defaultValue={limits.showGb || ''} />
+          <small>
+            A TV Request is refused if all its seasons, every episode at the episode limit, could add up to more than this. Needs an episode
+            limit.
+          </small>
+        </label>
+        <div className="actions">
+          <SubmitButton className="btn primary" pending="Saving...">
+            Save limits
+          </SubmitButton>
+        </div>
+      </form>
+    </section>
   )
 }

@@ -47,7 +47,7 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
   const current = grabs.findLast((g) => !dead.has(g.downloadId))
   const failed = grabs.filter((g) => g !== current)
   const torrentLink = (g: Grabbed) => (
-    <a href={`/api/requests/${request.id}/torrent?hash=${g.downloadId}`} download>
+    <a href={`/api/torrents/${g.downloadId}`} download>
       {g.release ?? g.downloadId.slice(0, 8)}
     </a>
   )

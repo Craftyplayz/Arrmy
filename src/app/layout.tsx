@@ -18,7 +18,6 @@ const NAV: [href: string, label: string, adminOnly: boolean, icon: string][] = [
   ['/', 'Search', false, 'M11 4a7 7 0 1 0 0 14 7 7 0 1 0 0-14zM20 20l-3.5-3.5'],
   ['/requests', 'Requests', false, 'M4 6h16M4 12h16M4 18h10'],
   ['/admin', 'Admin', true, 'M3 12h4l3-8 4 16 3-8h4'],
-  ['/settings', 'Settings', true, 'M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'],
 ]
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

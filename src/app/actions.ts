@@ -105,11 +105,11 @@ export async function saveLimits(form: FormData) {
         colour: 'info',
         app: 'Arrmy',
         title: 'Size Limits changed',
-        description: `**${user.username}** changed them in Settings.`,
+        description: `**${user.username}** changed them on the Admin page.`,
         fields: changed.map((k) => [`Per ${names[k]}`, `${shown(before[k])} → ${shown(limits[k])}`]),
       }),
     )
-  redirect('/settings?saved=1')
+  redirect('/admin?saved=1#limits')
 }
 
 export async function signIn() {

@@ -2,15 +2,15 @@
 // watch adds what happens in between and after: the download finishing (with its speeds), a copy of each .torrent so
 // its link outlives the torrent, and the moment the title shows up in Plex. Movies are searched by Arrmy itself, so
 // every release and why it was turned down is logged; audiobooks are followed through LazyLibrarian's history.
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { arr, posterOf, queueOf, type Media } from './arr'
 import { editionOf, sameBook, type LLBook } from './bookrules'
 import { ll, owned } from './books'
-import { addLog, getSetting, logItem, recentLog, requestsFor, waitingOfType } from './db'
+import { addLog, getSetting, listRequests, logItem, recentLog, requestsFor, waitingOfType } from './db'
 import { announce } from './discord'
 import { embed } from './embeds'
-import { whyNothing, type Grabbed, type Imported, type IndexerHealth, type Note, type Release, type Searched } from './logrules'
+import { utc, whyNothing, type Grabbed, type Imported, type IndexerHealth, type Note, type Release, type Searched } from './logrules'
 import { plex, plexLibrary, PLEX_URL, type PlexItem } from './plex'
 import { qbit, torrents } from './qbit'
 
@@ -99,6 +99,30 @@ export async function searchMovie(movieId: number, note?: Note) {
 
 /** Where .torrent copies live: next to Arrmy's database, in the config folder that's backed up. */
 export const torrentFile = (hash: string) => join(dirname(process.env.DB_PATH ?? '/config/arrmy.db'), 'torrents', `${hash.toLowerCase()}.torrent`)
+
+export type SavedTorrent = { hash: string; release?: string; title?: string; by?: string; at: number }
+
+/** Every .torrent Arrmy has saved, newest first, with what the Request Log knows of it; a removed Request's too. */
+export function savedTorrents(): SavedTorrent[] {
+  const dir = dirname(torrentFile('x'))
+  const files = existsSync(dir) ? readdirSync(dir).filter((f) => /^[a-f0-9]{40}\.torrent$/.test(f)) : []
+  const grabs = new Map(recentLog('grabbed', 36500).map((e) => [(JSON.parse(e.detail) as Grabbed).downloadId.toLowerCase(), e]))
+  const requests = new Map(listRequests().map((r) => [logItem(r.media_type, r.external_id), r]))
+  return files
+    .map((f) => {
+      const hash = f.slice(0, 40)
+      const grab = grabs.get(hash)
+      const r = grab && requests.get(grab.item)
+      return {
+        hash,
+        release: grab && (JSON.parse(grab.detail) as Grabbed).release,
+        title: r?.title,
+        by: r?.username,
+        at: grab ? utc(grab.at) : statSync(join(dir, f)).mtimeMs,
+      }
+    })
+    .sort((a, b) => b.at - a.at)
+}
 
 async function saveTorrent(hash: string) {
   const file = torrentFile(hash)

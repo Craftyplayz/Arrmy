@@ -21,7 +21,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Edit seasons | Add or remove seasons of a requested show. Removed seasons are deleted unless someone else requested them. | Fake. **Not yet live.** |
 | Remove | Cancels a Request if nothing has downloaded; otherwise deletes the download and the files, keeping whatever another Request still wants. | Fake. **Not yet live.** |
 | Discord message | Posts in #requests when a Request becomes Available (see Discord bot). | Fake. **Not yet live.** |
-| Size limits | The Admin sets a maximum per movie, per hour of episode and per show (Settings). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate. | Fake. **Not yet live:** no limits are set on the server. |
+| Size limits | The Admin sets a maximum per movie, per hour of episode and per show (Admin → Size Limits). Bigger releases are never grabbed; a TV Request that could go over the show limit is refused with the estimate. | Fake. **Not yet live:** no limits are set on the server. |
 | Request Log | Each Request's page (Requests → Request Log) lists every step with when it started and how long it took, a ticking timer on the step running now, and the total from Request to playable. Searching, then per release: Downloading (release, indexer, size and quality for the Admin; average speed, most seeders and peers), dead releases swapped, Importing (file, quality, resolution, codec, audio languages, subtitles), and Showing up in Plex until Plex lists it. Copy log copies it as text. The Admin can download each grabbed release's .torrent, saved when it was grabbed. Requesters see their own Request's steps without release names, indexers or errors. | Unit (the steps), Local (Radarr-shaped Grab and Download webhooks, the page as Admin and as another Requester). **Not yet live.** |
 | Request Log: Arrmy's own movie search | Movies are added with Radarr's search off; Arrmy asks Radarr for every release (`GET /release`), logs them all with why each was turned down, and grabs the first acceptable one, which is Radarr's own pick. The Admin sees every release (Every release, and in Copy log) and how each indexer answered, from Prowlarr's history: results and time, or failed. Everyone sees how many were found and acceptable, or the commonest reasons none was; the log then waits for a release, which Radarr keeps watching for. Nothing acceptable for a released movie goes to #problems. If the search itself fails, Radarr searches by itself. Search again in the Admin view runs the same search. Stuck shows Arrmy's last search and why it found nothing. | Unit (the steps), Live (the API shapes: Radarr 6's releases with their rejections, Prowlarr's query history). **Not yet live:** a Request searched this way. |
 | Request Log: edits and fixes | Seasons added or removed (in that Request's log only, with who), Search again and Try another release from the Admin view (with who; Try another release ends that download's step). | Unit. **Not yet live.** |
@@ -58,7 +58,8 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Feature | What it does | Tested |
 |---|---|---|
 | Admin view | Problems (Missing, Failed Download, Failed Import) with one-click fixes: search again, or blocklist the release and try another. Also what's downloading, speeds, library counts, disk space and Requests by person. | Unit (the Problem rules), Fake, Live (the page). **Not yet live:** a real Problem and its fix. |
-| Settings | Size limits (see Movies and TV). | Fake |
+| Size Limits on the Admin page | The Settings page is gone (2026-10-22): its Size Limits panel is on the Admin page, the sidebar has no Settings, and `/settings` sends old links to `/admin`. | Local (type-check). **Not yet seen live.** |
+| .torrent files | An Admin panel listing every .torrent Arrmy has saved, newest first, also those of removed Requests: release name, title, who asked, when it was grabbed, and Download. A search field filters by release name, title or hash as you type. One Admin-only download route by hash (40 hex characters) serves these and the Request page's links. | Local (type-check). **Not yet seen live.** |
 | Downloading | Every movie, show and audiobook downloading, read straight from qBittorrent every 3 seconds without reloading the page: poster, title, who asked, progress, speed, time left, seeders and peers, and the state in words (Downloading, Stalled, Fetching file list, Queued, Paused, Checking). | Unit (the states), Live (v1.1.0-rc.23: a movie with its poster, who asked, speed and time left) |
 | Stuck | Every Request that hasn't started downloading or has stopped, and why: Searching, Not released yet (with the cinema, digital or disc date), Nothing found (when it was last searched), or in qBittorrent but Stalled, Fetching file list, Queued, Paused or Error (how far it got, when it last moved, seeders). Audiobooks LazyLibrarian wants and hasn't found too. Once at the top: qBittorrent with no connection (the VPN), and indexers Prowlarr has switched off and until when. Stalled downloads keep "Try another release", Nothing found keeps "Search again". Missing moved here from Problems (Discord's #problems still gets it). | Unit (the rules), Live (v1.1.0-rc.24: the indexer notice, audiobooks not found with who asked), Local (stalled and queued torrents, through a fake qBittorrent). For about a minute after a redeploy Radarr's queue is empty, so a downloading movie can show as Searching. Movies: why the last search found nothing, from Arrmy's own search. **Later:** the same for shows, and each indexer's error text (Prowlarr's history doesn't keep it). |
 | Dead releases | A torrent with no file list 5 minutes after it was added, or nothing downloaded after 15, is swapped for another release: Radarr and Sonarr blocklist it and search again; for audiobooks Arrmy deletes it, waits for LazyLibrarian to mark it Failed, then searches again (about 2 minutes). LazyLibrarian sometimes grabs the same dead release again; that counts as another strike. After 3 dead releases in a row for the same title, the third is left alone, it shows as a Failed Download Problem, and Discord @mentions the Admin (`DISCORD_ADMIN_ID`). Torrents in other qBittorrent categories, and paused ones, are never touched. | Unit (the rule), Fake. **Not yet live.** |
@@ -228,9 +229,22 @@ Asked for 2026-10-21. The All tab (searching every Media Type at once) is built:
   - **Comics:** individual issue, series, publisher, character (every comic with Spider-Man in it).
 - Comics need Kapowarr (see Other planned); the other tabs can be built first.
 
+### Admin: .torrent files
+
+**Built 2026-10-22** (see Admin under Done). Asked for 2026-10-22. A panel on the Admin page listing every .torrent file Arrmy has ever saved (`torrents/<hash>.torrent` in its config folder), including those of removed Requests, whose pages are gone.
+
+- Each row: the release name and title (from the Request Log's grabbed entries), who asked, when it was grabbed, and a Download link. A file with no log entry left shows by its hash.
+- A search bar filters by release name, title or hash as you type.
+- How: a new Admin-only download route by hash (40 hex characters, as the Request page's route checks), since today's route only serves files of a Request that still exists.
+- About 1–2 hours.
+
+### Settings merged into Admin
+
+**Built 2026-10-22** (see Admin under Done). Asked for 2026-10-22. The Settings page goes away: Size Limits (its only panel) moves into the Admin page, the sidebar loses Settings, and `/settings` redirects to `/admin` so old links still work. Everything planned under Settings page below is built into the Admin page instead. About 30–60 minutes.
+
 ### Settings page
 
-Settings holds only Size Limits today. Candidates, in the order they'd help most:
+These become panels on the Admin page (see Settings merged into Admin above), next to Size Limits. Candidates, in the order they'd help most:
 
 1. **Resolution preference** and its blocklist (see above).
 2. **People:** who has access, and per person: approve first, quota, notifications.

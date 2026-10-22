@@ -152,3 +152,8 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .rows > .rowi { min-width: 0; }
 .ar-releases { max-height: 360px; overflow-y: auto; margin-top: 6px; }
 .ar-releases small { display: block; white-space: normal; overflow-wrap: anywhere; padding: 2px 0; }
+
+/* ---------- Admin: .torrent files ---------- */
+.ar-torrent-search { width: 100%; margin-bottom: 10px; }
+.ar-torrent-list { max-height: 480px; overflow-y: auto; }
+.ar-torrent-list .rowi .grow { min-width: 0; }
