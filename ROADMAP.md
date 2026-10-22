@@ -193,7 +193,15 @@ Asked for 2026-10-22. Request chosen episodes of a show, not only whole seasons:
 - Edit seasons becomes Edit episodes, with the same rule as now: removed episodes are deleted unless someone else requested them.
 - The Request page's Episodes panel, the poster's %, Available and Remove cover only the requested episodes.
 - How: Sonarr already monitors episode by episode (`PUT /episode/monitor`), then searches just those (`EpisodeSearch`). The Size Limit per hour of episode already applies to single episodes.
-- To decide: a Request today is a show with seasons, so whether chosen episodes are stored on the same Request or as a Request each. What happens when only a season pack exists for a wanted episode (download the pack and keep only that file, as Editions do for audiobook packs, or wait). Whether episodes not yet aired can be chosen. Ties into the season pack question under Request Log.
+Settled 2026-10-22:
+
+- **One Request per show.** The chosen episodes are stored on the show's Request, as its seasons are now, so the Requests list shows one row per show and Edit, Remove, the Episodes panel and the Request Log keep working per Request. Requesting more episodes later adds them to the same Request.
+- **Season packs.** When the wanted episode only comes in a pack, the pack is used and only that episode is kept:
+  - A pack of separate files: only the wanted episode's files are downloaded, every other file is set to "do not download" in qBittorrent (as Editions do with audiobook series packs).
+  - A pack inside an archive (zip or rar): the whole archive is downloaded, Arrmy extracts the wanted episode, and the archive and the rest are deleted. Arrmy does this itself; Unpackerr stays under Not planned. The torrent is removed with the archive, so it stops seeding.
+- **Unaired episodes can be requested.** Sonarr watches for them and they download when they air; until then they show as Not aired yet, as whole seasons already do.
+
+Still to decide: ties into the season pack question under Request Log (how Arrmy picks between a pack and single episodes).
 
 ### Requester features
 
