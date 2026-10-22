@@ -98,6 +98,9 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar .ar-seg a { padding: 7px 16px; border-radius: 999px; color: var(--muted); font-size: 15px; text-decoration: none; }
 .ar .ar-seg a:hover { color: var(--text); }
 .ar .ar-seg a[aria-current] { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+/* what a tab searches by: smaller, under the Media Types */
+.ar .ar-seg-by { margin-top: 8px; }
+.ar .ar-seg-by a { padding: 4px 12px; font-size: 13px; }
 .ar-count { margin: 32px 0 0; padding-bottom: 10px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14px; }
 .ar-results { margin: 0; padding: 0; list-style: none; }
 .ar-result { display: flex; align-items: flex-start; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--line); }

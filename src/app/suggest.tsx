@@ -9,7 +9,7 @@ const TYPE_NAMES: Record<string, string> = { movie: 'Movie', tv: 'TV Show', audi
  * The search field, with titles suggested as a person types, only from the tab they are on. Picking one searches for
  * that title; Enter without picking searches for what was typed, as before.
  */
-export function SuggestField({ type, q, placeholder, label }: { type: string; q: string; placeholder: string; label: string }) {
+export function SuggestField({ type, by, q, placeholder, label }: { type: string; by: string; q: string; placeholder: string; label: string }) {
   const input = useRef<HTMLInputElement>(null)
   const [term, setTerm] = useState('')
   const [items, setItems] = useState<Suggestion[]>([])
@@ -21,7 +21,7 @@ export function SuggestField({ type, q, placeholder, label }: { type: string; q:
     const abort = new AbortController()
     // waits for a pause in typing, so Radarr and Sonarr aren't asked on every key
     const timer = setTimeout(() => {
-      fetch(`/api/suggest?type=${type}&q=${encodeURIComponent(term)}`, { signal: abort.signal })
+      fetch(`/api/suggest?type=${type}&by=${by}&q=${encodeURIComponent(term)}`, { signal: abort.signal })
         .then((res) => (res.ok ? res.json() : []))
         .then((s: Suggestion[]) => {
           setItems(s)
@@ -33,7 +33,7 @@ export function SuggestField({ type, q, placeholder, label }: { type: string; q:
       clearTimeout(timer)
       abort.abort()
     }
-  }, [term, type])
+  }, [term, type, by])
 
   const pick = (s: Suggestion) => {
     input.current!.value = s.title
@@ -97,9 +97,9 @@ export function SuggestField({ type, q, placeholder, label }: { type: string; q:
               <span className="grow">
                 {s.title}
                 <small>
-                  <span className={`ar-type ar-type-${s.type}`}>{TYPE_NAMES[s.type]}</span>
-                  {s.year}
-                  {s.status && ` · ${s.status}`}
+                  {/* a name, not a title: no Media Type, and the status line says what they're known for */}
+                  {by === 'title' && <span className={`ar-type ar-type-${s.type}`}>{TYPE_NAMES[s.type]}</span>}
+                  {[s.year, s.status].filter(Boolean).join(' · ')}
                 </small>
               </span>
             </li>

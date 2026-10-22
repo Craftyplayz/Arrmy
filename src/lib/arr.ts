@@ -146,34 +146,59 @@ async function qualityProfile(name: 'radarr' | 'sonarr') {
 export async function search(type: MediaType, term: string): Promise<SearchResult[]> {
   if (type === 'audiobook') return searchAudiobooks(term)
   const q = encodeURIComponent(term)
-  const card = (m: Media) => ({ title: m.title, year: m.year, overview: m.overview, poster: posterOf(m) })
   if (type === 'movie') {
     const [found, queue] = await Promise.all([arr<LookupMovie[]>('radarr', `/movie/lookup?term=${q}`), queueOf('radarr')])
-    return Promise.all(
-      found.slice(0, 12).map(async (m) => ({
-        ...card(m),
-        id: m.tmdbId,
-        seasons: [],
-        requestedSeasons: [],
-        status: movieStatus(await libraryMovie(m.tmdbId), queue),
-      })),
-    )
+    return movieResults(found.slice(0, 12), queue)
   }
   const [found, queue] = await Promise.all([arr<LookupSeries[]>('sonarr', `/series/lookup?term=${q}`), queueOf('sonarr')])
+  return seriesResults(found.filter((s) => s.tvdbId > 0).slice(0, 12), queue)
+}
+
+/**
+ * Results for titles found elsewhere (TMDB ids for movies, TVDB ids for TV), in the order given. A title Radarr or
+ * Sonarr can't look up is left out.
+ */
+export async function searchIds(type: 'movie' | 'tv', ids: number[]): Promise<SearchResult[]> {
+  const queue = await queueOf(type === 'movie' ? 'radarr' : 'sonarr')
+  const found = await Promise.all(
+    ids.map((id) =>
+      (type === 'movie'
+        ? arr<LookupMovie>('radarr', `/movie/lookup/tmdb?tmdbId=${id}`)
+        : arr<LookupSeries[]>('sonarr', `/series/lookup?term=tvdb:${id}`).then((s) => s[0])
+      ).catch(() => undefined),
+    ),
+  )
+  return type === 'movie'
+    ? movieResults(found.filter((m) => m !== undefined) as LookupMovie[], queue)
+    : seriesResults((found as (LookupSeries | undefined)[]).filter((s) => s && s.tvdbId > 0) as LookupSeries[], queue)
+}
+
+const card = (m: Media) => ({ title: m.title, year: m.year, overview: m.overview, poster: posterOf(m) })
+
+function movieResults(found: LookupMovie[], queue: QueueRecord[]): Promise<SearchResult[]> {
   return Promise.all(
-    found
-      .filter((s) => s.tvdbId > 0)
-      .slice(0, 12)
-      .map(async (s) => {
-        const existing = await librarySeries(s.tvdbId)
-        return {
-          ...card(s),
-          id: s.tvdbId,
-          seasons: seasonNumbers(s.seasons),
-          requestedSeasons: existing ? seasonNumbers(existing.seasons, (x) => x.monitored) : [],
-          status: seriesStatus(existing, queue),
-        }
-      }),
+    found.map(async (m) => ({
+      ...card(m),
+      id: m.tmdbId,
+      seasons: [],
+      requestedSeasons: [],
+      status: movieStatus(await libraryMovie(m.tmdbId), queue),
+    })),
+  )
+}
+
+function seriesResults(found: LookupSeries[], queue: QueueRecord[]): Promise<SearchResult[]> {
+  return Promise.all(
+    found.map(async (s) => {
+      const existing = await librarySeries(s.tvdbId)
+      return {
+        ...card(s),
+        id: s.tvdbId,
+        seasons: seasonNumbers(s.seasons),
+        requestedSeasons: existing ? seasonNumbers(existing.seasons, (x) => x.monitored) : [],
+        status: seriesStatus(existing, queue),
+      }
+    }),
   )
 }
 
