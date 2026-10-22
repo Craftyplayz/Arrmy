@@ -36,6 +36,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Search: All | All, the default tab, searches movies, TV shows and audiobooks at once. Each result carries a Media Type tag, the searches' best hits take turns, and a search that is down only drops its own results. Movies, TV Shows and Audiobooks stay for finer control. Live since v1.1.0-rc.40. | Local (with Radarr and Sonarr down). **Not yet seen live:** all three answering. |
 | Instant pages | The sidebar's pages are fetched in the background as soon as any page opens, and a page seen in the last 30 seconds opens from memory, so clicks show the page at once instead of Loading. Pages with live numbers refresh themselves straight after. Live since v1.1.0-rc.41. | Local (a production build: 40–240 ms a click) |
 | Layouts | Fifteen static mockups of other ways Arrmy could look, on made-up data, each with Home, Requests, Admin and Settings tabs and phone pictures. Admin → Layouts. Kept for a future redesign or Themes. | Live |
+| Discover | A Discover page between Search and Requests: rows of posters for trending movies, trending shows and upcoming movies, and a genre picker (movie and TV genres) showing what is popular in one. Each poster shows its status if Arrmy has one and opens an item page with the poster, backdrop, overview, rating, genres, runtime or seasons, release dates, the first 12 cast, a trailer link and similar titles, plus the Request controls Search uses (a show needs a TheTVDB entry). Statuses come from one read of the Radarr and Sonarr libraries per page. Needs the optional TMDB_API_KEY; without it the page says the Admin needs to set it. | Local (the rules). **Not yet seen in a browser, nor against TMDB.** |
 
 ### Audiobooks
 
@@ -209,7 +210,7 @@ Still to decide: ties into the season pack question under Request Log (how Arrmy
 From the Seerr and Requestarr comparison, 2026-10-21. In this order:
 
 1. **Per-user approval, quotas and permissions.** Auto-approve stays the default. A per-person "Approve first" switch, and a quota such as N movies a week, protect the disk and the VPN.
-2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB. The Request page's title side (see Done) can share this data.
+2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB. The Request page's title side (see Done) can share this data. **Built 2026-10-22** (see The site under Done); movies and TV only. **Not yet seen in a browser.**
 3. **Library scan.** Anything Plex already has shows Available without a Request (audiobooks already do this).
 4. **Plex Watchlist auto-request.** Whatever a person adds to their Plex watchlist is requested for them.
 5. **Per-user notifications.** A Discord DM or email when your Request is Available, with an opt-out.
