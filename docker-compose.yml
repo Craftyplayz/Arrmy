@@ -48,6 +48,7 @@ services:
       PORTAINER_STACK_URL: ${PORTAINER_STACK_URL:-}
       ABS_API_KEY: ${ABS_API_KEY:-}
       TMDB_API_KEY: ${TMDB_API_KEY:-}
+      DOCTOR: ${CLAUDE_CODE_OAUTH_TOKEN:+on} # hands Problems to the doctor only when it's set up
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
       - ${BACKUP_DIR:-/opt/arrmy-backups}:/backups:ro # so the Discord bot can report the nightly backup
@@ -236,6 +237,29 @@ services:
       KOMETA_TIMES: "06:00"
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/kometa:/config
+    depends_on: *after-init
+
+  # The doctor: Claude looks into each Problem and posts what it found to #problems, on your Claude subscription. It reads
+  # the apps' APIs and can only run a few safe fixes (search again, another release, restart an app): scripts/doctor.mjs.
+  # Without CLAUDE_CODE_OAUTH_TOKEN it exits at once and stays stopped.
+  doctor:
+    image: ghcr.io/craftyplayz/arrmy:latest
+    restart: on-failure
+    user: "${PUID}:${PGID}"
+    command: [node, doctor.mjs]
+    environment:
+      TZ: ${TZ}
+      HOME: /config # Claude Code keeps its CLI and settings here
+      CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:-}
+      DISABLE_AUTOUPDATER: 1 # doctor.mjs updates it on each start
+      DOCTOR_DAILY: ${DOCTOR_DAILY:-10}
+      RADARR_API_KEY: ${RADARR_API_KEY}
+      SONARR_API_KEY: ${SONARR_API_KEY}
+      PROWLARR_API_KEY: ${PROWLARR_API_KEY}
+      QBIT_PASSWORD: ${QBIT_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/doctor:/config
     depends_on: *after-init
 
   # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps

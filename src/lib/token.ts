@@ -33,6 +33,9 @@ export const hookToken = (secret: string) => sign(secret, 'hook')
 /** Shared secret in the AudioBook Bay relay's address (see abbrelay.ts). scripts/init.mjs derives the same. */
 export const audiobookBayToken = (secret: string) => sign(secret, 'audiobookbay')
 
+/** Shared secret Arrmy sends the doctor (see doctor.ts). scripts/doctor.mjs derives the same. */
+export const doctorToken = (secret: string) => sign(secret, 'doctor')
+
 /** LazyLibrarian's API key, derived so nobody has to set one. scripts/init.mjs writes the same value into its config. */
 export const lazyLibrarianKey = (secret: string) => createHmac('sha256', secret).update('lazylibrarian').digest('hex').slice(0, 32)
 

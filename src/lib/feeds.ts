@@ -10,6 +10,7 @@ import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, pr
 import { COMMANDS } from './commands'
 import { absKey } from './keys'
 import { getDeadLimits, getSetting, setSetting } from './db'
+import { investigate } from './doctor'
 import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncAvatar, syncBarEmoji } from './discord'
 import { COLOUR, downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
 import { bookArt, downloadMeta, plexArt } from './media'
@@ -189,6 +190,7 @@ async function problems() {
       }),
       true,
     )
+    investigate(p)
   }
   setSetting('bot:problems', seen)
 }

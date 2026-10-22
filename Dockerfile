@@ -15,6 +15,6 @@ ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 NEXT_TELEMETRY_DISABLED=1 ARR
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
-COPY scripts/init.mjs ./
+COPY scripts/init.mjs scripts/doctor.mjs ./
 EXPOSE 3000
 CMD ["node", "server.js"]

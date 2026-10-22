@@ -81,6 +81,15 @@ The bot makes an **Arrmy** category in your server with nine channels: #requests
 
 Slash commands (`/status`, `/queue`, `/requests`, `/problems`, `/search`) start Admin-only; **Server Settings → Integrations → Arrmy** opens them to others. If Cloudflare challenges Discord's requests, add a rule that skips the challenge for `/api/discord`.
 
+### The doctor
+
+Claude looks into each Problem #problems announces, on your Claude subscription, and posts the cause under it. It reads Radarr's, Sonarr's, Prowlarr's and qBittorrent's APIs, and can only run a few safe fixes (search again, try another release, test indexers, restart an app, recheck or start a torrent). Anything else it tells you to do.
+
+1. On any PC with Claude Code: `claude setup-token`, sign in, copy the token (it lasts a year).
+2. In the stack: `CLAUDE_CODE_OAUTH_TOKEN` = the token. Redeploy.
+
+It looks into each Problem once a day, and at most `DOCTOR_DAILY` (10) Problems a day, so your own use of Claude keeps its limits. Its log is the `doctor` container's.
+
 ## Develop
 
 ```sh

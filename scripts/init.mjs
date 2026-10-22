@@ -23,7 +23,7 @@ for (const dir of ['torrents/movies', 'torrents/tv', 'torrents/books', 'media/mo
   own(`${data}/${parent}`)
   own(`${data}/${dir}`)
 }
-for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian', 'tautulli', 'autobrr', 'tdarr/server', 'tdarr/configs', 'tdarr/logs', 'tdarr/temp', 'kometa']) {
+for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian', 'tautulli', 'autobrr', 'tdarr/server', 'tdarr/configs', 'tdarr/logs', 'tdarr/temp', 'kometa', 'doctor']) {
   mkdirSync(`${config}/${dir}`, { recursive: true })
   own(`${config}/${dir}`)
 }
