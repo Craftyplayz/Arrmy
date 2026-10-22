@@ -10,6 +10,7 @@ import { removeEdition } from '@/lib/editions'
 import {
   addLog,
   deleteRequest,
+  getDeadLimits,
   getLimits,
   getRequest,
   logItem,
@@ -25,6 +26,7 @@ import { embed } from '@/lib/embeds'
 import { applyLimits, showLimitProblem } from '@/lib/limits'
 import { tellRequest } from '@/lib/notify'
 import { createPin } from '@/lib/plex'
+import { type DeadLimits } from '@/lib/problems'
 import { createAudiobookRequest, createMovieRequest, createTvRequest } from '@/lib/requests'
 import { logEpisodeSearch, logRetry, searchMovie } from '@/lib/requestlog'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
@@ -109,6 +111,61 @@ export async function saveLimits(form: FormData) {
       }),
     )
   redirect('/admin?saved=1#limits')
+}
+
+export async function saveDeadLimits(form: FormData) {
+  const user = await requireUser()
+  if (!user.is_admin) throw new Error('Only the Admin can change Dead releases')
+  const whole = (key: keyof DeadLimits, min: number, max: number) => {
+    const n = Number(form.get(key))
+    if (!Number.isInteger(n) || n < min || n > max) throw new Error(`Needs a whole number from ${min} to ${max}: ${form.get(key)}`)
+    return n
+  }
+  const limits: DeadLimits = { metaMinutes: whole('metaMinutes', 1, 1440), idleMinutes: whole('idleMinutes', 1, 1440), strikes: whole('strikes', 1, 20) }
+  const before = getDeadLimits()
+  setSetting('dead', limits)
+  const names: Record<keyof DeadLimits, [string, string]> = {
+    metaMinutes: ['Minutes without a file list', ' min'],
+    idleMinutes: ['Minutes with nothing downloaded', ' min'],
+    strikes: ['Dead releases in a row', ''],
+  }
+  const changed = (Object.keys(limits) as (keyof DeadLimits)[]).filter((k) => limits[k] !== before[k])
+  if (changed.length)
+    announce(
+      'admin-log',
+      embed({
+        colour: 'info',
+        app: 'Arrmy',
+        title: 'Dead releases changed',
+        description: `**${user.username}** changed them on the Admin page.`,
+        fields: changed.map((k) => [names[k][0], `${before[k]}${names[k][1]} → ${limits[k]}${names[k][1]}`]),
+      }),
+    )
+  redirect('/admin?saved=dead#dead')
+}
+
+/** A blank box keeps the key; the values are never shown or logged, only which ones changed. */
+export async function saveKeys(form: FormData) {
+  const user = await requireUser()
+  if (!user.is_admin) throw new Error('Only the Admin can change the API keys')
+  const changed: string[] = []
+  for (const [field, setting, name] of [['absKey', 'absKey', 'Audiobookshelf API key'], ['tmdbKey', 'tmdbKey', 'TMDB key']]) {
+    const value = String(form.get(field) ?? '').trim()
+    if (!value) continue
+    setSetting(setting, value)
+    changed.push(name)
+  }
+  if (changed.length)
+    announce(
+      'admin-log',
+      embed({
+        colour: 'info',
+        app: 'Arrmy',
+        title: 'API keys changed',
+        description: `**${user.username}** set the ${changed.join(' and ')} on the Admin page.`,
+      }),
+    )
+  redirect('/admin?saved=keys#apps')
 }
 
 export async function signIn() {

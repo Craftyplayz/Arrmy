@@ -45,6 +45,10 @@ test('dead releases: no file list after 5 minutes, or nothing downloaded after 1
   assert.equal(deadReason(torrent('stalledDL', 60, 1), now), undefined, 'slow but alive')
   assert.equal(deadReason(torrent('stoppedDL', 60), now), undefined, 'paused by hand')
   assert.equal(deadReason(torrent('queuedDL', 60), now), undefined)
+  const slow = { metaMinutes: 10, idleMinutes: 30, strikes: 3 }
+  assert.equal(deadReason(torrent('metaDL', 6), now, slow), undefined, 'a longer limit')
+  assert.equal(deadReason(torrent('metaDL', 11), now, slow), 'No file list after 10 minutes')
+  assert.equal(deadReason(torrent('stalledDL', 31), now, slow), 'Nothing downloaded after 30 minutes')
 })
 
 test('Missing skips fresh Requests, unreleased titles and anything downloading', () => {

@@ -8,12 +8,13 @@ import { arr } from './arr'
 import { abs, ABS_URL, ll } from './books'
 import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, releaseNotes, size } from './botrules'
 import { COMMANDS } from './commands'
-import { getSetting, setSetting } from './db'
+import { absKey } from './keys'
+import { getDeadLimits, getSetting, setSetting } from './db'
 import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncAvatar, syncBarEmoji } from './discord'
 import { COLOUR, downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
 import { bookArt, downloadMeta, plexArt } from './media'
 import { plex, PLEX_URL } from './plex'
-import { DEAD_DETAIL } from './problems'
+import { deadDetail } from './problems'
 import { qbit, torrents } from './qbit'
 import { history, tautulli } from './tautulli'
 import { summaryDue, weekSummary } from './watchrules'
@@ -164,7 +165,7 @@ async function problems() {
   const now = Date.now()
   const seen: Seen = {}
   for (const p of list) {
-    const raisedByArrmy = p.detail === DEAD_DETAIL
+    const raisedByArrmy = p.detail === deadDetail(getDeadLimits().strikes)
     const key = problemKey(p) + (raisedByArrmy ? ':dead' : '')
     const s = (seen[key] = before?.[key] ?? { first: now, told: !before })
     if (s.told || (!raisedByArrmy && now - s.first < GRACE)) continue
@@ -201,7 +202,7 @@ const status = async (app: keyof typeof ARRS) => {
 }
 
 /** Each app's running version, and for the *arr apps when they started, which shows a restart. Throws when it's down. */
-const APPS: Record<string, () => Promise<{ version?: string; started?: string }>> = {
+export const APPS: Record<string, () => Promise<{ version?: string; started?: string }>> = {
   Radarr: () => status('radarr'),
   Sonarr: () => status('sonarr'),
   Prowlarr: () => status('prowlarr'),
@@ -393,7 +394,7 @@ async function plexSessions() {
 type AbsSession = { id: string; userId: string; displayTitle: string; displayAuthor?: string; deviceInfo?: { deviceName?: string; clientName?: string; browserName?: string; model?: string } }
 
 async function audiobookshelfSessions() {
-  if (!process.env.ABS_API_KEY) return
+  if (!absKey()) return
   const [{ openSessions }, { users }] = await Promise.all([
     abs<{ openSessions: AbsSession[] }>('/users/online'),
     abs<{ users: { id: string; username: string }[] }>('/users'),
@@ -457,7 +458,7 @@ async function accessChanges() {
     if (!res.ok) throw new Error(`plex.tv /api/users → ${res.status}`)
     people.Plex = plexUsers(await res.text())
   }
-  if (process.env.ABS_API_KEY) people.Audiobookshelf = (await abs<{ users: { username: string }[] }>('/users')).users.map((u) => ({ name: u.username }))
+  if (absKey()) people.Audiobookshelf = (await abs<{ users: { username: string }[] }>('/users')).users.map((u) => ({ name: u.username }))
   for (const [app, list] of Object.entries(people)) {
     const now = list.map((p) => p.name).sort()
     const before = since(`access:${app}`, now)

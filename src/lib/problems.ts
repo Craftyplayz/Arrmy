@@ -45,19 +45,21 @@ export type Torrent = {
   last_activity: number
 }
 
-/** Dead releases in a row for one title before Arrmy stops swapping them and makes it a Problem. */
-export const STRIKES = 3
-export const DEAD_DETAIL = `${STRIKES} releases in a row never started: nobody is sharing them.`
+/** The Admin's Dead releases settings. strikes = dead releases in a row for one title before Arrmy stops swapping and makes it a Problem. */
+export type DeadLimits = { metaMinutes: number; idleMinutes: number; strikes: number }
+export const DEAD_DEFAULTS: DeadLimits = { metaMinutes: 5, idleMinutes: 15, strikes: 3 }
+export const deadDetail = (strikes: number) => `${strikes} releases in a row never started: nobody is sharing them.`
 
 /**
- * Why a torrent counts as dead, or undefined if it doesn't: no file list (metadata) after 5 minutes, or nothing
- * downloaded 15 minutes after it was added. Stopped, queued and checking torrents never count.
+ * Why a torrent counts as dead, or undefined if it doesn't: no file list (metadata) after metaMinutes, or nothing
+ * downloaded idleMinutes after it was added. Stopped, queued and checking torrents never count.
  */
-export function deadReason(t: Torrent, now = Date.now()) {
+export function deadReason(t: Torrent, now = Date.now(), limits = DEAD_DEFAULTS) {
   const minutes = (now - t.added_on * 1000) / 60_000
-  if (t.state === 'metaDL' || t.state === 'forcedMetaDL') return minutes > 5 ? 'No file list after 5 minutes' : undefined
-  if (['stalledDL', 'downloading', 'forcedDL'].includes(t.state) && t.downloaded === 0 && minutes > 15)
-    return 'Nothing downloaded after 15 minutes'
+  if (t.state === 'metaDL' || t.state === 'forcedMetaDL')
+    return minutes > limits.metaMinutes ? `No file list after ${limits.metaMinutes} minutes` : undefined
+  if (['stalledDL', 'downloading', 'forcedDL'].includes(t.state) && t.downloaded === 0 && minutes > limits.idleMinutes)
+    return `Nothing downloaded after ${limits.idleMinutes} minutes`
 }
 /** A torrent's state in a word or two, for the Admin view's Downloading list. */
 export function stateLabel(state: string) {

@@ -1,13 +1,15 @@
+import { tmdbKey } from './keys'
+
 // TMDB, for what Radarr's and Sonarr's lookups can't answer: people, companies, trending, upcoming and genres. Needs
 // TMDB_API_KEY (free at themoviedb.org → Settings → API); without it those features stay hidden.
 const TMDB_URL = process.env.TMDB_URL ?? 'https://api.themoviedb.org/3'
 
-export const tmdbEnabled = () => !!process.env.TMDB_API_KEY
+export const tmdbEnabled = () => !!tmdbKey()
 
 /** GET a TMDB v3 path. The key can be the short v3 key or the long v4 read token. */
 export async function tmdb<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {
-  const key = process.env.TMDB_API_KEY
-  if (!key) throw new Error('TMDB_API_KEY is not set')
+  const key = tmdbKey()
+  if (!key) throw new Error('TMDB_API_KEY is not set (Admin → Connected apps)')
   const bearer = key.length > 40 // the v4 read token is a long JWT; the v3 key is 32 characters
   const query = new URLSearchParams({ ...(bearer ? {} : { api_key: key }), ...Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])) })
   const res = await fetch(`${TMDB_URL}${path}?${query}`, {

@@ -7,6 +7,7 @@ import { basename, dirname, join } from 'node:path'
 import { arr, posterOf, queueOf, type Media } from './arr'
 import { editionOf, sameBook, type LLBook } from './bookrules'
 import { ll, owned } from './books'
+import { absKey } from './keys'
 import { addLog, getSetting, listRequests, logItem, recentLog, requestsFor, waitingOfType } from './db'
 import { announce } from './discord'
 import { embed } from './embeds'
@@ -200,13 +201,13 @@ async function followBooks() {
   }
 
   // shortcut: without an Audiobookshelf API key Arrmy can't look, so a filed book counts as in Audiobookshelf.
-  const all = landing.size && process.env.ABS_API_KEY ? await ll<LLBook[]>('getAllBooks') : []
+  const all = landing.size && absKey() ? await ll<LLBook[]>('getAllBooks') : []
   for (const item of landing) {
     const id = item.slice('audiobook:'.length)
     const request = requestsFor('audiobook', id)[0]
     const book = all.find((b) => b.BookID === id)
     const there =
-      !process.env.ABS_API_KEY ||
+      !absKey() ||
       (!!request && !!book && (await owned(request.title)).some((i) => sameBook(i, { title: request.title, author: book.AuthorName })))
     if (there) addLog(item, 'playable', { app: 'Audiobookshelf' })
   }

@@ -15,6 +15,8 @@ import { AutoRefresh } from '../auto-refresh'
 import { Downloads } from '../downloads'
 import { SubmitButton } from '../submit-button'
 import { Hero, num, size } from '../ui'
+import { ConnectedApps } from './connected-apps'
+import { DeadReleases } from './dead-releases'
 import { SizeLimits } from './size-limits'
 import { TorrentFiles } from './torrent-files'
 
@@ -195,7 +197,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             </section>
           )}
 
-          <SizeLimits saved={!!saved} />
+          <SizeLimits saved={saved === '1'} />
+
+          <DeadReleases saved={saved === 'dead'} />
+
+          <ConnectedApps saved={saved === 'keys'} />
 
           <section className="ar-panel">
             <h2>Watched in the last 30 days</h2>
