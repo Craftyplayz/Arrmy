@@ -31,6 +31,13 @@
     --gold-bg: #4a3d16;
     --gold-line: #a8862a;
     /* chart series, checked with the dataviz validator against --card */
+    --on-btn: #fff;
+    --bar-bg: rgb(30 35 41 / .94);
+    --dlg-bg: #222;
+    --track: rgb(255 255 255 / .06);
+    --close: #bbb;
+    --purple-bg: #3d2a4f;
+    --purple-line: #6c4b8f;
     --series-1: #3987e5;
     --series-2: #c98500;
     --series-3: #9085e9;
@@ -73,6 +80,9 @@ body {
 /* who is signed in, and Sign out */
 .side-user { display: flex; align-items: center; gap: 10px; margin-top: auto; padding: 10px 4px 0; border-top: 1px solid var(--line); }
 .side-avatar { display: grid; flex: none; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.side-theme { margin-top: auto; padding-bottom: 10px; }
+.side-theme .field { width: 100%; padding: 6px 8px; font-size: 13px; }
+.side-theme + .side-user { margin-top: 0; }
 .side-who { flex: 1; min-width: 0; }
 .side-user b { display: block; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .side-user small { color: var(--muted); font-size: 11px; }
@@ -87,6 +97,9 @@ body {
     .side-brand { padding: 0; }
     .side-user { margin: 0 0 0 auto; padding: 0; border: 0; }
     .side-who { display: none; }
+    .side-theme { margin: 0 8px 0 auto; padding: 0; }
+    .side-theme .field { width: auto; }
+    .side-theme + .side-user { margin-left: 0; }
     .side-nav { position: fixed; right: 0; bottom: 0; left: 0; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); background: var(--sunken); border-top: 1px solid var(--line); }
     .side-list { grid-auto-columns: 1fr; grid-auto-flow: column; }
     .side-list a { flex-direction: column; justify-content: center; gap: 3px; padding: 6px 2px; font-size: 11px; }

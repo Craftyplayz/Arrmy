@@ -15,10 +15,10 @@
 .btn:hover { background: var(--btn2-hover); text-decoration: none; }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .5; cursor: default; transform: none; }
-.btn.primary { background: var(--btn); border-color: var(--btn-line); color: #fff; }
+.btn.primary { background: var(--btn); border-color: var(--btn-line); color: var(--on-btn); }
 .btn.primary:hover { background: var(--btn-hover); }
 .page a.btn { color: var(--text); text-decoration: none; }
-.page a.btn.primary { color: #fff; }
+.page a.btn.primary { color: var(--on-btn); }
 .btn.small { padding: 5px 10px; font-size: 13px; }
 
 /* ---------- cards and layout ---------- */
@@ -40,7 +40,7 @@
 .badge { padding: 2px 9px; background: var(--btn2); border: 1px solid var(--line-strong); border-radius: 999px; font-size: 12px; }
 .badge.g { background: var(--ok-bg); border-color: var(--ok-line); }
 .badge.r { background: var(--danger-bg); border-color: var(--danger-line); }
-.badge.p { background: #3d2a4f; border-color: #6c4b8f; }
+.badge.p { background: var(--purple-bg); border-color: var(--purple-line); }
 .badge.b { background: var(--info-bg); border-color: var(--info-line); }
 .pill { padding: 1px 7px; background: var(--btn2); border-radius: 6px; font-size: 12px; }
 
@@ -74,7 +74,7 @@
 .bar {
     position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
     margin-bottom: 16px; padding: 10px 0; border-bottom: 1px solid var(--line);
-    background: rgb(30 35 41 / .94); backdrop-filter: blur(6px);
+    background: var(--bar-bg); backdrop-filter: blur(6px);
 }
 .field {
     min-width: 160px; padding: 8px 12px; background: var(--sunken); border: 1px solid var(--line-strong); border-radius: var(--radius);
@@ -124,12 +124,12 @@ textarea.field { min-height: 96px; line-height: 1.5; resize: vertical; }
     color: var(--text); transform: translateX(105%); transition: transform var(--base) ease-out;
 }
 .drawer.open { transform: none; }
-.drawer .close { position: absolute; top: 10px; right: 12px; padding: 0 6px; background: none; border: 0; color: #bbb; font-size: 26px; cursor: pointer; }
+.drawer .close { position: absolute; top: 10px; right: 12px; padding: 0 6px; background: none; border: 0; color: var(--close); font-size: 26px; cursor: pointer; }
 
 /* ---------- dialog (use the native <dialog> element) ---------- */
 dialog.dlg {
     width: min(520px, 92vw); margin: auto; padding: 20px;
-    background: #222; border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
+    background: var(--dlg-bg); border: 1px solid var(--line-strong); border-radius: var(--radius-lg);
     color: var(--text); font: 15px/1.45 var(--font);
 }
 dialog.dlg::backdrop { background: rgba(0, 0, 0, .65); }
