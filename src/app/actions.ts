@@ -3,20 +3,17 @@
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, retryRelease, type Media } from '@/lib/arr'
-import { cleanEdition, editionId, editionOf } from '@/lib/bookrules'
-import { addAudiobook, audiobookTorrents, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
-import { addEdition, removeEdition } from '@/lib/editions'
+import { addSeries, arr, removeMovie, removeSeasons, retryRelease } from '@/lib/arr'
+import { editionOf } from '@/lib/bookrules'
+import { audiobookTorrents, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
+import { removeEdition } from '@/lib/editions'
 import {
   addLog,
-  addRequest,
   deleteRequest,
   getLimits,
   getRequest,
-  hasRequest,
   logItem,
   otherRequests,
-  requestsFor,
   seasonsOf,
   setSearchPending,
   setSeasons,
@@ -28,6 +25,7 @@ import { embed } from '@/lib/embeds'
 import { applyLimits, showLimitProblem } from '@/lib/limits'
 import { tellRequest } from '@/lib/notify'
 import { createPin } from '@/lib/plex'
+import { createAudiobookRequest, createMovieRequest, createTvRequest } from '@/lib/requests'
 import { logEpisodeSearch, logRetry, searchMovie } from '@/lib/requestlog'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
@@ -126,15 +124,7 @@ export async function signOut() {
 }
 
 export async function requestMovie(form: FormData) {
-  const user = await requireUser()
-  const tmdbId = positiveInt(form.get('id'))
-  const { movie, search } = await addMovie(tmdbId)
-  if (!hasRequest(user.id, 'movie', tmdbId)) {
-    addRequest({ userId: user.id, type: 'movie', externalId: tmdbId, title: movie.title, year: movie.year, poster: posterOf(movie) })
-    const item = { media_type: 'movie' as const, external_id: tmdbId, title: movie.title, year: movie.year ?? null, poster: posterOf(movie) ?? null }
-    tellRequest(item, 'info', `Requested by **${user.username}**.`)
-  }
-  if (search) logged(searchMovie(search)) // in the background: it waits on every indexer
+  await createMovieRequest(await requireUser(), positiveInt(form.get('id')))
   revalidatePath('/')
 }
 
@@ -178,20 +168,8 @@ const bookId = (value: FormDataEntryValue | null) => {
   return id
 }
 
-/** The book, or with an Edition (a narrator, or Full Cast) that edition, which Arrmy finds itself (see editions.ts). */
 export async function requestAudiobook(form: FormData) {
-  const user = await requireUser()
-  const edition = cleanEdition(String(form.get('edition') ?? ''))
-  const book = bookId(form.get('id'))
-  if (edition && !/^OL\d+W$/.test(book)) throw new Error('Editions need an OpenLibrary book')
-  const id = edition ? editionId(book, edition) : book
-  const found = edition ? { year: undefined, ...(await addEdition(id)) } : await addAudiobook(id)
-  const title = edition ? `${found.title} (${edition})` : found.title
-  if (!hasRequest(user.id, 'audiobook', id)) {
-    addRequest({ userId: user.id, type: 'audiobook', externalId: id, title, year: found.year, poster: found.poster })
-    const item = { media_type: 'audiobook' as const, external_id: id, title, year: found.year ?? null, poster: found.poster ?? null }
-    tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Author', found.author]])
-  }
+  await createAudiobookRequest(await requireUser(), bookId(form.get('id')), String(form.get('edition') ?? ''))
   revalidatePath('/')
 }
 
@@ -226,25 +204,7 @@ export async function editSeasons(form: FormData) {
 }
 
 export async function requestTv(form: FormData) {
-  const user = await requireUser()
-  const tvdbId = positiveInt(form.get('id'))
-  const seasons = form.getAll('season').map(positiveInt)
-  if (!seasons.length) return
-  const problem = await showLimitProblem(tvdbId, union(requestsFor('tv', tvdbId).flatMap(seasonsOf), seasons))
-  if (problem) {
-    const [show] = await arr<Media[]>('sonarr', `/series/lookup?term=tvdb:${tvdbId}`).catch(() => [])
-    tellRequest(
-      { media_type: 'tv', external_id: tvdbId, title: show?.title ?? `TVDB ${tvdbId}`, year: show?.year ?? null, poster: (show && posterOf(show)) ?? null },
-      'danger',
-      `**${user.username}**'s Request was refused. ${problem}`,
-      [['Seasons', seasons.join(', ')]],
-    )
-    redirect(`/?type=${form.get('type') === 'all' ? 'all' : 'tv'}&q=${encodeURIComponent(String(form.get('q') ?? ''))}&notice=${encodeURIComponent(problem)}`)
-  }
-  const show = await addSeries(tvdbId, seasons)
-  addRequest({ userId: user.id, type: 'tv', externalId: tvdbId, title: show.title, year: show.year, poster: posterOf(show), seasons })
-  const slug = (show as { titleSlug?: string }).titleSlug
-  const item = { media_type: 'tv' as const, external_id: tvdbId, title: show.title, year: show.year ?? null, poster: posterOf(show) ?? null, slug }
-  tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Seasons', seasons.join(', ')]])
+  const problem = await createTvRequest(await requireUser(), positiveInt(form.get('id')), form.getAll('season').map(positiveInt))
+  if (problem) redirect(`/?type=${form.get('type') === 'all' ? 'all' : 'tv'}&q=${encodeURIComponent(String(form.get('q') ?? ''))}&notice=${encodeURIComponent(problem)}`)
   revalidatePath('/')
 }
