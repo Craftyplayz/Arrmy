@@ -50,6 +50,19 @@ export async function plexAccount(token: string) {
   return { id: user.id, username: user.username || user.title, access, avatar: user.thumb }
 }
 
+export type PlexItem = { ratingKey: string; Guid?: { id: string }[] }
+
+/** Every movie or show in Plex, with the ids it matched (tmdb://603, tvdb://81189). */
+export async function plexLibrary(token: string, type: 'movie' | 'show') {
+  const sections = (await plex<{ MediaContainer: { Directory?: { key: string; type: string }[] } }>(`${PLEX_URL}/library/sections`, token)).MediaContainer.Directory ?? []
+  const lists = await Promise.all(
+    sections
+      .filter((s) => s.type === type)
+      .map(async (s) => (await plex<{ MediaContainer: { Metadata?: PlexItem[] } }>(`${PLEX_URL}/library/sections/${s.key}/all?includeGuids=1`, token)).MediaContainer.Metadata ?? []),
+  )
+  return lists.flat()
+}
+
 const LIBRARIES = [
   { name: 'Movies', type: 'movie', agent: 'tv.plex.agents.movie', scanner: 'Plex Movie', location: MOVIES_ROOT },
   { name: 'TV Shows', type: 'show', agent: 'tv.plex.agents.series', scanner: 'Plex TV Series', location: TV_ROOT },

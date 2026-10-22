@@ -12,6 +12,7 @@ export const CHANNELS = {
   system: 'Apps and the VPN going down or coming back, health warnings, disk space and backups.',
   updates: 'Arrmy commits and releases, and new versions of every app. @mentions the Admin.',
   activity: 'Sign-ins to Arrmy, and who started watching or listening.',
+  watched: 'Every Sunday evening: who watched what in Plex that week, from Tautulli.',
 } as const
 export type Channel = keyof typeof CHANNELS
 

@@ -15,6 +15,8 @@ import { bookArt, downloadMeta, plexArt } from './media'
 import { plex, PLEX_URL } from './plex'
 import { DEAD_DETAIL } from './problems'
 import { qbit, torrents } from './qbit'
+import { history, tautulli } from './tautulli'
+import { summaryDue, weekSummary } from './watchrules'
 
 /** What a check saw last time (undefined the first time), remembering what it sees now. */
 function since<T>(key: string, now: T): T | undefined {
@@ -208,6 +210,7 @@ const APPS: Record<string, () => Promise<{ version?: string; started?: string }>
   Audiobookshelf: async () => ({ version: (await json<{ serverVersion: string }>(`${ABS_URL}/status`)).serverVersion }),
   Plex: async () => ({ version: (await plex<{ MediaContainer: { version: string } }>(`${PLEX_URL}/identity`)).MediaContainer.version }),
   FlareSolverr: async () => ({ version: (await json<{ version: string }>(FLARESOLVERR_URL)).version }),
+  Tautulli: async () => ({ version: (await tautulli<{ tautulli_version: string }>('get_tautulli_info')).tautulli_version }),
 }
 export type AppState = { fails: number; down: boolean; version?: string; started?: string }
 
@@ -466,6 +469,15 @@ async function accessChanges() {
   }
 }
 
+// #watched: once a week, Sunday from 18:00 in the server's time zone (TZ), who watched what in Plex in the last 7 days.
+async function watchedWeek() {
+  const week = summaryDue(new Date(), getSetting<string>('bot:watchedWeek'))
+  if (!week) return
+  const lines = weekSummary(await history(), Date.now() - 7 * 24 * 60 * 60 * 1000)
+  setSetting('bot:watchedWeek', week)
+  announce('watched', embed({ colour: 'info', ...appCard('Tautulli'), title: 'Watched this week', description: lines.join('\n') || 'Nothing was played in Plex this week.' }))
+}
+
 // #updates
 const REPO = 'Craftyplayz/Arrmy'
 const github = <T>(path: string) => json<T>(`https://api.github.com${path}`, { Accept: 'application/vnd.github+json', 'User-Agent': 'Arrmy' })
@@ -551,6 +563,7 @@ const RELEASE_PAGES: Record<string, Releases> = {
   Prowlarr: onGitHub('Prowlarr/Prowlarr'),
   Audiobookshelf: onGitHub('advplyr/audiobookshelf'),
   FlareSolverr: onGitHub('FlareSolverr/FlareSolverr'),
+  Tautulli: onGitHub('Tautulli/Tautulli'),
   qBittorrent: {
     // Tags without GitHub releases; each tag's Changelog file starts with its own version.
     changelog: 'https://www.qbittorrent.org/news',
@@ -621,6 +634,7 @@ const RELEASES: Record<string, () => Promise<{ version: string; url: string }>> 
   },
   Audiobookshelf: () => latest('advplyr/audiobookshelf'),
   FlareSolverr: () => latest('FlareSolverr/FlareSolverr'),
+  Tautulli: () => latest('Tautulli/Tautulli'),
   gluetun: () => latest('qdm12/gluetun'),
   cloudflared: () => latest('cloudflare/cloudflared'),
   Plex: async () => {
@@ -676,6 +690,7 @@ export const checks = {
   accessChanges,
   arrmyChanges,
   appUpdates,
+  watchedWeek,
 }
 
 export function startBot() {
@@ -697,5 +712,6 @@ export function startBot() {
   every(5, 'settings', settingsChanges)
   every(10, 'access', accessChanges)
   every(15, 'Arrmy on GitHub', arrmyChanges)
+  every(15, 'watched this week', watchedWeek)
   every(360, 'app releases', appUpdates, 3) // after `apps` has read what the server runs
 }

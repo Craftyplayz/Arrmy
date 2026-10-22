@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { audiobookBayToken, lazyLibrarianKey } from '../src/lib/token.ts'
+import { audiobookBayToken, lazyLibrarianKey, tautulliKey } from '../src/lib/token.ts'
 
 const run = (data: string, config: string) =>
   spawnSync(process.execPath, ['scripts/init.mjs', data, config], {
@@ -29,6 +29,24 @@ test('init gives LazyLibrarian the API key Arrmy derives, and never overwrites i
     writeFileSync(join(config, 'lazylibrarian', 'config.ini'), '[API]\napi_key = changed-by-user\n')
     assert.equal(run(data, config).status, 0)
     assert.equal(readFileSync(join(config, 'lazylibrarian', 'config.ini'), 'utf8'), '[API]\napi_key = changed-by-user\n')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('init gives Tautulli the API key Arrmy derives and Plex\'s address, once', () => {
+  const root = mkdtempSync(join(tmpdir(), 'arrmy-init-'))
+  try {
+    const [data, config] = [join(root, 'data'), join(root, 'config')]
+    assert.equal(run(data, config).status, 0)
+    const ini = readFileSync(join(config, 'tautulli', 'config.ini'), 'utf8')
+    const key = tautulliKey('a-test-secret-of-32-characters!!')
+    assert.equal(key.length, 32, 'Tautulli refuses any other length')
+    for (const line of [`api_key = ${key}`, 'api_enabled = 1', 'pms_ip = plex', 'pms_port = 32400']) assert.match(ini, new RegExp(`^${line}$`, 'm'), line)
+
+    writeFileSync(join(config, 'tautulli', 'config.ini'), '[General]\napi_key = set-by-tautulli\n')
+    assert.equal(run(data, config).status, 0)
+    assert.equal(readFileSync(join(config, 'tautulli', 'config.ini'), 'utf8'), '[General]\napi_key = set-by-tautulli\n')
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

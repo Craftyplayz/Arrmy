@@ -1,12 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Fragment } from 'react'
 import { adminOverview, liveDownloads, type LiveDownload, type Problem } from '@/lib/admin'
 import { requestDetails } from '@/lib/arr'
 import { listRequests } from '@/lib/db'
 import type { Stuck } from '@/lib/problems'
 import { requireUser } from '@/lib/session'
 import { stuckRequests } from '@/lib/stuck'
+import { watchOverview } from '@/lib/tautulli'
 import { fixProblem } from '../actions'
 import { AutoRefresh } from '../auto-refresh'
 import { Downloads } from '../downloads'
@@ -41,7 +43,13 @@ export default async function AdminPage() {
   }
 
   const requests = listRequests()
-  const details = await requestDetails(requests).catch(() => undefined)
+  const [details, watch] = await Promise.all([
+    requestDetails(requests).catch(() => undefined),
+    watchOverview(requests).catch((e) => {
+      console.error(e) // Tautulli down: its panels say so
+      return undefined
+    }),
+  ])
   const people = new Map<string, { count: number; bytes: number }>()
   requests.forEach((r, i) => {
     const p = people.get(r.username) ?? { count: 0, bytes: 0 }
@@ -115,6 +123,29 @@ export default async function AdminPage() {
             </h2>
             <Downloads initial={downloads} />
           </section>
+
+          {watch && watch.unwatched.length > 0 && (
+            <section className="ar-panel" id="unwatched">
+              <h2>
+                Unwatched <span className="n">{num(watch.unwatched.length)}</span>
+              </h2>
+              <p className="ar-sub">Available for 8 weeks or more and nobody has played them in Plex. Remove one from its page if it isn&apos;t wanted.</p>
+              <div className="rows">
+                {watch.unwatched.map(({ r, since }) => (
+                  <div className="rowi" key={r.id}>
+                    <div className="grow">
+                      <Link href={`/requests/${r.id}`}>
+                        <b>{r.title}</b>
+                      </Link>
+                      <span className="ar-sub">
+                        Available since {new Date(since).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · Requested by {r.username}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <div>
@@ -150,6 +181,45 @@ export default async function AdminPage() {
               </div>
             </section>
           )}
+
+          <section className="ar-panel">
+            <h2>Watched in the last 30 days</h2>
+            {!watch ? (
+              <p className="muted">Tautulli isn&apos;t responding. Check its container in Portainer.</p>
+            ) : watch.top.people.length === 0 ? (
+              <p className="muted">Nothing played in Plex yet. If Tautulli is new, open it (README → On the home network) and sign in with Plex once.</p>
+            ) : (
+              (
+                [
+                  ['Movies', watch.top.movies],
+                  ['Shows', watch.top.shows],
+                  ['People', watch.top.people],
+                ] as const
+              )
+                .filter(([, rows]) => rows.length > 0)
+                .map(([label, rows]) => (
+                  <Fragment key={label}>
+                    <h3 className="ar-h3">{label}</h3>
+                    <div className="ar-ranks">
+                      {rows.map(([name, n], i) => (
+                        <div className="ar-rank" key={name}>
+                          <span className="ar-rank-n">{i + 1}</span>
+                          <span className="grow">
+                            <b>{name}</b>
+                            <span className="ar-rank-bar">
+                              <i style={{ width: `${Math.round((n / rows[0][1]) * 100)}%` }} />
+                            </span>
+                          </span>
+                          <span className="ar-rank-val">
+                            {num(n)} {n === 1 ? 'play' : 'plays'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </Fragment>
+                ))
+            )}
+          </section>
 
           <section className="ar-panel">
             <h2>Layouts</h2>

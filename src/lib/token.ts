@@ -35,3 +35,6 @@ export const audiobookBayToken = (secret: string) => sign(secret, 'audiobookbay'
 
 /** LazyLibrarian's API key, derived so nobody has to set one. scripts/init.mjs writes the same value into its config. */
 export const lazyLibrarianKey = (secret: string) => createHmac('sha256', secret).update('lazylibrarian').digest('hex').slice(0, 32)
+
+/** Tautulli's API key, derived the same way; scripts/init.mjs writes it into Tautulli's config. Tautulli wants 32 characters. */
+export const tautulliKey = (secret: string) => createHmac('sha256', secret).update('tautulli').digest('hex').slice(0, 32)

@@ -10,6 +10,8 @@ import { editionSearch } from '@/lib/editions'
 import { getRequest, logFor, logItem, seasonsOf, type RequestRow } from '@/lib/db'
 import { buildSteps, logText, releaseText, stats, took, utc, type Grabbed } from '@/lib/logrules'
 import { torrentFile } from '@/lib/requestlog'
+import { requestPlays } from '@/lib/tautulli'
+import { episodeCode } from '@/lib/watchrules'
 import { requireUser } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
 import { duration, size } from '@/lib/botrules'
@@ -50,14 +52,26 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
     </a>
   )
 
-  const [poster, info, [details]] = await Promise.all([
+  const [poster, info, [details], allPlays] = await Promise.all([
     betterPoster(request),
     lookupTitle(request.media_type, request.external_id),
     requestDetails([request]).catch((e) => {
       console.error(e)
       return []
     }),
+    // Plex only: audiobooks play in Audiobookshelf. undefined: Tautulli isn't responding.
+    request.media_type === 'audiobook'
+      ? []
+      : requestPlays([request]).then(
+          ([p]) => p,
+          (e) => {
+            console.error(e)
+            return undefined
+          },
+        ),
   ])
+  // Requesters see only their own plays
+  const plays = admin ? allPlays : allPlays?.filter((p) => p.user_id === user.id)
   const dl = stats(events)
   const summary: [string, string][] = [
     ['Requested by', request.username],
@@ -100,6 +114,31 @@ export default async function RequestLogPage({ params }: { params: Promise<{ id:
             <section className="ar-panel">
               <h2>Episodes</h2>
               <EpisodeFiles id={request.id} />
+            </section>
+          )}
+          {request.media_type !== 'audiobook' && (
+            <section className="ar-panel">
+              <h2>
+                Watched {plays && <span className="n">{plays.length} {plays.length === 1 ? 'play' : 'plays'}</span>}
+              </h2>
+              {!plays ? (
+                <p className="muted">Tautulli isn&apos;t responding, so who watched it can&apos;t be shown.</p>
+              ) : plays.length === 0 ? (
+                <p className="muted">{admin ? 'Nobody has watched it yet.' : "You haven't watched it yet."}</p>
+              ) : (
+                <div className="rows">
+                  {plays.map((p) => (
+                    <div className="rowi" key={`${p.date}-${p.user_id}-${p.rating_key}`}>
+                      <div className="grow">
+                        <b>{admin ? p.friendly_name : 'You'}</b> {p.media_type === 'episode' && `watched ${episodeCode(p)} · ${p.title}`}
+                        <small className="ar-sub">
+                          {clock(p.date * 1000)} · {p.percent_complete}%
+                        </small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           )}
           {details && (

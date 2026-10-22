@@ -1,5 +1,5 @@
 // One-shot setup the Stack needs before qBittorrent and Arrmy start (the `init` service, run as root):
-// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login and LazyLibrarian's settings. Safe to re-run;
+// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login, and LazyLibrarian's and Tautulli's settings. Safe to re-run;
 // never overwrites.
 import { createHmac, pbkdf2Sync, randomBytes } from 'node:crypto'
 import { chownSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -23,7 +23,7 @@ for (const dir of ['torrents/movies', 'torrents/tv', 'torrents/books', 'media/mo
   own(`${data}/${parent}`)
   own(`${data}/${dir}`)
 }
-for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian']) {
+for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian', 'tautulli']) {
   mkdirSync(`${config}/${dir}`, { recursive: true })
   own(`${config}/${dir}`)
 }
@@ -99,4 +99,20 @@ if (!existsSync(books)) {
   writeFileSync(books, `${lines.join('\n')}\n`)
   own(books)
 }
-console.log('[init] folders, qBittorrent login and LazyLibrarian settings ready')
+const watch = `${config}/tautulli/config.ini`
+if (!existsSync(watch)) {
+  // Its API key is the one Arrmy derives (src/lib/token.ts tautulliKey). Tautulli keeps a key it finds, and its
+  // first-run wizard only asks for the Plex sign-in, with Plex's address already filled in.
+  const lines = [
+    '[General]',
+    'api_enabled = 1',
+    `api_key = ${createHmac('sha256', SESSION_SECRET).update('tautulli').digest('hex').slice(0, 32)}`,
+    '',
+    '[PMS]',
+    'pms_ip = plex',
+    'pms_port = 32400',
+  ]
+  writeFileSync(watch, `${lines.join('\n')}\n`)
+  own(watch)
+}
+console.log('[init] folders, qBittorrent login, LazyLibrarian and Tautulli settings ready')

@@ -11,7 +11,7 @@ import { addLog, getSetting, logItem, recentLog, requestsFor, waitingOfType } fr
 import { announce } from './discord'
 import { embed } from './embeds'
 import { whyNothing, type Grabbed, type Imported, type IndexerHealth, type Note, type Release, type Searched } from './logrules'
-import { plex, PLEX_URL } from './plex'
+import { plex, plexLibrary, PLEX_URL, type PlexItem } from './plex'
 import { qbit, torrents } from './qbit'
 
 type RadarrRelease = {
@@ -210,9 +210,6 @@ export async function logEpisodeSearch(episodeIds: number[], by: string) {
   for (const [tvdbId, seasons] of shows) addLog(logItem('tv', tvdbId), 'note', { text: 'Search again', by, seasons: [...seasons] } satisfies Note)
 }
 
-type PlexItem = { ratingKey: string; Guid?: { id: string }[] }
-type Section = { key: string; type: string }
-
 /** Imports not yet in Plex: logged as playable once Plex lists the movie, or every season of the show. */
 async function followImports() {
   const token = getSetting<string>('plexToken') // kept when the Admin signs in
@@ -220,16 +217,7 @@ async function followImports() {
   const shown = new Set(recentLog('playable', 7).map((e) => `${e.item}:${JSON.parse(e.detail).seasons ?? ''}`))
   const pending = recentLog('imported', 7).filter((e) => !e.item.startsWith('audiobook:') && !shown.has(`${e.item}:${JSON.parse(e.detail).seasons ?? ''}`))
   if (!pending.length) return
-  const sections = (await plex<{ MediaContainer: { Directory?: Section[] } }>(`${PLEX_URL}/library/sections`, token)).MediaContainer.Directory ?? []
-  const all = async (type: string) =>
-    (
-      await Promise.all(
-        sections
-          .filter((s) => s.type === type)
-          .map(async (s) => (await plex<{ MediaContainer: { Metadata?: PlexItem[] } }>(`${PLEX_URL}/library/sections/${s.key}/all?includeGuids=1`, token)).MediaContainer.Metadata ?? []),
-      )
-    ).flat()
-  const [movies, shows] = await Promise.all([all('movie'), all('show')])
+  const [movies, shows] = await Promise.all([plexLibrary(token, 'movie'), plexLibrary(token, 'show')])
   const find = (items: PlexItem[], guid: string) => items.find((i) => i.Guid?.some((g) => g.id === guid))
 
   const logged = new Set<string>()

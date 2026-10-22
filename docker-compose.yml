@@ -170,6 +170,17 @@ services:
       - ${LL_PORT:-7659}:5299
     depends_on: *after-init
 
+  # Plex watch history: who watched what, for the Request page, the Admin view and #watched. init presets its API key
+  # and Plex's address; sign in with Plex once in its own page to finish setting it up.
+  tautulli:
+    <<: *linuxserver
+    image: lscr.io/linuxserver/tautulli:latest
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/tautulli:/config
+    ports:
+      - ${TAUTULLI_PORT:-7660}:8181
+    depends_on: *after-init
+
   # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps
   # listening progress and stats when the files move on the server. Follows latest: it's public, so it
   # needs security fixes. ABS upgrades its database on start (one-way); the nightly backup holds the old one.
@@ -207,7 +218,8 @@ services:
             --exclude='*/Plex Media Server/Cache' --exclude='*/Plex Media Server/Media' \
             --exclude='*/Plex Media Server/Metadata' --exclude='*/Plex Media Server/Logs' \
             --exclude='audiobookshelf/metadata/cache' --exclude='audiobookshelf/metadata/logs' \
-            --exclude='audiobookshelf/metadata/backups' --exclude='audiobookshelf/metadata/streams' .; then
+            --exclude='audiobookshelf/metadata/backups' --exclude='audiobookshelf/metadata/streams' \
+            --exclude='tautulli/cache' --exclude='tautulli/logs' --exclude='tautulli/backups' .; then
           mv "$$name.part" "$$name" && echo "[backup] saved $$name ($$(du -h "$$name" | cut -f1))"
         else
           rm -f "$$name.part" && echo "[backup] FAILED, kept the older backups"
