@@ -185,6 +185,16 @@ Chosen 2026-10-21. A Request (or a person's default) names a preferred resolutio
 - A resolution blocklist sits next to it: resolutions or release groups never to grab, per Request or globally.
 - To decide: whether the ladder is per Request or a per-person default; how it maps onto Radarr and Sonarr quality profiles; TV, which waits on the season pack question above.
 
+### Episode Requests
+
+Asked for 2026-10-22. Request chosen episodes of a show, not only whole seasons: a single episode someone missed, or the last few of a season.
+
+- In the TV drawer, each season opens to its episodes with a checkbox each; ticking the season still requests all of it.
+- Edit seasons becomes Edit episodes, with the same rule as now: removed episodes are deleted unless someone else requested them.
+- The Request page's Episodes panel, the poster's %, Available and Remove cover only the requested episodes.
+- How: Sonarr already monitors episode by episode (`PUT /episode/monitor`), then searches just those (`EpisodeSearch`). The Size Limit per hour of episode already applies to single episodes.
+- To decide: a Request today is a show with seasons, so whether chosen episodes are stored on the same Request or as a Request each. What happens when only a season pack exists for a wanted episode (download the pack and keep only that file, as Editions do for audiobook packs, or wait). Whether episodes not yet aired can be chosen. Ties into the season pack question under Request Log.
+
 ### Requester features
 
 From the Seerr and Requestarr comparison, 2026-10-21. In this order:
