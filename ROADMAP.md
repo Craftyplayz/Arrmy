@@ -36,6 +36,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Search: All | All, the default tab, searches movies, TV shows and audiobooks at once. Each result carries a Media Type tag, the searches' best hits take turns, and a search that is down only drops its own results. Movies, TV Shows and Audiobooks stay for finer control. Live since v1.1.0-rc.40. | Local (with Radarr and Sonarr down). **Not yet seen live:** all three answering. |
 | Instant pages | The sidebar's pages are fetched in the background as soon as any page opens, and a page seen in the last 30 seconds opens from memory, so clicks show the page at once instead of Loading. Pages with live numbers refresh themselves straight after. Live since v1.1.0-rc.41. | Local (a production build: 40–240 ms a click) |
 | Layouts | Fifteen static mockups of other ways Arrmy could look, on made-up data, each with Home, Requests, Admin and Settings tabs and phone pictures. Admin → Layouts. Kept for a future redesign or Themes. | Live |
+| Install as an app | Arrmy installs to a phone's home screen (Chrome: Install app; iPhone: Share, Add to Home Screen) with its logo, opens full screen without the browser bar, and keeps the top bar clear of the notch. The icons are drawn in code from the logo. No offline mode and no notifications yet (see Phone app). | Local (a production build serves the manifest and icons as the right types). **Not yet tried on a real phone.** |
 
 ### Audiobooks
 
@@ -257,6 +258,9 @@ Also possible: English-only audio on or off, backup status and last run, and the
 ### Phone app
 
 Chosen 2026-10-21. An installable app for Requesters and the Admin: first as a PWA of the existing site (home-screen icon, full screen, push notifications for Available and Problems), a native app only if the PWA falls short. Needs the Requester features above for push to be worth having.
+
+- **Built:** the install part (manifest, icons, iOS home-screen meta, safe-area insets on the phone top bar). No service worker, since Chrome installs without one.
+- **To come:** push notifications (needs a service worker for them, and a notifications permission prompt in Settings).
 
 ### Themes
 

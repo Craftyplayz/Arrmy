@@ -10,8 +10,10 @@ import './pieces.css'
 export const metadata: Metadata = {
   title: { default: 'Arrmy', template: '%s · Arrmy' },
   description: 'Request movies, TV shows and audiobooks for the family Plex server',
+  appleWebApp: { capable: true, title: 'Arrmy', statusBarStyle: 'black-translucent' },
+  icons: { apple: '/pwa-icon/180' },
 }
-export const viewport: Viewport = { themeColor: '#171b20', colorScheme: 'dark' }
+export const viewport: Viewport = { themeColor: '#171b20', colorScheme: 'dark', viewportFit: 'cover' }
 
 /** The sidebar links: the only list of them. `adminOnly` marks Admin-only pages; `icon` is a 24x24 stroke path. */
 const NAV: [href: string, label: string, adminOnly: boolean, icon: string][] = [

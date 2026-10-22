@@ -21,12 +21,12 @@ function distance(px: number, py: number, [ax, ay]: number[], [bx, by]: number[]
   return Math.hypot(px - ax - t * dx, py - ay - t * dy)
 }
 
-/** The logo as a `size` px square PNG on --bg, the 128 square at 80% of it, as the bot's avatar. */
-export function drawLogo(size = 512) {
+/** The logo as a `size` px square PNG on `bg` (Discord's grey unless given), the 128 square at 80% of it, as the bot's avatar. */
+export function drawLogo(size = 512, bg = BG) {
   const rgba = new Uint8Array(size * size * 4)
   const scale = (size * 0.8) / 128
   const colourAt = (x: number, y: number) =>
-    CHEVRONS.find(({ points: [a, b, c] }) => distance(x, y, a, b) <= HALF_STROKE || distance(x, y, b, c) <= HALF_STROKE)?.colour ?? BG
+    CHEVRONS.find(({ points: [a, b, c] }) => distance(x, y, a, b) <= HALF_STROKE || distance(x, y, b, c) <= HALF_STROKE)?.colour ?? bg
   for (let y = 0; y < size; y++)
     for (let x = 0; x < size; x++) {
       // 4×4 samples per pixel, so the edges are smooth
