@@ -41,7 +41,7 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-rank { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 10px 6px 6px; background: var(--card2); border-radius: var(--radius); }
 .ar-rank-n { color: var(--muted); font-size: 13px; font-weight: 700; text-align: center; }
 .ar-rank b { display: block; overflow: hidden; font-size: 14px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.ar-rank-bar { display: block; height: 6px; margin-top: 6px; overflow: hidden; background: rgb(255 255 255 / .06); border-radius: 999px; }
+.ar-rank-bar { display: block; height: 6px; margin-top: 6px; overflow: hidden; background: var(--track); border-radius: 999px; }
 .ar-rank-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--btn), var(--accent)); border-radius: 999px; }
 .ar-rank-val { font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
 .ar-rank-val small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
@@ -108,7 +108,7 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 /* which search found it: one tint per Media Type */
 .ar-type { padding: 1px 8px; background: var(--btn2); border: 1px solid var(--line-strong); border-radius: 999px; color: var(--text); font-size: 12px; font-weight: 600; }
 .ar-type-movie { background: var(--info-bg); border-color: var(--info-line); }
-.ar-type-tv { background: #3d2a4f; border-color: #6c4b8f; }
+.ar-type-tv { background: var(--purple-bg); border-color: var(--purple-line); }
 .ar-type-audiobook { background: var(--gold-bg); border-color: var(--gold-line); }
 .ar-result-over { display: -webkit-box; margin: 6px 0 0; overflow: hidden; color: var(--text); font-size: 15px; opacity: .8; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .ar-result-act { display: flex; flex: none; flex-direction: column; align-items: flex-end; align-self: center; gap: 8px; }

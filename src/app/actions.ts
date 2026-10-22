@@ -29,6 +29,7 @@ import { createAudiobookRequest, createMovieRequest, createTvRequest } from '@/l
 import { logEpisodeSearch, logRetry, searchMovie } from '@/lib/requestlog'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
+import { themeOf } from '@/lib/themes'
 
 const positiveInt = (value: FormDataEntryValue | null) => {
   const n = Number(value)
@@ -116,6 +117,14 @@ export async function signIn() {
   const { pinId, authUrl } = await createPin(`${proto}://${h.get('x-forwarded-host') ?? h.get('host')}/api/auth/plex/callback`)
   ;(await cookies()).set(PIN_COOKIE, String(pinId), { httpOnly: true, sameSite: 'lax', maxAge: 600, path: '/' })
   redirect(authUrl)
+}
+
+export async function setTheme(form: FormData) {
+  const user = await requireUser()
+  const theme = themeOf(form.get('theme'))
+  if (!theme) return
+  setSetting(`theme:${user.id}`, theme.id)
+  revalidatePath('/', 'layout')
 }
 
 export async function signOut() {

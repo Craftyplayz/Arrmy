@@ -1,0 +1,55 @@
+/* Colour themes: overrides of the :root tokens in globals.css, picked per person (see src/lib/themes.ts).
+   Palettes come from the Layouts mockups. Body and muted text are 4.5:1 or better on every surface they sit on
+   (test/themes.test.ts checks it). The default theme is :root itself. */
+
+[data-theme="light"] {
+    color-scheme: light;
+    --bg: #faf7f2; --card: #ffffff; --card2: #f3efe8; --sunken: #efe9df;
+    --line: #e0d9cc; --line-strong: #bfb6a6; --text: #1f1d1a; --muted: #5f5953;
+    --accent: #1d5c8f; --accent-soft: #e3eef7; --btn: #1d5c8f; --btn-line: #174b75; --btn-hover: #174b75;
+    --btn2: #ece6dc; --btn2-hover: #e0d9cc; --link: #1d5c8f; --highlight: #8a5a00;
+    --danger-bg: #fbe3e1; --danger-line: #c0392b; --info-bg: #e3eef7; --info-line: #6f9cc4;
+    --ok-bg: #e2f1de; --ok-line: #4a8a3a; --gold-bg: #f8ecc8; --gold-line: #b08a1e;
+    --series-1: #1d6fc4; --series-2: #a35f00; --series-3: #6b5bd1;
+    --lift: 0 12px 28px rgb(60 50 30 / .18);
+    --bar-bg: rgb(250 247 242 / .94); --dlg-bg: #ffffff; --track: rgb(0 0 0 / .08); --close: #5f5953;
+    --purple-bg: #eadff5; --purple-line: #9b78c4;
+}
+
+[data-theme="paper"] {
+    color-scheme: light;
+    --bg: #f6f1e7; --card: #fbf8f1; --card2: #efe8d9; --sunken: #ebe3d2;
+    --line: #d8cfbc; --line-strong: #8a7f6a; --text: #1d1a15; --muted: #5e564a;
+    --accent: #8b1e1e; --accent-soft: #f2dbd5; --btn: #1d1a15; --btn-line: #1d1a15; --btn-hover: #3a342b;
+    --btn2: #e6dec9; --btn2-hover: #d9cfb6; --link: #8b1e1e; --highlight: #7a4f00;
+    --danger-bg: #f6d9d4; --danger-line: #b3261e; --info-bg: #dfe8ee; --info-line: #6a8aa3;
+    --ok-bg: #dfead6; --ok-line: #5a8a3a; --gold-bg: #f1e3b8; --gold-line: #a8862a;
+    --series-1: #2b6aa8; --series-2: #a35f00; --series-3: #7b4fa8;
+    --lift: 0 12px 28px rgb(60 45 20 / .2);
+    --bar-bg: rgb(246 241 231 / .94); --dlg-bg: #fbf8f1; --track: rgb(0 0 0 / .08); --close: #5e564a;
+    --purple-bg: #e6d9ef; --purple-line: #8f6bb0;
+}
+
+[data-theme="terminal"] {
+    --bg: #0b0d0b; --card: #101410; --card2: #151b15; --sunken: #060806;
+    --line: #233023; --line-strong: #3b4e3b; --text: #c9d1c9; --muted: #7f917f;
+    --accent: #5dff8a; --accent-soft: #11331c; --btn: #11331c; --btn-line: #5dff8a; --btn-hover: #184a28;
+    --btn2: #151b15; --btn2-hover: #1f291f; --link: #c9d1c9; --highlight: #ffbf47;
+    --danger-bg: #2e1313; --danger-line: #ff5f5f; --info-bg: #10222e; --info-line: #5fb3ff;
+    --ok-bg: #11331c; --ok-line: #5dff8a; --gold-bg: #2e2410; --gold-line: #ffbf47;
+    --series-1: #5fb3ff; --series-2: #ffbf47; --series-3: #5dff8a;
+    --bar-bg: rgb(11 13 11 / .94); --dlg-bg: #101410; --close: #7f917f;
+    --purple-bg: #231a33; --purple-line: #8a6fc4;
+}
+
+[data-theme="violet"] {
+    --bg: #17151f; --card: #1f1c2a; --card2: #272335; --sunken: #121019;
+    --line: #312c42; --line-strong: #463f5c; --text: #ebe9f2; --muted: #9a95b0;
+    --accent: #a394ff; --accent-soft: #2b2547; --btn: #5b4bd6; --btn-line: #7a6cf0; --btn-hover: #6a5be6;
+    --btn2: #2c2839; --btn2-hover: #393450; --link: #b4a8ff; --highlight: #ffd84a;
+    --danger-bg: #43202a; --danger-line: #e5534b; --info-bg: #1f3350; --info-line: #5aa9f0;
+    --ok-bg: #1f3a24; --ok-line: #6fc35a; --gold-bg: #433716; --gold-line: #e0b341;
+    --series-1: #5aa9f0; --series-2: #e0b341; --series-3: #a394ff;
+    --bar-bg: rgb(23 21 31 / .94); --dlg-bg: #1f1c2a; --close: #9a95b0;
+    --purple-bg: #35254f; --purple-line: #7a5cb8;
+}

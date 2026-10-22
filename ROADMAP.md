@@ -37,6 +37,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Instant pages | The sidebar's pages are fetched in the background as soon as any page opens, and a page seen in the last 30 seconds opens from memory, so clicks show the page at once instead of Loading. Pages with live numbers refresh themselves straight after. Live since v1.1.0-rc.41. | Local (a production build: 40–240 ms a click) |
 | Layouts | Fifteen static mockups of other ways Arrmy could look, on made-up data, each with Home, Requests, Admin and Settings tabs and phone pictures. Admin → Layouts. Kept for a future redesign or Themes. | Live |
 | Install as an app | Arrmy installs to a phone's home screen (Chrome: Install app; iPhone: Share, Add to Home Screen) with its logo, opens full screen without the browser bar, and keeps the top bar clear of the notch. The icons are drawn in code from the logo. No offline mode and no notifications yet (see Phone app). | Local (a production build serves the manifest and icons as the right types). **Not yet tried on a real phone.** |
+| Colour themes | Each person picks how Arrmy looks from a small menu in the sidebar: Dark blue (the current look), Light, Paper, Terminal or Violet, palettes taken from the Layouts mockups. Saved per person, so it follows them to any device, and set on the page by the server so there is no flash. The phone browser bar changes colour with it. | Unit (names validated; text, link and button contrast at least 4.5:1 in every theme). **Not yet live.** |
 
 ### Audiobooks
 
@@ -266,7 +267,7 @@ Chosen 2026-10-21. An installable app for Requesters and the Admin: first as a P
 
 Possible add-on, asked for 2026-10-22. Let each person pick how Arrmy looks, from the styles mocked up on the Layouts page (Admin → Layouts):
 
-- **Colour themes:** the palettes only, same pages. About 1–2 hours, including a per-person setting.
+- **Colour themes:** built 2026-10-22, see Colour themes under Done. Five palettes (Dark blue, Light, Paper, Terminal, Violet), picked per person.
 - **Full layouts** (Board, Chat feed and so on): about a day each, since every one needs its own working Search, Requests, Admin and Settings pages, and every later feature built into each.
 
 The current look (Sidebar dashboard colours and pages, Search-first Home) was picked on 2026-10-22.
