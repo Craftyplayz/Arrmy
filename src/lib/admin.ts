@@ -1,11 +1,14 @@
 // The Admin view: Problems with one-click fixes, what's downloading, and library and disk stats.
 import { arr, queueOf, type QueueRecord } from './arr'
-import { coverUrl } from './bookrules'
+import { coverUrl, editionOf } from './bookrules'
+import { audiobookStatuses } from './books'
 import { CATEGORY_APPS, duration, size } from './botrules'
-import { getDeadLimits, keptDeadReleases, requestsFor } from './db'
+import { getDeadLimits, keptDeadReleases, requestsFor, waitingOfType } from './db'
+import { waitingEditions } from './editions'
 import { speed, type DownloadMeta } from './embeds'
 import { downloadMeta } from './media'
 import {
+  bookProblem,
   byDownload,
   deadDetail,
   missingProblems,
@@ -18,6 +21,7 @@ import {
   type Problem,
   type Service,
   type Torrent,
+  type WaitingBook,
 } from './problems'
 import { liveProgress, torrents, transferSpeeds } from './qbit'
 
@@ -25,7 +29,7 @@ export type { Problem } from './problems'
 
 // shortcut: reads whole libraries and queues each time; fine for a family server, page them past a few thousand titles.
 export async function adminOverview() {
-  const [movieQueue, tvQueue, missingMovies, missingEpisodes, movies, series, disks, speeds, live] = await Promise.all([
+  const [movieQueue, tvQueue, missingMovies, missingEpisodes, movies, series, disks, speeds, live, books] = await Promise.all([
     queueOf('radarr'),
     queueOf('sonarr'),
     arr<{ records: MissingMovie[] }>('radarr', '/wanted/missing?pageSize=500&monitored=true'),
@@ -35,6 +39,7 @@ export async function adminOverview() {
     arr<{ path: string; freeSpace: number; totalSpace: number }[]>('radarr', '/diskspace'),
     transferSpeeds().catch(() => undefined), // qBittorrent down: no speeds, everything else still shows
     liveProgress().catch(() => new Map<string, unknown>()),
+    waitingBooks(),
   ])
 
   // The last of the Admin's allowed dead releases in a row (see dead.ts), while it's still in qBittorrent.
@@ -58,6 +63,7 @@ export async function adminOverview() {
         return { kind: 'Failed Download', service: 'lazylibrarian', title: d.title, detail: deadDetail(strikes), fix: 'retry', ids: [], hash: d.hash, poster }
       }),
     ...missingProblems(missingMovies.records, missingEpisodes.records, movieQueue, tvQueue),
+    ...books.flatMap((b) => bookProblem(b) ?? []),
   ]
 
   const sum = <T>(list: T[], pick: (x: T) => number) => list.reduce((n, x) => n + pick(x), 0)
@@ -78,6 +84,21 @@ export async function adminOverview() {
       settings: disks.find((d) => d.path === '/config'),
     },
   }
+}
+
+/** Audiobook Requests still waiting with nothing downloading. LazyLibrarian or qBittorrent down: none, the rest still shows. */
+async function waitingBooks(): Promise<WaitingBook[]> {
+  const rows = waitingOfType('audiobook')
+  const plain = [...new Set(rows.map((r) => String(r.external_id)).filter((id) => !editionOf(id)))]
+  const [statuses, editions] = await Promise.all([audiobookStatuses(plain).catch(() => []), waitingEditions().catch(() => [])])
+  const request = (id: string) => {
+    const mine = rows.filter((r) => r.external_id === id)
+    return { title: mine[0].title, poster: mine[0].poster, requestedAt: Math.min(...mine.map((r) => Date.parse(`${r.created_at.replace(' ', 'T')}Z`))) }
+  }
+  return [
+    ...plain.filter((_, i) => statuses[i]?.label === 'Requested').map((id) => ({ book: id, ...request(id) })),
+    ...editions.map((e) => ({ book: e.id, ...request(e.id), narrator: e.narrator, search: e.search })),
+  ]
 }
 
 /** A download in the Admin view, read live from qBittorrent and ready to show. */

@@ -1,16 +1,20 @@
 // Problem rules for the Admin view. No I/O here, so they can be unit-tested.
 import type { QueueRecord } from './arr'
+import type { EditionSearch } from './bookrules'
 
 export type Service = 'radarr' | 'sonarr'
 export type Problem = {
   kind: 'Missing' | 'Failed Download' | 'Failed Import'
-  service: Service | 'lazylibrarian'
+  /** editions: an Audiobook Edition, which Arrmy searches for itself. */
+  service: Service | 'lazylibrarian' | 'editions'
   title: string
   detail: string
   /** retry = blocklist this release and grab another; search = look for a release again. */
   fix: 'retry' | 'search'
   /** Queue ids for retry; movie or episode ids for search. */
   ids: number[]
+  /** The audiobook's BookID, or its Edition id, for its search. */
+  book?: string
   /** The torrent, for an audiobook's retry. */
   hash?: string
   /** The poster or cover, for Discord. */
@@ -166,6 +170,23 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
     })
   }
   return problems
+}
+
+/** An audiobook Request still waiting with nothing downloading. An Edition has its narrator and last search. */
+export type WaitingBook = { book: string; title: string; poster?: string | null; requestedAt: number; narrator?: string; search?: EditionSearch }
+
+/** Missing = still nothing an hour after the Request: an Edition whose last search grabbed nothing, or a book LazyLibrarian still wants. */
+export function bookProblem(b: WaitingBook, now = Date.now()): Problem | undefined {
+  if (now - b.requestedAt < HOUR) return
+  const base = { kind: 'Missing' as const, title: b.title, fix: 'search' as const, ids: [], book: b.book, poster: b.poster }
+  if (!b.narrator) return { ...base, service: 'lazylibrarian', detail: 'LazyLibrarian has found no release yet.' }
+  const s = b.search
+  if (!s || s.grabbed) return // not searched yet, or found
+  const n = `${s.found} release${s.found === 1 ? '' : 's'}`
+  const found = s.abb === 'failed' ? `AudioBook Bay didn't answer (${s.abbError}); Prowlarr found ${n}` : `AudioBook Bay and Prowlarr found ${n}`
+  const which = b.narrator.toLowerCase() === 'full cast' ? 'the Full Cast edition of this book' : `this book read by ${b.narrator}`
+  const why = s.singles || s.packs ? `${s.singles + s.packs} looked like ${which}, but none could be sent to qBittorrent` : `none of ${which}`
+  return { ...base, service: 'editions', detail: `${found}${s.abb === 'failed' ? ',' : ';'} ${why}.` }
 }
 
 /** A Request that hasn't started downloading or has stopped, and why, for the Admin view's Stuck list. */

@@ -215,7 +215,8 @@ export function editionCandidates(releases: Release[], titles: string[], edition
 }
 
 /** What the last search for an edition found, kept so the Request Log and Stuck can say why nothing is downloading. */
-export type EditionSearch = { at: number; found: number; singles: number; seeded: number; packs: number; grabbed?: string }
+/** abb: how many releases AudioBook Bay gave, or failed when it didn't answer (abbError says why). */
+export type EditionSearch = { at: number; found: number; singles: number; seeded: number; packs: number; grabbed?: string; abb?: number | 'failed'; abbError?: string }
 export function searchText(s: EditionSearch, edition: string, now = Date.now()) {
   const ago = duration(Math.max(0, now - s.at) / 1000)
   const parts = [`${s.found} releases found`]

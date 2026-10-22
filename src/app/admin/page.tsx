@@ -69,7 +69,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const problems = overview.problems.filter((p) => p.kind !== 'Missing')
   const { speeds, library, disks } = overview
   // A download that's already a Problem isn't listed again under Stuck.
-  const isProblem = (s: Stuck) => problems.some((p) => p.service === s.service && ((s.hash && p.hash === s.hash) || s.ids.some((id) => p.ids.includes(id))))
+  const isProblem = (s: Stuck) => problems.some((p) => p.service === s.service && ((s.hash && p.hash === s.hash) || (s.book && p.book === s.book) || s.ids.some((id) => p.ids.includes(id))))
   stuck.items = stuck.items.filter((s) => !isProblem(s))
   return (
     <>
@@ -278,6 +278,7 @@ function ProblemRow({ p, badge, warn }: { p: Problem | Stuck; badge: string; war
             <input key={id} type="hidden" name="id" value={id} />
           ))}
           {p.hash && <input type="hidden" name="hash" value={p.hash} />}
+          {p.book && <input type="hidden" name="book" value={p.book} />}
           <input type="hidden" name="title" value={p.title} />
           <SubmitButton className="btn small" pending="Working...">
             {p.fix === 'retry' ? 'Try another release' : 'Search again'}

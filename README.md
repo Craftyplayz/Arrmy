@@ -83,7 +83,9 @@ Slash commands (`/status`, `/queue`, `/requests`, `/problems`, `/search`) start 
 
 ### The doctor
 
-Claude looks into each Problem #problems announces, on your Claude subscription, and posts the cause under it. It reads Radarr's, Sonarr's, Prowlarr's and qBittorrent's APIs, and can only run a few safe fixes (search again, try another release, test indexers, restart an app, recheck or start a torrent). Anything else it tells you to do.
+Claude looks into each Problem #problems announces, on your Claude subscription, and posts the cause under it. It reads Radarr's, Sonarr's, Prowlarr's and qBittorrent's APIs, and can only run a few safe fixes (search again, try another release, test indexers, restart an app, recheck or start a torrent, search again for an audiobook Edition). Anything else it tells you to do.
+
+When AudioBook Bay refuses the VPN's region, it reconnects the VPN to other regions until AudioBook Bay answers (up to 4 tries), preferring ones that worked before, and remembers them in the `doctor` folder's `vpn-regions.json`. The region holds until gluetun restarts.
 
 1. On any PC with Claude Code: `claude setup-token`, sign in, copy the token (it lasts a year).
 2. In the stack: `CLAUDE_CODE_OAUTH_TOKEN` = the token. Redeploy.

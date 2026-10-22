@@ -4,7 +4,8 @@
 //
 // It's its own small server on an internal port, not a Next.js route: LazyLibrarian opens book pages imitating Chrome,
 // which asks to switch to HTTP/2 mid-request, and Next.js's server leaves that hanging. Node's plain server answers it
-// as HTTP/1.1. The port isn't published or tunnelled, and the key in the address is checked anyway.
+// as HTTP/1.1. The port isn't published or tunnelled, and the key in the address is checked anyway. /doctor/ addresses
+// are the doctor's own questions (doctorapi.ts).
 import { createServer } from 'node:http'
 import { fetch as undiciFetch, ProxyAgent } from 'undici'
 // .ts so plain node (the tests) can load this file too
@@ -40,6 +41,8 @@ export function upstreamUrl(requestUrl: string, key: string): string | 403 | 400
 
 export function startAudiobookBayRelay() {
   createServer(async (req, res) => {
+    // Loaded only when asked: it pulls in the database, which the tests loading this file don't have.
+    if (req.url?.startsWith('/doctor/')) return (await import('./doctorapi')).doctorApi(req, res)
     const target = req.method === 'GET' ? upstreamUrl(req.url ?? '/', audiobookBayToken(sessionSecret())) : 405
     if (typeof target === 'number') return res.writeHead(target).end()
     try {

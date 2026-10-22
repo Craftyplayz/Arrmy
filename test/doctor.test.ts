@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { admit, FIXES, prompt } from '../scripts/doctor.mjs'
+import { admit, FIXES, nextRegion, prompt } from '../scripts/doctor.mjs'
 
 const HOUR = 3_600_000
 
@@ -28,4 +28,29 @@ test('the prompt lists every fix and the Problem', () => {
   const text = prompt({ kind: 'Missing', title: 'Dune (2021)' })
   for (const f of Object.values(FIXES) as { usage: string }[]) assert.ok(text.includes(f.usage))
   assert.ok(text.includes('Dune (2021)'))
+})
+
+test('nextRegion: where AudioBook Bay worked first, then untried regions, then the oldest failure', () => {
+  const history = {
+    Riga: { failed: 5 },
+    Montreal: { ok: 3 },
+    Toronto: { ok: 4, failed: 6 },
+    Berlin: { failed: 2 },
+    Paris: { ok: 1 },
+  }
+  const all = ['Riga', 'Montreal', 'Toronto', 'Berlin', 'Paris', 'Oslo', 'Rome']
+  const first = (list: string[]) => list[0]
+  assert.equal(nextRegion(history, all, [], first), 'Montreal')
+  assert.equal(nextRegion(history, all, ['Montreal'], first), 'Paris')
+  assert.equal(nextRegion(history, all, ['Montreal', 'Paris'], first), 'Oslo')
+  assert.equal(nextRegion(history, all, ['Montreal', 'Paris', 'Oslo', 'Rome'], first), 'Berlin')
+  assert.equal(nextRegion(history, all, ['Montreal', 'Paris', 'Oslo', 'Rome', 'Berlin', 'Riga'], first), 'Toronto')
+  assert.equal(nextRegion(history, all, all, first), null)
+  assert.equal(nextRegion({}, [], []), null)
+})
+
+test('edition-search refuses anything but an Edition id', async () => {
+  await assert.rejects(async () => FIXES['edition-search'].run('OL1W~x/../../admin'), /Edition id/)
+  await assert.rejects(async () => FIXES['edition-search'].run('x'.repeat(121)), /Edition id/)
+  await assert.rejects(async () => FIXES['edition-search'].run(), /Edition id/)
 })

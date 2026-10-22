@@ -1,8 +1,8 @@
 // One-shot setup the Stack needs before qBittorrent and Arrmy start (the `init` service, run as root):
-// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login, and LazyLibrarian's and Tautulli's settings, and the folders autobrr and Tdarr keep theirs in. Safe to re-run;
-// never overwrites.
+// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login, and LazyLibrarian's and Tautulli's settings, and the folders autobrr and Tdarr keep theirs in,
+// and the doctor's key to gluetun's control server. Safe to re-run; never overwrites a file the user may have changed.
 import { createHmac, pbkdf2Sync, randomBytes } from 'node:crypto'
-import { chownSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { chownSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
 const [data = '/data', config = '/config'] = process.argv.slice(2)
 const { PUID, PGID, QBIT_PASSWORD, SESSION_SECRET } = process.env
@@ -115,4 +115,21 @@ if (!existsSync(watch)) {
   writeFileSync(watch, `${lines.join('\n')}\n`)
   own(watch)
 }
-console.log('[init] folders, qBittorrent login, LazyLibrarian and Tautulli settings ready')
+// gluetun's control server refuses everything until it has a role. This one lets the doctor (doctor.mjs gluetunKey
+// derives the same key) see the VPN's IP and status and reconnect it, nothing else: GET /v1/vpn/settings shows the VPN login.
+// Rewritten each deploy while it carries the marker; a file without it is the user's own and stays.
+const ARRMY_MARK = '# Written by Arrmy (scripts/init.mjs). Delete this line to keep your own changes.'
+const gluetunAuth = `${config}/gluetun/auth/config.toml`
+if (!existsSync(gluetunAuth) || readFileSync(gluetunAuth, 'utf8').startsWith(ARRMY_MARK)) {
+  mkdirSync(`${config}/gluetun/auth`, { recursive: true })
+  const lines = [
+    ARRMY_MARK,
+    '[[roles]]',
+    'name = "doctor"',
+    'routes = ["GET /v1/publicip/ip", "GET /v1/vpn/status", "PUT /v1/vpn/status", "PUT /v1/vpn/settings"]',
+    'auth = "apikey"',
+    `apikey = "${createHmac('sha256', SESSION_SECRET).update('gluetun').digest('hex').slice(0, 32)}"`,
+  ]
+  writeFileSync(gluetunAuth, `${lines.join('\n')}\n`, { mode: 0o600 }) // gluetun runs as root, so root may keep it
+}
+console.log('[init] folders, qBittorrent login, LazyLibrarian, Tautulli and gluetun settings ready')

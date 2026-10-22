@@ -97,9 +97,12 @@ services:
       VPN_PORT_FORWARDING_DOWN_COMMAND: >-
         /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://127.0.0.1:8080/api/v2/app/setPreferences'
     volumes:
-      - ${CONFIG_DIR:-/opt/arrmy}/gluetun:/gluetun # keeps the forwarded port across restarts
+      # Keeps the forwarded port across restarts, and holds auth/config.toml: init writes the doctor's key to
+      # gluetun's control server (gluetun:8000, inside Docker only) there, so the doctor can change VPN region.
+      - ${CONFIG_DIR:-/opt/arrmy}/gluetun:/gluetun
     ports:
       - ${QBIT_PORT:-7655}:8080 # qBittorrent web UI: qBittorrent lives inside gluetun's network
+    depends_on: *after-init # gluetun reads the control server's keys only when it starts
 
   qbittorrent:
     <<: *linuxserver

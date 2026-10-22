@@ -30,9 +30,12 @@ const page = async (url: string) => {
   return res.text()
 }
 
+/** The book page links and titles on the first page of results. Throws if AudioBook Bay doesn't answer. */
+export const searchPage = async (query: string) => parseSearch(await page(`${ABB_URL}/?s=${encodeURIComponent(query).replace(/%20/g, '+')}`))
+
 /** First page of results. A failing search throws; a book page that fails or has no info hash is skipped. */
 export async function searchAudiobookBay(query: string): Promise<Release[]> {
-  const found = parseSearch(await page(`${ABB_URL}/?s=${encodeURIComponent(query).replace(/%20/g, '+')}`))
+  const found = await searchPage(query)
   const books = await Promise.all(found.map(async (f) => {
     try { return { title: f.title, book: parseBook(await page(`${ABB_URL}${f.path}`)) } } catch { return null }
   }))

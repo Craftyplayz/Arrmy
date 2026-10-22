@@ -6,6 +6,7 @@ import { join } from 'node:path'
 import { test } from 'node:test'
 import { existsSync } from 'node:fs'
 import { audiobookBayToken, lazyLibrarianKey, tautulliKey } from '../src/lib/token.ts'
+import { gluetunKey } from '../scripts/doctor.mjs'
 
 const run = (data: string, config: string) =>
   spawnSync(process.execPath, ['scripts/init.mjs', data, config], {
@@ -59,6 +60,29 @@ test('init makes the folders autobrr and Tdarr keep their settings in', () => {
     const [data, config] = [join(root, 'data'), join(root, 'config')]
     assert.equal(run(data, config).status, 0)
     for (const dir of ['autobrr', 'tdarr/server', 'tdarr/configs', 'tdarr/logs', 'tdarr/temp']) assert.ok(existsSync(join(config, dir)), dir)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('init gives gluetun the doctor\'s key, keeps it in step, and leaves a file the user wrote', () => {
+  const root = mkdtempSync(join(tmpdir(), 'arrmy-init-'))
+  try {
+    const [data, config] = [join(root, 'data'), join(root, 'config')]
+    const file = join(config, 'gluetun', 'auth', 'config.toml')
+    assert.equal(run(data, config).status, 0)
+    const toml = readFileSync(file, 'utf8')
+    assert.match(toml, new RegExp(`^apikey = "${gluetunKey('a-test-secret-of-32-characters!!')}"$`, 'm'))
+    assert.match(toml, /^auth = "apikey"$/m)
+    assert.doesNotMatch(toml, /GET \/v1\/vpn\/settings/, 'its settings show the VPN login')
+
+    writeFileSync(file, toml.replace(/apikey = ".*"/, 'apikey = "old"'))
+    assert.equal(run(data, config).status, 0)
+    assert.equal(readFileSync(file, 'utf8'), toml, 'Arrmy\'s own file is rewritten')
+
+    writeFileSync(file, '[[roles]]\nname = "mine"\n')
+    assert.equal(run(data, config).status, 0)
+    assert.equal(readFileSync(file, 'utf8'), '[[roles]]\nname = "mine"\n')
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

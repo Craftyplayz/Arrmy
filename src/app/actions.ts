@@ -4,9 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { addSeries, arr, removeMovie, removeSeasons, retryRelease } from '@/lib/arr'
-import { editionOf } from '@/lib/bookrules'
-import { audiobookTorrents, dropAudiobookRelease, removeAudiobook } from '@/lib/books'
-import { removeEdition } from '@/lib/editions'
+import { cleanEdition, editionOf } from '@/lib/bookrules'
+import { audiobookTorrents, dropAudiobookRelease, ll, removeAudiobook } from '@/lib/books'
+import { findEdition, removeEdition } from '@/lib/editions'
 import {
   addLog,
   deleteRequest,
@@ -64,6 +64,17 @@ export async function fixProblem(form: FormData) {
     await dropAudiobookRelease(hash)
     setSearchPending(hash, true)
     fixed('Try another release')
+    return revalidatePath('/admin')
+  }
+  if ((service === 'lazylibrarian' || service === 'editions') && form.get('fix') === 'search') {
+    const book = String(form.get('book'))
+    if (service === 'editions') {
+      const edition = editionOf(book)
+      // The same rules as createAudiobookRequest: an OpenLibrary work and a cleaned edition name.
+      if (!edition || !/^OL\d+W$/.test(edition.bookId) || cleanEdition(edition.edition) !== edition.edition) throw new Error(`Not an Edition: ${book}`)
+      void findEdition(book) // in the background: it waits on every indexer
+    } else await ll('searchBook', { id: bookId(book), type: 'AudioBook' })
+    fixed('Search again')
     return revalidatePath('/admin')
   }
   if (service !== 'radarr' && service !== 'sonarr') throw new Error(`Unknown service: ${service}`)

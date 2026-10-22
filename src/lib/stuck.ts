@@ -116,6 +116,8 @@ export async function stuckRequests() {
       service: 'lazylibrarian',
       title: requests[0]?.title ?? b.BookName,
       ids: [],
+      book: b.BookID,
+      fix: 'search',
       poster: requests[0]?.poster ?? b.BookImg,
       by: requests.map((r) => r.username),
     })
@@ -130,9 +132,11 @@ export async function stuckRequests() {
     items.push({
       reason: 'Nothing found',
       detail: `${editionSearch(id) ?? 'No release of this edition found yet'} Searched every 6 hours. Requested ${day(`${requests[0].created_at.replace(' ', 'T')}Z`, now)}`,
-      service: 'lazylibrarian',
+      service: 'editions',
       title: requests[0].title,
       ids: [],
+      book: id,
+      fix: 'search',
       poster: requests[0].poster,
       by: requests.map((r) => r.username),
     })

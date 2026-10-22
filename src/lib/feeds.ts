@@ -159,7 +159,7 @@ async function downloads() {
 // once it has lasted 20; one Arrmy raised itself after its tries ran out is announced at once.
 type Seen = Record<string, { first: number; told: boolean }>
 const GRACE = 20 * 60_000
-const SERVICE_APPS = { radarr: 'Radarr', sonarr: 'Sonarr', lazylibrarian: 'LazyLibrarian' }
+const SERVICE_APPS = { radarr: 'Radarr', sonarr: 'Sonarr', lazylibrarian: 'LazyLibrarian', editions: 'Arrmy' } // Arrmy: no app page to link
 
 async function problems() {
   const { problems: list } = await adminOverview()

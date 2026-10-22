@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { ago as agoText, byDownload, deadReason, missingProblems, movieStuck, queueProblem, seasonStuck, stateLabel, torrentStuck } from '../src/lib/problems.ts'
+import { ago as agoText, bookProblem, byDownload, deadReason, missingProblems, movieStuck, queueProblem, seasonStuck, stateLabel, torrentStuck } from '../src/lib/problems.ts'
 
 const ago = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString()
 const record = (over: object) => ({ id: 1, title: 'Release.1080p', size: 100, sizeleft: 50, ...over })
@@ -150,4 +150,25 @@ test('ago reads in minutes, hours, then days', () => {
   assert.equal(agoText(now - 20_000, now), '1 min ago')
   assert.equal(agoText(now - 3 * 3_600_000, now), '3 h ago')
   assert.equal(agoText(now - 3 * 86_400_000, now), '3 days ago')
+})
+
+test('an audiobook still not found an hour after its Request is Missing, and says why', () => {
+  const now = Date.parse('2026-10-20T12:00:00Z')
+  const search = { at: now, found: 19, singles: 0, seeded: 0, packs: 0 }
+  const book = { book: 'OL27513W~Andy Serkis', title: 'The Two Towers (Andy Serkis)', requestedAt: now - 2 * 3_600_000, narrator: 'Andy Serkis' }
+  assert.equal(bookProblem({ ...book, search }, now - 1.5 * 3_600_000), undefined) // within the hour
+  assert.equal(bookProblem(book, now), undefined) // not searched yet
+  assert.equal(bookProblem({ ...book, search: { ...search, singles: 1, seeded: 1, grabbed: 'Grabbed X.' } }, now), undefined)
+  assert.deepEqual(bookProblem({ ...book, search: { ...search, abb: 'failed', abbError: 'fetch failed' } }, now), {
+    kind: 'Missing', service: 'editions', title: 'The Two Towers (Andy Serkis)', fix: 'search', ids: [], book: 'OL27513W~Andy Serkis', poster: undefined,
+    detail: "AudioBook Bay didn't answer (fetch failed); Prowlarr found 19 releases, none of this book read by Andy Serkis.",
+  })
+  assert.equal(bookProblem({ ...book, search: { ...search, abb: 4 } }, now)?.detail, 'AudioBook Bay and Prowlarr found 19 releases; none of this book read by Andy Serkis.')
+  assert.equal(
+    bookProblem({ ...book, narrator: 'Full Cast', search: { ...search, packs: 2 } }, now)?.detail,
+    'AudioBook Bay and Prowlarr found 19 releases; 2 looked like the Full Cast edition of this book, but none could be sent to qBittorrent.',
+  )
+  const plain = bookProblem({ book: 'OL1W', title: 'Dune', requestedAt: now - 2 * 3_600_000 }, now)
+  assert.equal(plain?.service, 'lazylibrarian')
+  assert.equal(plain?.detail, 'LazyLibrarian has found no release yet.')
 })

@@ -8,7 +8,7 @@ import { searchAudiobookBay } from './abb'
 import { arr } from './arr'
 import { commonDir, editionCandidates, editionOf, packFiles, safeName, searchText, seriesOf, titleVariants, type EditionSearch, type Release } from './bookrules'
 import { abs, owned, scanLibrary } from './books'
-import { getSetting, markAvailable, setSetting, type RequestRow } from './db'
+import { getSetting, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { tellDiscord } from './notify'
 import type { Torrent } from './problems'
 import { deleteTorrents, qbit, torrentFiles } from './qbit'
@@ -70,7 +70,7 @@ export async function addEdition(id: string) {
 const searching = new Set<string>()
 
 /** Searches Prowlarr and AudioBook Bay for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
-async function findEdition(id: string) {
+export async function findEdition(id: string) {
   let e = editions()[id]
   const edition = editionOf(id)?.edition
   if (!e || !edition || searching.has(id)) return
@@ -91,9 +91,19 @@ async function findEdition(id: string) {
     const series = e.series ?? seriesOf(e.title)
     const queries = [...new Set([...titles.map((t) => `${t} ${edition}`), ...(series !== e.title ? [`${series} ${edition}`] : []), ...titles])]
     // AudioBook Bay isn't in Prowlarr and has narrated editions it lacks; only the queries with the edition, as each
-    // result costs a page fetch. Down or changed: Prowlarr's results still count.
+    // result costs a page fetch. Down or changed: Prowlarr's results still count, and the summary says it failed.
+    let abbFound = 0
+    let abbAnswered = false
+    let abbError: string | undefined
     const abb = (query: string) =>
-      searchAudiobookBay(query).catch((err) => (console.warn(`[editions] AudioBook Bay: ${(err as Error).message}`), [] as Release[]))
+      searchAudiobookBay(query).then(
+        (r) => ((abbAnswered = true), (abbFound += r.length), r),
+        (err) => {
+          abbError = (err as Error).message.slice(0, 120)
+          console.warn(`[editions] AudioBook Bay: ${abbError}`)
+          return [] as Release[]
+        },
+      )
     const found = await Promise.all([...queries.map(search), ...queries.filter((q) => q.endsWith(` ${edition}`)).map(abb)])
     const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
     const candidates = editionCandidates(releases, titles, edition, series)
@@ -103,6 +113,8 @@ async function findEdition(id: string) {
       singles: candidates.filter((c) => c.kind !== 'pack').length,
       seeded: candidates.filter((c) => c.kind === 'single').length,
       packs: candidates.filter((c) => c.kind === 'pack').length,
+      // Failed only when no AudioBook Bay search answered: one that did still counts its results.
+      ...(abbError && !abbAnswered ? { abb: 'failed' as const, abbError } : { abb: abbFound }),
     }
     for (const { release, kind } of candidates) {
       if (kind === 'pack' ? !(await grabPack(release, tagOf(id), titles).catch(() => false)) : !(await grab(release, tagOf(id)).then(() => true, () => false))) continue
@@ -245,4 +257,21 @@ export async function removeEdition(id: string) {
     }
   }
   update(id, undefined)
+}
+
+/**
+ * The Edition Requests still waiting with nothing downloading, for Problems and the doctor. requestedAt is the first
+ * Request for it (ms); search is what the last search found.
+ */
+export async function waitingEditions() {
+  const rows = waitingOfType('audiobook').filter((r) => editionOf(r.external_id) && editions()[String(r.external_id)])
+  const ids = [...new Set(rows.map((r) => String(r.external_id)))]
+  const statuses = await editionStatuses(ids)
+  return ids
+    .filter((_, i) => statuses[i].label === 'Requested')
+    .map((id) => {
+      const e = editions()[id]
+      const requestedAt = Math.min(...rows.filter((r) => r.external_id === id).map((r) => Date.parse(`${r.created_at.replace(' ', 'T')}Z`)))
+      return { id, title: e.title, author: e.author, narrator: editionOf(id)!.edition, requestedAt, searchedAt: e.searchedAt, search: e.search }
+    })
 }
