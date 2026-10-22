@@ -38,6 +38,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Layouts | Fifteen static mockups of other ways Arrmy could look, on made-up data, each with Home, Requests, Admin and Settings tabs and phone pictures. Admin → Layouts. Kept for a future redesign or Themes. | Live |
 | Install as an app | Arrmy installs to a phone's home screen (Chrome: Install app; iPhone: Share, Add to Home Screen) with its logo, opens full screen without the browser bar, and keeps the top bar clear of the notch. The icons are drawn in code from the logo. No offline mode and no notifications yet (see Phone app). | Local (a production build serves the manifest and icons as the right types). **Not yet tried on a real phone.** |
 | Colour themes | Each person picks how Arrmy looks from a small menu in the sidebar: Dark blue (the current look), Light, Paper, Terminal or Violet, palettes taken from the Layouts mockups. Saved per person, so it follows them to any device, and set on the page by the server so there is no flash. The phone browser bar changes colour with it. | Unit (names validated; text, link and button contrast at least 4.5:1 in every theme). **Not yet live.** |
+| Discover | A Discover page between Search and Requests: rows of posters for trending movies, trending shows and upcoming movies, and a genre picker (movie and TV genres) showing what is popular in one. Each poster shows its status if Arrmy has one and opens an item page with the poster, backdrop, overview, rating, genres, runtime or seasons, release dates, the first 12 cast, a trailer link and similar titles, plus the Request controls Search uses (a show needs a TheTVDB entry). Statuses come from one read of the Radarr and Sonarr libraries per page. Needs the optional TMDB_API_KEY; without it the page says the Admin needs to set it. | Local (the rules). **Not yet seen in a browser, nor against TMDB.** |
 
 ### Audiobooks
 
@@ -211,7 +212,7 @@ Still to decide: ties into the season pack question under Request Log (how Arrmy
 From the Seerr and Requestarr comparison, 2026-10-21. In this order:
 
 1. **Per-user approval, quotas and permissions.** Auto-approve stays the default. A per-person "Approve first" switch, and a quota such as N movies a week, protect the disk and the VPN.
-2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB. The Request page's title side (see Done) can share this data.
+2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB. The Request page's title side (see Done) can share this data. **Built 2026-10-22** (see The site under Done); movies and TV only. **Not yet seen in a browser.**
 3. **Library scan.** Anything Plex already has shows Available without a Request (audiobooks already do this).
 4. **Plex Watchlist auto-request.** Whatever a person adds to their Plex watchlist is requested for them.
 5. **Per-user notifications.** A Discord DM or email when your Request is Available, with an opt-out.

@@ -33,6 +33,7 @@ export async function generateViewport(): Promise<Viewport> {
 /** The sidebar links: the only list of them. `adminOnly` marks Admin-only pages; `icon` is a 24x24 stroke path. */
 const NAV: [href: string, label: string, adminOnly: boolean, icon: string][] = [
   ['/', 'Search', false, 'M11 4a7 7 0 1 0 0 14 7 7 0 1 0 0-14zM20 20l-3.5-3.5'],
+  ['/discover', 'Discover', false, 'M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18zM15.5 8.5l-2 5-5 2 2-5z'],
   ['/requests', 'Requests', false, 'M4 6h16M4 12h16M4 18h10'],
   ['/admin', 'Admin', true, 'M3 12h4l3-8 4 16 3-8h4'],
 ]

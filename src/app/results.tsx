@@ -78,7 +78,7 @@ function AudiobookAction({ r }: { r: SearchResult }) {
 }
 
 /** Movies: one thing to request, so a Request button until it's requested. */
-function RequestButton({ r, action }: { r: SearchResult; action: (form: FormData) => Promise<void> }) {
+export function RequestButton({ r, action }: { r: SearchResult; action: (form: FormData) => Promise<void> }) {
   if (r.status) return null
   return (
     <form action={action} className="actions">
@@ -91,7 +91,7 @@ function RequestButton({ r, action }: { r: SearchResult; action: (form: FormData
 }
 
 /** `q` and `mode` ride along so a refused Request comes back to the same search. */
-function TvAction({ r, q, mode }: { r: SearchResult; q: string; mode: Mode }) {
+export function TvAction({ r, q, mode }: { r: SearchResult; q: string; mode: Mode }) {
   const unrequested = r.seasons.filter((n) => !r.requestedSeasons.includes(n))
   if (unrequested.length === 0) return null
   return (
