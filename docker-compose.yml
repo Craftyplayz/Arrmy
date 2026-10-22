@@ -47,6 +47,7 @@ services:
       PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:-}
       PORTAINER_STACK_URL: ${PORTAINER_STACK_URL:-}
       ABS_API_KEY: ${ABS_API_KEY:-}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
       - ${BACKUP_DIR:-/opt/arrmy-backups}:/backups:ro # so the Discord bot can report the nightly backup
