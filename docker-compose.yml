@@ -182,6 +182,47 @@ services:
       - ${TAUTULLI_PORT:-7660}:8181
     depends_on: *after-init
 
+  # Grabs releases the moment a private tracker announces them on IRC, instead of waiting for Radarr's and Sonarr's
+  # next RSS check. Arrmy makes its account (admin / QBIT_PASSWORD) and adds Radarr, Sonarr and qBittorrent as clients;
+  # the IRC networks, indexers and filters are yours to add in its own page.
+  autobrr:
+    image: ghcr.io/autobrr/autobrr:latest
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    environment:
+      TZ: ${TZ}
+      AUTOBRR__HOST: 0.0.0.0 # its default is localhost, which Docker's port can't reach
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/autobrr:/config
+    ports:
+      - ${AUTOBRR_PORT:-7661}:7474
+    depends_on: *after-init
+
+  # Re-encodes the library to H.265 to save disk space. The server has no GPU, so it encodes on the CPU, and only
+  # between 01:00 and 07:00 (a library Schedule, set in its page: README) so Plex isn't slowed. Sees only
+  # media/, never torrents/, so seeding files and their hardlinks are untouched. It replaces files in place.
+  tdarr:
+    <<: *linuxserver
+    image: ghcr.io/haveagitgat/tdarr:latest
+    environment:
+      <<: *env
+      UMASK: "002"
+      serverIP: 0.0.0.0
+      serverPort: 8266
+      webUIPort: 8265
+      internalNode: "true"
+      inContainer: "true"
+      nodeName: ArrmyNode
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/tdarr/server:/app/server
+      - ${CONFIG_DIR:-/opt/arrmy}/tdarr/configs:/app/configs
+      - ${CONFIG_DIR:-/opt/arrmy}/tdarr/logs:/app/logs
+      - ${CONFIG_DIR:-/opt/arrmy}/tdarr/temp:/temp # the file being encoded, before it replaces the original
+      - ${DATA_DIR:-/data}/media:/data/media
+    ports:
+      - ${TDARR_PORT:-7662}:8265
+    depends_on: *after-init
+
   # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps
   # listening progress and stats when the files move on the server. Follows latest: it's public, so it
   # needs security fixes. ABS upgrades its database on start (one-way); the nightly backup holds the old one.
@@ -220,7 +261,8 @@ services:
             --exclude='*/Plex Media Server/Metadata' --exclude='*/Plex Media Server/Logs' \
             --exclude='audiobookshelf/metadata/cache' --exclude='audiobookshelf/metadata/logs' \
             --exclude='audiobookshelf/metadata/backups' --exclude='audiobookshelf/metadata/streams' \
-            --exclude='tautulli/cache' --exclude='tautulli/logs' --exclude='tautulli/backups' .; then
+            --exclude='tautulli/cache' --exclude='tautulli/logs' --exclude='tautulli/backups' \
+            --exclude='tdarr/temp' --exclude='tdarr/logs' --exclude='tdarr/server/Tdarr/Backups' .; then
           mv "$$name.part" "$$name" && echo "[backup] saved $$name ($$(du -h "$$name" | cut -f1))"
         else
           rm -f "$$name.part" && echo "[backup] FAILED, kept the older backups"

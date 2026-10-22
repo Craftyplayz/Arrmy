@@ -15,6 +15,7 @@ import { bookArt, downloadMeta, plexArt } from './media'
 import { plex, PLEX_URL } from './plex'
 import { DEAD_DETAIL } from './problems'
 import { qbit, torrents } from './qbit'
+import { autobrrVersion } from './autobrr'
 import { history, tautulli } from './tautulli'
 import { summaryDue, weekSummary } from './watchrules'
 
@@ -192,6 +193,8 @@ async function problems() {
 }
 
 // #system: apps up, down or restarted. An app counts as down after two failed checks in a row (a minute apart).
+const TDARR_NOTES = 'https://docs.tdarr.io/docs/releases/latest/'
+const TDARR_URL = process.env.TDARR_URL ?? 'http://tdarr:8265'
 const FLARESOLVERR_URL = process.env.FLARESOLVERR_URL ?? 'http://gluetun:8191'
 const ARRS = { radarr: 'Radarr', sonarr: 'Sonarr', prowlarr: 'Prowlarr' } as const
 
@@ -211,6 +214,8 @@ const APPS: Record<string, () => Promise<{ version?: string; started?: string }>
   Plex: async () => ({ version: (await plex<{ MediaContainer: { version: string } }>(`${PLEX_URL}/identity`)).MediaContainer.version }),
   FlareSolverr: async () => ({ version: (await json<{ version: string }>(FLARESOLVERR_URL)).version }),
   Tautulli: async () => ({ version: (await tautulli<{ tautulli_version: string }>('get_tautulli_info')).tautulli_version }),
+  autobrr: async () => ({ version: await autobrrVersion() }),
+  Tdarr: async () => ({ version: (await json<{ version?: string }>(`/api/v2/status`)).version }),
 }
 export type AppState = { fails: number; down: boolean; version?: string; started?: string }
 
@@ -564,6 +569,9 @@ const RELEASE_PAGES: Record<string, Releases> = {
   Audiobookshelf: onGitHub('advplyr/audiobookshelf'),
   FlareSolverr: onGitHub('FlareSolverr/FlareSolverr'),
   Tautulli: onGitHub('Tautulli/Tautulli'),
+  autobrr: onGitHub('autobrr/autobrr'),
+  // Its GitHub releases stopped at v1.x; the docs site has the changelog and package.json the current version.
+  Tdarr: { changelog: TDARR_NOTES, page: () => TDARR_NOTES, notes: async () => '' },
   qBittorrent: {
     // Tags without GitHub releases; each tag's Changelog file starts with its own version.
     changelog: 'https://www.qbittorrent.org/news',
@@ -635,6 +643,8 @@ const RELEASES: Record<string, () => Promise<{ version: string; url: string }>> 
   Audiobookshelf: () => latest('advplyr/audiobookshelf'),
   FlareSolverr: () => latest('FlareSolverr/FlareSolverr'),
   Tautulli: () => latest('Tautulli/Tautulli'),
+  autobrr: () => latest('autobrr/autobrr'),
+  Tdarr: async () => ({ version: (await json<{ version: string }>('https://raw.githubusercontent.com/HaveAGitGat/Tdarr/master/package.json')).version, url: TDARR_NOTES }),
   gluetun: () => latest('qdm12/gluetun'),
   cloudflared: () => latest('cloudflare/cloudflared'),
   Plex: async () => {

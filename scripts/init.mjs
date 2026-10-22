@@ -1,5 +1,5 @@
 // One-shot setup the Stack needs before qBittorrent and Arrmy start (the `init` service, run as root):
-// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login, and LazyLibrarian's and Tautulli's settings. Safe to re-run;
+// the TRaSH /data folders, Arrmy's config folder, qBittorrent's login, and LazyLibrarian's and Tautulli's settings, and the folders autobrr and Tdarr keep theirs in. Safe to re-run;
 // never overwrites.
 import { createHmac, pbkdf2Sync, randomBytes } from 'node:crypto'
 import { chownSync, existsSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -23,7 +23,7 @@ for (const dir of ['torrents/movies', 'torrents/tv', 'torrents/books', 'media/mo
   own(`${data}/${parent}`)
   own(`${data}/${dir}`)
 }
-for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian', 'tautulli']) {
+for (const dir of ['arrmy', 'qbittorrent/qBittorrent', 'audiobookshelf/config', 'audiobookshelf/metadata', 'lazylibrarian', 'tautulli', 'autobrr', 'tdarr/server', 'tdarr/configs', 'tdarr/logs', 'tdarr/temp']) {
   mkdirSync(`${config}/${dir}`, { recursive: true })
   own(`${config}/${dir}`)
 }

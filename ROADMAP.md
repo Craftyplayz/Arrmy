@@ -76,6 +76,8 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | First-run setup | A one-shot `init` container creates the folders and writes qBittorrent's and LazyLibrarian's settings the first time, never overwriting them. | Unit, Live |
 | Wiring | Arrmy connects the apps itself: root folders, download clients, its webhook, Prowlarr → Radarr, Sonarr and LazyLibrarian, the FlareSolverr proxy, size limits and English-only audio. It retries every 30 seconds until everything is connected, and creates the Plex libraries. | Fake, Live |
 | Bulk indexers | `scripts/add-indexers.mjs` adds every public English indexer that passes Prowlarr's test. | Live (25 indexers) |
+| autobrr | A container in the stack. Arrmy makes its account (`admin` / `QBIT_PASSWORD`) and API key on first start and adds Radarr, Sonarr and qBittorrent as its clients; IRC networks, trackers and filters stay the Admin's own (private trackers). | Not yet deployed |
+| Tdarr | A container (server with its internal node) re-encoding `media/` to H.265 on the CPU, in place; it can't see `torrents/`. Its library schedule (01:00 to 07:00) and plugins are set once in its page: README. | Not yet deployed |
 | Configurable ports | Every port is a variable. Defaults: 7654–7659, Plex 32400, Audiobookshelf 13378. | Live |
 | VPN | PIA with port forwarding. qBittorrent only connects through the VPN; Prowlarr and FlareSolverr reach indexers through it. | Live |
 | Seeding | Every torrent seeds, not just a few at a time. | Live (Dune seeds after filing) |
@@ -290,8 +292,8 @@ Chosen 2026-10-22 from a longer list, in the order they'd be built: cheap ones t
 3. **Kometa** (formerly Plex Meta Manager). In Plex: franchise collections (Marvel, Star Wars), a "Requested by …" collection per person, quality overlays on posters (4K, HDR, audio) and status overlays (New, Leaving soon, the Request's status). Titles missing from a collection are not downloaded by themselves: they show for the Admin to approve, and an approved one becomes a normal Request.
 4. **Podcasts** (Audiobookshelf). A Podcasts tab in Search; a Request subscribes in Audiobookshelf, which then downloads new episodes by itself.
 5. **YouTube playlists** (TubeArchivist, with YouTube channels under Other planned). A Request subscribes to the playlist, and TubeArchivist's scheduled rescan downloads new videos as they are added.
-6. **autobrr.** Grabs new releases the moment a tracker announces them on IRC, instead of waiting for Radarr's and Sonarr's next RSS check. Works best with private trackers.
-7. **Tdarr.** Re-encodes big files to H.265 to save disk space. The server's Ryzen 5 5500 has no graphics, so it encodes on the CPU (about as long as the film or longer, for 1080p) and runs overnight only, so Plex isn't slowed.
+6. **autobrr.** Built 2026-10-22: see Stack and deployment under Done. Grabs new releases the moment a tracker announces them on IRC, instead of waiting for Radarr's and Sonarr's next RSS check. Works best with private trackers.
+7. **Tdarr.** Built 2026-10-22: see Stack and deployment under Done. Re-encodes big files to H.265 to save disk space. The server's Ryzen 5 5500 has no graphics, so it encodes on the CPU (about as long as the film or longer, for 1080p) and runs overnight only, so Plex isn't slowed.
 
 ## Not planned
 

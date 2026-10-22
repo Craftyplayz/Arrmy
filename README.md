@@ -49,14 +49,24 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 | LazyLibrarian | `http://<box>:7659` | `admin` / `QBIT_PASSWORD` from `.env` |
 | Audiobookshelf | `http://<box>:13378` | your Audiobookshelf account |
 | Tautulli | `http://<box>:7660` | on the first visit, sign in with Plex once; Arrmy already has its API key |
-
+| autobrr | `http://<box>:7661` | `admin` / `QBIT_PASSWORD` from `.env`, made by Arrmy on first start |
+| Tdarr | `http://<box>:7662` | none |
 If a port is already taken on your box, change it with the `*_PORT` settings in [.env.example](.env.example).
 
 **Media on your PC:** share `DATA_DIR/media` with the box's own Samba (the stack doesn't run one, since port 445 can only be used once).
 
 Plex runs on Docker's bridge network. Set **Plex → Settings → Network → LAN Networks** to your home subnet (e.g. `192.168.1.0/24`); otherwise Plex treats devices at home as remote.
 
-## Discord
+### autobrr and Tdarr
+
+**autobrr** grabs a release seconds after a private tracker announces it on IRC. Arrmy adds Radarr, Sonarr and qBittorrent (through the VPN) as its clients, so what is left is yours: **Settings → IRC** (your tracker's network and your key), **Settings → Indexers** (the tracker), then **Filters** with the action **Radarr**, **Sonarr** or **qBittorrent**. If you made an autobrr account before Arrmy did, Arrmy leaves it alone: add the three clients under **Settings → Download Clients** (Radarr and Sonarr need their URL `http://radarr:7878` / `http://sonarr:8989` and API key, qBittorrent `http://gluetun:8080` with `admin` / `QBIT_PASSWORD`).
+
+**Tdarr** shrinks files to H.265 on the CPU, in place, and sees only `media/` (never `torrents/`, whose files are hard-linked for seeding). Its schedule and plugins are stored in its own database, so set them once in its page:
+
+1. **Libraries → Library +**: name `Movies`, source `/data/media/movies`; again for `TV` with `/data/media/tv`. Turn on **Scan on start** and **Folder watch**.
+2. In each library, **Transcode options**: add the plugin **Migz Transcode Using CPU & FFMPEG** (`Tdarr_Plugin_MC93_Migz1FFMPEG_CPU`) with **container** `original` (an `.mp4` stays `.mp4`, so Radarr and Sonarr never see their file vanish and search again), then **New file size check** (`Tdarr_Plugin_a9he_New_file_size_check`) after it, so a result bigger than the original is dropped.
+3. In each library, **Schedule**: tick only the hours 01:00 to 07:00 on every day (the stack's `TZ`).
+4. **Nodes**: leave the internal node at 1 transcode CPU worker and 1 health-check CPU worker, with 0 for the GPU workers. Raise the transcode workers only if Plex never stutters at night.
 
 The bot makes an **Arrmy** category in your server with nine channels: #requests, #downloads (a live card per download, updated every 5 seconds), #downloaded (each finished download), #problems, #admin-log, #system, #updates, #activity and #watched (who watched what in Plex, every Sunday evening). Every message is a card with the poster, cover or app icon, in [DESIGN.md](DESIGN.md)'s colours; the progress bar's pieces are uploaded once as the bot's own emoji, and Arrmy's logo as its avatar. It only reads and reports, and @mentions you for Problems, app updates, an app or the VPN going down, low disk space and failed backups. It has no live connection to Discord, so nothing extra runs: Arrmy calls Discord's API, and Discord sends slash commands to Arrmy.
 
