@@ -232,6 +232,7 @@ Asked for 2026-10-21. The All tab (searching every Media Type at once) is built:
   - **Movies and TV:** actor, director, studio or company (Marvel, Disney).
   - **Books and audiobooks:** individual book, series, author.
   - **Comics:** individual issue, series, publisher, character (every comic with Spider-Man in it).
+  - **Built 2026-10-22** for Movies, TV and Audiobooks: a row under the tabs (Title, Actor, Director, Studio; Book, Series, Author), the `by` in the address. Movies and TV ask TMDB for the person's 20 most popular titles (talk and news shows left out) or the companies' 20 most popular, then Radarr and Sonarr for each one's status, so they show with Request buttons as usual; a show with no TVDB id is left out. Without `TMDB_API_KEY` Movies and TV offer only Title. Books by author use OpenLibrary's author search; by series its series field, which only some books have (Discworld finds 23 of 41), keeping the main author's books, oldest first. Suggestions follow the choice: people (with what they're known for), companies or authors; none for series. Limits: a name goes to TMDB's best-known person of that name; owned audiobooks found by series or author show LazyLibrarian's status only; a refused TV Request comes back to a title search. Tested Local (the rules); **not yet run against TMDB or seen in a browser.**
 - Comics need Kapowarr (see Other planned); the other tabs can be built first.
 
 ### Admin: .torrent files

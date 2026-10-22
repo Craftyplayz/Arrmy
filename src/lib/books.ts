@@ -21,6 +21,7 @@ import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
 import { findCover } from './covers'
+import { seriesBooks, type SearchBy } from './searchrules'
 import { bookInfo, type OpenLibraryWork } from './titlerules'
 import { lazyLibrarianKey, sessionSecret } from './token'
 
@@ -134,10 +135,11 @@ export const audiobookStatuses = async (bookIds: string[]): Promise<(Status | nu
 /**
  * OpenLibrary's search, asked directly for its top 30: LazyLibrarian's findBook fetches every match (thousands for a
  * popular title) and can take minutes. Same source, same order, same BookIDs, so Request still goes through
- * LazyLibrarian.
+ * LazyLibrarian. By series uses OpenLibrary's series field, which only some books have.
  */
-export async function openLibrary(term: string): Promise<OpenLibraryDoc[]> {
-  const query = new URLSearchParams({ q: term, limit: '30', fields: 'key,title,author_name,cover_i,first_publish_year,isbn' })
+export async function openLibrary(term: string, by: SearchBy = 'title'): Promise<OpenLibraryDoc[]> {
+  const what: Record<string, string> = by === 'author' ? { author: term } : { q: by === 'series' ? `series:"${term.replace(/"/g, '')}"` : term }
+  const query = new URLSearchParams({ ...what, limit: '30', fields: 'key,title,author_name,cover_i,first_publish_year,isbn' })
   const res = await fetch(`${OPENLIBRARY_URL}/search.json?${query}`, {
     headers: { 'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)' }, // OpenLibrary asks apps to identify themselves
     cache: 'no-store',
@@ -157,7 +159,10 @@ const olGet = async <T>(path: string) => {
   if (!res.ok) throw new Error(`OpenLibrary ${path} → ${res.status}`)
   return (await res.json()) as T
 }
-type OpenLibraryWorkRecord = OpenLibraryWork & { authors?: { author?: { key?: string } }[] }
+/** Authors whose names match, for the suggestions when searching by author. */
+export const findAuthors = async (q: string) =>
+  (await olGet<{ docs: { key: string; name: string; top_work?: string }[] }>(`/search/authors.json?${new URLSearchParams({ q, limit: '8' })}`)).docs
+type OpenLibraryWorkRecord =OpenLibraryWork & { authors?: { author?: { key?: string } }[] }
 const authorOf = async (work: OpenLibraryWorkRecord) => {
   const key = work.authors?.[0]?.author?.key
   return key ? (await olGet<{ name?: string }>(`${key}.json`).catch(() => undefined))?.name : undefined
@@ -198,10 +203,15 @@ export async function betterPoster(r: RequestRow) {
   }
 }
 
-/** Best match first (see rankBooks). Books already in Audiobookshelf show as Available. */
-export async function searchAudiobooks(term: string) {
+/**
+ * Best match first (see rankBooks); by author, their most popular first; by series, in order. Books already in
+ * Audiobookshelf show as Available.
+ */
+// shortcut: by series or author, Audiobookshelf's search (by title) rarely finds the books, so only LazyLibrarian's
+// statuses show; ask Audiobookshelf per book if owned audiobooks show as not Available.
+export async function searchAudiobooks(term: string, by: SearchBy = 'title') {
   const [docs, status, library] = await Promise.all([
-    openLibrary(term),
+    openLibrary(term, by).then((d) => (by === 'series' ? seriesBooks(d) : d)),
     // LazyLibrarian down: still show what OpenLibrary found, just without statuses.
     statusLookup().catch((e) => {
       console.warn(`[books] LazyLibrarian: ${(e as Error).message}`)
@@ -210,7 +220,7 @@ export async function searchAudiobooks(term: string) {
     owned(term),
   ])
   const isbns = new Map(docs.map((d) => [d.key.replace('/works/', ''), d.isbn?.slice(0, 30)]))
-  const top = rankBooks(docs.map(fromOpenLibrary), term).slice(0, 12)
+  const top = rankBooks(docs.map(fromOpenLibrary), by === 'title' ? term : '').slice(0, 12)
   const covers = await Promise.all(top.map((b) => findCover({ title: b.bookname, author: b.authorname }, isbns.get(b.bookid))))
   return top.map((b, i) => {
     const inLibrary = library.some((item) => sameBook(item, { title: b.bookname, author: b.authorname }))
