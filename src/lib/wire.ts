@@ -5,6 +5,7 @@ import { MULTI_AUDIO } from './releases'
 import { LAZYLIBRARIAN_URL, ll } from './books'
 import { relayAddress } from './abbrelay'
 import { qbit as qbitApi } from './qbit'
+import { wireAutobrr } from './autobrr'
 import { hookToken, lazyLibrarianKey, sessionSecret } from './token'
 
 type Provider = { name: string; implementation: string; fields: { name: string; value?: unknown }[] }
@@ -96,6 +97,7 @@ export function startWiring() {
       await ll('writeCFG', { name: 'REJECT_MINAUDIO', group: 'Magazines', value: '50' })
       setSetting('wired:audiobookMinSize', true)
     }],
+    ['autobrr â†’ Radarr, Sonarr, qBittorrent', wireAutobrr],
     // Re-applied every start, so a rebuilt Radarr or Sonarr gets the Admin's Size Limits back.
     ['Size limits', () => applyLimits(getLimits())],
     // At the same quality, a release with only English audio beats MULTi, Dual Audio or another language: less space.

@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import { existsSync } from 'node:fs'
 import { audiobookBayToken, lazyLibrarianKey, tautulliKey } from '../src/lib/token.ts'
 
 const run = (data: string, config: string) =>
@@ -47,6 +48,17 @@ test('init gives Tautulli the API key Arrmy derives and Plex\'s address, once', 
     writeFileSync(join(config, 'tautulli', 'config.ini'), '[General]\napi_key = set-by-tautulli\n')
     assert.equal(run(data, config).status, 0)
     assert.equal(readFileSync(join(config, 'tautulli', 'config.ini'), 'utf8'), '[General]\napi_key = set-by-tautulli\n')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('init makes the folders autobrr and Tdarr keep their settings in', () => {
+  const root = mkdtempSync(join(tmpdir(), 'arrmy-init-'))
+  try {
+    const [data, config] = [join(root, 'data'), join(root, 'config')]
+    assert.equal(run(data, config).status, 0)
+    for (const dir of ['autobrr', 'tdarr/server', 'tdarr/configs', 'tdarr/logs', 'tdarr/temp']) assert.ok(existsSync(join(config, dir)), dir)
   } finally {
     rmSync(root, { recursive: true, force: true })
   }
