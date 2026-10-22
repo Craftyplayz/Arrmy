@@ -1,6 +1,6 @@
 // AudioBook Bay search for the Audiobook Edition: Prowlarr has no ABB, so the results are read off the site's pages.
 // ABB lists no seeders, and the info hash plus the page's trackers make the magnet.
-import { ABB_URL, BROWSER } from './abbrelay.ts'
+import { ABB_URL, abbFetch } from './abbrelay.ts'
 import type { Release } from './bookrules.ts'
 
 const UNITS: Record<string, number> = { KBs: 1024, MBs: 1024 ** 2, GBs: 1024 ** 3 }
@@ -25,7 +25,7 @@ export const magnetOf = (hash: string, title: string, trackers: string[]) =>
   `magnet:?xt=urn:btih:${hash}&dn=${encodeURIComponent(title)}${trackers.map((t) => `&tr=${encodeURIComponent(t)}`).join('')}`
 
 const page = async (url: string) => {
-  const res = await fetch(url, { headers: { 'User-Agent': BROWSER }, cache: 'no-store', signal: AbortSignal.timeout(30_000) })
+  const res = await abbFetch(url)
   if (!res.ok) throw new Error(`AudioBook Bay answered ${res.status}`)
   return res.text()
 }

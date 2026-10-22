@@ -21,13 +21,14 @@ import { tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
 import { findCover } from './covers'
-import { seriesBooks, type SearchBy } from './searchrules'
+import { seriesBooks, seriesTitles, type HardcoverSeries, type SearchBy } from './searchrules'
 import { bookInfo, type OpenLibraryWork } from './titlerules'
 import { lazyLibrarianKey, sessionSecret } from './token'
 
 export const LAZYLIBRARIAN_URL = process.env.LAZYLIBRARIAN_URL ?? 'http://lazylibrarian:5299'
 export const ABS_URL = process.env.ABS_URL ?? 'http://audiobookshelf:80'
 const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
+const HARDCOVER_URL = process.env.HARDCOVER_URL ?? 'https://api.hardcover.app/v1/graphql'
 
 /** A row of LazyLibrarian's wanted table (getSnatched, getHistory): one download of one book. */
 type Download = { BookID: string; AuxInfo?: string; DownloadID?: string; Status?: string }
@@ -149,6 +150,61 @@ export async function openLibrary(term: string, by: SearchBy = 'title'): Promise
   return (await res.json()).docs ?? []
 }
 
+async function hardcover<T>(query: string, variables: object): Promise<T> {
+  const res = await fetch(HARDCOVER_URL, {
+    method: 'POST',
+    headers: {
+      // Hardcover's page shows the token with "Bearer " in front; accept it pasted either way.
+      Authorization: `Bearer ${process.env.HARDCOVER_TOKEN!.replace(/^Bearer\s+/i, '')}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'Arrmy (https://github.com/Craftyplayz/Arrmy)',
+    },
+    body: JSON.stringify({ query, variables }),
+    cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok || body.errors) throw new Error(`Hardcover → ${res.status} ${JSON.stringify(body.errors ?? body.error ?? '').slice(0, 200)}`)
+  return body.data as T
+}
+
+/** The best-matching series on Hardcover, its books found in OpenLibrary (for their BookIDs), in reading order. */
+async function hardcoverSeries(term: string): Promise<OpenLibraryDoc[]> {
+  const { search } = await hardcover<{ search: { ids: (string | number)[] } }>(
+    'query ($q: String!) { search(query: $q, query_type: "Series", per_page: 1) { ids } }',
+    { q: term },
+  )
+  const id = Number(search.ids[0])
+  if (!id) return []
+  // From Hardcover's guide to a series' books: one per position, most popular first, no duplicates or compilations.
+  const { series } = await hardcover<{ series: HardcoverSeries[] }>(
+    `query ($id: Int!) { series(where: {id: {_eq: $id}}) { name author { name } book_series(
+      distinct_on: position, order_by: [{position: asc}, {book: {users_count: desc}}],
+      where: {position: {_is_null: false}, compilation: {_eq: false}, book: {canonical_id: {_is_null: true}, is_partial_book: {_eq: false}}}
+    ) { position book { title } } } }`,
+    { id },
+  )
+  if (!series[0]) return []
+  const { author, titles } = seriesTitles(series[0])
+  const quote = (s: string) => s.replace(/"/g, '')
+  // The first 12: all the page shows (searchAudiobooks), and OpenLibrary limits how fast it's asked.
+  const docs = await Promise.all(titles.slice(0, 12).map((t) => openLibrary(`title:"${quote(t)}"${author ? ` author:"${quote(author)}"` : ''}`).then((d) => d[0])))
+  const seen = new Set<string>()
+  return docs.filter((d): d is OpenLibraryDoc => !!d && !seen.has(d.key) && !!seen.add(d.key))
+}
+
+/** By series: Hardcover's list when HARDCOVER_TOKEN is set (OpenLibrary leaves many books untagged), else OpenLibrary's series field. */
+async function seriesDocs(term: string) {
+  if (process.env.HARDCOVER_TOKEN)
+    try {
+      const docs = await hardcoverSeries(term)
+      if (docs.length) return docs
+    } catch (e) {
+      console.warn(`[books] ${(e as Error).message}`)
+    }
+  return seriesBooks(await openLibrary(term, 'series'))
+}
+
 /** A book's description, author and rating from OpenLibrary (BookIDs are its work ids); undefined if it can't be reached. */
 const olGet = async <T>(path: string) => {
   const res = await fetch(`${OPENLIBRARY_URL}${path}`, {
@@ -211,7 +267,7 @@ export async function betterPoster(r: RequestRow) {
 // statuses show; ask Audiobookshelf per book if owned audiobooks show as not Available.
 export async function searchAudiobooks(term: string, by: SearchBy = 'title') {
   const [docs, status, library] = await Promise.all([
-    openLibrary(term, by).then((d) => (by === 'series' ? seriesBooks(d) : d)),
+    by === 'series' ? seriesDocs(term) : openLibrary(term, by),
     // LazyLibrarian down: still show what OpenLibrary found, just without statuses.
     statusLookup().catch((e) => {
       console.warn(`[books] LazyLibrarian: ${(e as Error).message}`)

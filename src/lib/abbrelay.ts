@@ -6,12 +6,21 @@
 // which asks to switch to HTTP/2 mid-request, and Next.js's server leaves that hanging. Node's plain server answers it
 // as HTTP/1.1. The port isn't published or tunnelled, and the key in the address is checked anyway.
 import { createServer } from 'node:http'
+import { fetch as undiciFetch, ProxyAgent } from 'undici'
 // .ts so plain node (the tests) can load this file too
 import { audiobookBayToken, safeEqual, sessionSecret } from './token.ts'
 
 export const ABB_URL = process.env.ABB_URL ?? 'https://audiobookbay.lu'
 export const BROWSER = 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
 export const RELAY_PORT = Number(process.env.ABB_RELAY_PORT ?? 3001)
+
+// The home connection can't reach AudioBook Bay (it times out), so in the Stack it goes through the VPN's proxy
+// (ABB_PROXY, gluetun:8888), like Prowlarr's indexers. undici's fetch: Node's own can't take a proxy per request.
+const proxy = process.env.ABB_PROXY ? new ProxyAgent(process.env.ABB_PROXY) : undefined
+
+/** Fetches an AudioBook Bay page as a browser would, through the VPN when ABB_PROXY is set. */
+export const abbFetch = (url: string) =>
+  undiciFetch(url, { headers: { 'User-Agent': BROWSER }, dispatcher: proxy, signal: AbortSignal.timeout(30_000) })
 
 /** The address LazyLibrarian's AudioBook Bay setting gets. scripts/init.mjs writes the same for fresh installs. */
 export const relayAddress = () => `http://arrmy:${RELAY_PORT}/abb/${audiobookBayToken(sessionSecret())}`
@@ -34,7 +43,7 @@ export function startAudiobookBayRelay() {
     const target = req.method === 'GET' ? upstreamUrl(req.url ?? '/', audiobookBayToken(sessionSecret())) : 405
     if (typeof target === 'number') return res.writeHead(target).end()
     try {
-      const page = await fetch(target, { headers: { 'User-Agent': BROWSER }, signal: AbortSignal.timeout(30_000) })
+      const page = await abbFetch(target)
       res.writeHead(page.status, { 'Content-Type': page.headers.get('content-type') ?? 'text/html' }).end(await page.text())
     } catch (e) {
       res.writeHead(502).end(`AudioBook Bay: ${(e as Error).message}`)

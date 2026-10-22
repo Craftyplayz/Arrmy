@@ -48,6 +48,8 @@ services:
       PORTAINER_STACK_URL: ${PORTAINER_STACK_URL:-}
       ABS_API_KEY: ${ABS_API_KEY:-}
       TMDB_API_KEY: ${TMDB_API_KEY:-}
+      HARDCOVER_TOKEN: ${HARDCOVER_TOKEN:-}
+      ABB_PROXY: http://gluetun:8888 # AudioBook Bay times out on the home connection: through the VPN instead
       DOCTOR: ${CLAUDE_CODE_OAUTH_TOKEN:+on} # hands Problems to the doctor only when it's set up
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config

@@ -1,6 +1,22 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { creditsOf, pickCompanies, pickPerson, searchByOf, seriesBooks } from '../src/lib/searchrules.ts'
+import { creditsOf, pickCompanies, pickPerson, searchByOf, seriesBooks, seriesTitles } from '../src/lib/searchrules.ts'
+
+test('seriesTitles: main books in order, no novellas or untitled positions', () => {
+  const s = {
+    name: 'The Lord of the Rings',
+    author: { name: 'J.R.R. Tolkien' },
+    book_series: [
+      { position: 1, book: { title: 'The Fellowship of the Ring' } },
+      { position: 1.5, book: { title: 'A Novella' } },
+      { position: 2, book: { title: 'The Two Towers' } },
+      { position: 3, book: { title: 'The Return of the King' } },
+      { position: null, book: { title: 'A Companion' } },
+    ],
+  }
+  assert.deepEqual(seriesTitles(s), { author: 'J.R.R. Tolkien', titles: ['The Fellowship of the Ring', 'The Two Towers', 'The Return of the King'] })
+  assert.deepEqual(seriesTitles({ name: 'x', author: null, book_series: [] }), { author: undefined, titles: [] })
+})
 
 test('search by: only what the tab offers, and movies and TV only with TMDB', () => {
   assert.equal(searchByOf('movie', 'actor', true), 'actor')

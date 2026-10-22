@@ -59,6 +59,17 @@ export function creditsOf<T extends Credit>(credits: { cast?: T[]; crew?: T[] },
     .slice(0, max)
 }
 
+/** One series as Hardcover lists it: one book per position, without duplicates or compilations (books.ts's query filters those). */
+export type HardcoverSeries = { name: string; author?: { name: string } | null; book_series: { position: number | null; book: { title: string } }[] }
+
+/** The series' main books in reading order, to look up in OpenLibrary. Whole positions only: 1.5 is a novella between books. */
+export function seriesTitles(s: HardcoverSeries) {
+  return {
+    author: s.author?.name,
+    titles: s.book_series.filter((b) => b.position !== null && Number.isInteger(b.position)).map((b) => b.book.title),
+  }
+}
+
 /**
  * OpenLibrary's series field also catches books about a series and box sets by nobody. Keeps the books by the
  * series' most frequent author, oldest first, which is usually reading order.
