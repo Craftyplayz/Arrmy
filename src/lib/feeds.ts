@@ -564,6 +564,7 @@ const RELEASE_PAGES: Record<string, Releases> = {
   Audiobookshelf: onGitHub('advplyr/audiobookshelf'),
   FlareSolverr: onGitHub('FlareSolverr/FlareSolverr'),
   Tautulli: onGitHub('Tautulli/Tautulli'),
+  Kometa: onGitHub('Kometa-Team/Kometa'),
   qBittorrent: {
     // Tags without GitHub releases; each tag's Changelog file starts with its own version.
     changelog: 'https://www.qbittorrent.org/news',
@@ -635,6 +636,7 @@ const RELEASES: Record<string, () => Promise<{ version: string; url: string }>> 
   Audiobookshelf: () => latest('advplyr/audiobookshelf'),
   FlareSolverr: () => latest('FlareSolverr/FlareSolverr'),
   Tautulli: () => latest('Tautulli/Tautulli'),
+  Kometa: () => latest('Kometa-Team/Kometa'), // a nightly job with no API, so any new release counts
   gluetun: () => latest('qdm12/gluetun'),
   cloudflared: () => latest('cloudflare/cloudflared'),
   Plex: async () => {

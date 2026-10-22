@@ -37,6 +37,7 @@ export const ICONS: Record<string, string> = {
   Plex: ICON('plex'),
   FlareSolverr: ICON('flaresolverr'),
   Tautulli: ICON('tautulli'),
+  Kometa: ICON('kometa'),
   gluetun: ICON('gluetun'),
   cloudflared: ICON('cloudflare'),
   GitHub: ICON('github'),
