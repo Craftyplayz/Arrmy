@@ -30,8 +30,12 @@ const page = async (url: string) => {
   return res.text()
 }
 
-/** The book page links and titles on the first page of results. Throws if AudioBook Bay doesn't answer. */
-export const searchPage = async (query: string) => parseSearch(await page(`${ABB_URL}/?s=${encodeURIComponent(query).replace(/%20/g, '+')}`))
+/**
+ * The book page links and titles on the first page of results. Throws if AudioBook Bay doesn't answer. Lower case: a
+ * capital letter makes it answer with its latest uploads instead ("Lord of the Rings serkis" finds nothing, seen 2026-10-23).
+ */
+export const searchPage = async (query: string) =>
+  parseSearch(await page(`${ABB_URL}/?s=${encodeURIComponent(query.toLowerCase()).replace(/%20/g, '+')}`))
 
 /** First page of results. A failing search throws; a book page that fails or has no info hash is skipped. */
 export async function searchAudiobookBay(query: string): Promise<Release[]> {
