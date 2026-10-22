@@ -283,6 +283,7 @@ The current look (Sidebar dashboard colours and pages, Search-first Home) was pi
 - **More Media Types.** Music (Lidarr → Plex); Books and Periodicals (LazyLibrarian → Kavita); Comics (Kapowarr → Kavita); Manga (Mangarr → Kavita).
 - **Better Movies + TV.** Anime routed to anime-tuned Radarr and Sonarr, Recyclarr quality profiles, Bazarr subtitles.
 - **YouTube channels** (TubeArchivist), once its Plex plugin is confirmed to work.
+- **The doctor's steps in Discord** (chosen 2026-10-22, about 30 minutes). Today only Claude's final answer reaches #problems, and the container log says only "looking into it". Planned: post "Claude is looking into this…" when a run starts, then edit that card with the answer plus **Checked** (each `get` it made, e.g. `radarr /queue`) and **Fixed** (each `fix` it ran, e.g. `retry radarr 412`), so a fix can be confirmed rather than taken from Claude's summary. The doctor would record steps from Claude Code's `stream-json` output. An Admin panel with run history was considered and left for later.
 
 ### Possible integrations
 
