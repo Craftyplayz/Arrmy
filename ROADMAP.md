@@ -202,7 +202,7 @@ A form for Requesters to report issues ("this episode has no audio") was conside
 
 Asked for 2026-10-21. The All tab (searching every Media Type at once) is built: see The site under Done. Still to come, so Search works like Overseerr's:
 
-- Suggestions appear as you type, and only for the Media Type tab you are on (Movies shows only movies, and the same for TV, Books and every later type). Never people or companies mixed in.
+- Suggestions appear as you type, and only for the Media Type tab you are on (Movies shows only movies, and the same for TV, Books and every later type). Never people or companies mixed in. **Built 2026-10-22:** up to 8 titles after a 0.3 second pause in typing (2 letters or more), with Media Type, year and status; arrow keys and Enter, or a click, search for that title. All suggests from every Media Type. Tested Local (the route, against a fake Radarr). **Not yet seen in a browser.**
 - A small control on each tab switches what is searched, so a person can look for something other than a title:
   - **Movies and TV:** actor, director, studio or company (Marvel, Disney).
   - **Books and audiobooks:** individual book, series, author.

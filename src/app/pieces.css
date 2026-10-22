@@ -87,6 +87,13 @@ a.ar-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
 .ar-find-box button { position: absolute; top: 50%; right: 8px; display: grid; place-items: center; width: 42px; height: 42px; padding: 0; background: var(--btn); border: 0; border-radius: 50%; color: #fff; cursor: pointer; transform: translateY(-50%); }
 .ar-find-box button:hover { background: var(--btn-hover); }
 .ar-find-box svg { width: 20px; height: 20px; }
+/* titles suggested as a person types */
+.ar-suggest { position: absolute; top: calc(100% + 6px); right: 0; left: 0; z-index: 5; margin: 0; padding: 6px; overflow: hidden; background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); box-shadow: 0 8px 24px rgb(0 0 0 / .4); list-style: none; }
+.ar-suggest li { display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-radius: var(--radius); cursor: pointer; }
+.ar-suggest li:hover, .ar-suggest li[aria-selected="true"] { background: var(--accent-soft); }
+.ar-suggest img, .ar-suggest-poster { flex: none; width: 32px; height: 48px; object-fit: cover; background: var(--card2); border-radius: 4px; }
+.ar-suggest .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ar-suggest small { display: flex; align-items: center; gap: 8px; margin-top: 2px; color: var(--muted); font-size: 13px; }
 .ar-seg { display: inline-flex; gap: 2px; margin-top: 16px; padding: 4px; background: var(--sunken); border: 1px solid var(--line); border-radius: 999px; }
 .ar .ar-seg a { padding: 7px 16px; border-radius: 999px; color: var(--muted); font-size: 15px; text-decoration: none; }
 .ar .ar-seg a:hover { color: var(--text); }

@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import Form from 'next/form'
 import Link from 'next/link'
-import { search, type SearchResult } from '@/lib/arr'
+import { searchMany, type Found, type SearchResult } from '@/lib/arr'
 import type { MediaType } from '@/lib/db'
 import { requireUser } from '@/lib/session'
 import { requestAudiobook, requestMovie, requestTv } from './actions'
 import { AutoRefresh } from './auto-refresh'
 import { SubmitButton } from './submit-button'
+import { SuggestField } from './suggest'
 import { Badge } from './ui'
 
 export const metadata: Metadata = { title: 'Search' }
@@ -41,16 +42,8 @@ export default async function SearchPage({
   let results: Found[] | undefined
   let error = ''
   if (q) {
-    const types: MediaType[] = type === 'all' ? ['movie', 'tv', 'audiobook'] : [type]
-    const settled = await Promise.allSettled(types.map((t) => search(t, q)))
-    const down = types.filter((t, i) => settled[i].status === 'rejected')
-    settled.forEach((r) => r.status === 'rejected' && console.error(r.reason))
-    const lists = settled.map((r, i) => (r.status === 'fulfilled' ? r.value.map((result) => ({ r: result, type: types[i] })) : []))
-    if (down.length < types.length) {
-      // All: each search's best hit in turn, so no Media Type is buried under another's
-      const longest = Math.max(...lists.map((l) => l.length))
-      results = Array.from({ length: longest }, (_, i) => lists.flatMap((l) => l[i] ?? [])).flat()
-    }
+    const { found, down } = await searchMany(type, q)
+    results = found
     if (down.length) {
       const names = `${down.map((t) => LABELS[t][0]).join(' and ')} ${down.length === 1 ? "isn't" : "aren't"} responding`
       error = results ? `${names}, so some results are missing. Try again in a minute.` : `${names}. Try again in a minute.`
@@ -63,15 +56,8 @@ export default async function SearchPage({
         <h1 className="ar-logo">Arrmy</h1>
         <Form action="/" className="ar-find-box">
           <input type="hidden" name="type" value={type} />
-          <input
-            className="field"
-            type="search"
-            name="q"
-            defaultValue={q}
-            placeholder={LABELS[type][2]}
-            aria-label={LABELS[type][1]}
-            autoFocus
-          />
+          {/* keyed on the tab, so switching tabs drops the last tab's suggestions */}
+          <SuggestField key={type} type={type} q={q} placeholder={LABELS[type][2]} label={LABELS[type][1]} />
           <button aria-label="Search" title="Search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
               <path d="M11 4a7 7 0 1 0 0 14 7 7 0 1 0 0-14zM20 20l-3.5-3.5" />
@@ -106,9 +92,6 @@ export default async function SearchPage({
     </div>
   )
 }
-
-/** A search result and which search found it. */
-type Found = { r: SearchResult; type: MediaType }
 
 /** One search result: poster, title, its Media Type, a line of overview, its status, and what can still be requested. */
 function Result({ r, type, mode, q, eager }: { r: SearchResult; type: MediaType; mode: Mode; q: string; eager: boolean }) {

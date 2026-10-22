@@ -177,6 +177,27 @@ export async function search(type: MediaType, term: string): Promise<SearchResul
   )
 }
 
+/** A search result and which search found it. */
+export type Found = { r: SearchResult; type: MediaType }
+
+/** A title suggested under the search field as a person types. */
+export type Suggestion = { type: MediaType; id: number | string; title: string; year?: number; poster?: string; status?: string }
+
+/**
+ * One Media Type, or 'all' of them at once, each search's best hit in turn so no Media Type is buried under another's.
+ * A search that is down only drops its own results; `found` is undefined only when every one is down.
+ */
+export async function searchMany(mode: MediaType | 'all', term: string): Promise<{ found?: Found[]; down: MediaType[] }> {
+  const types: MediaType[] = mode === 'all' ? ['movie', 'tv', 'audiobook'] : [mode]
+  const settled = await Promise.allSettled(types.map((t) => search(t, term)))
+  settled.forEach((r) => r.status === 'rejected' && console.error(r.reason))
+  const down = types.filter((_, i) => settled[i].status === 'rejected')
+  if (down.length === types.length) return { down }
+  const lists = settled.map((r, i) => (r.status === 'fulfilled' ? r.value.map((result) => ({ r: result, type: types[i] })) : []))
+  const longest = Math.max(...lists.map((l) => l.length))
+  return { found: Array.from({ length: longest }, (_, i) => lists.flatMap((l) => l[i] ?? [])).flat(), down }
+}
+
 export type RequestDetails = { status: Status | null; seasons: number[]; bytes: number }
 
 /**
