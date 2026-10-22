@@ -20,8 +20,17 @@ export const RELAY_PORT = Number(process.env.ABB_RELAY_PORT ?? 3001)
 const proxy = process.env.ABB_PROXY ? new ProxyAgent(process.env.ABB_PROXY) : undefined
 
 /** Fetches an AudioBook Bay page as a browser would, through the VPN when ABB_PROXY is set. */
-export const abbFetch = (url: string) =>
-  undiciFetch(url, { headers: { 'User-Agent': BROWSER }, dispatcher: proxy, signal: AbortSignal.timeout(30_000) })
+export async function abbFetch(url: string) {
+  // Up to 3 tries: from some VPN servers it drops about 1 connection in 10, and an Edition search makes ~20.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await undiciFetch(url, { headers: { 'User-Agent': BROWSER }, dispatcher: proxy, signal: AbortSignal.timeout(30_000) })
+    } catch (e) {
+      if (attempt === 3) throw e
+      await new Promise((r) => setTimeout(r, 2000))
+    }
+  }
+}
 
 /** The address LazyLibrarian's AudioBook Bay setting gets. scripts/init.mjs writes the same for fresh installs. */
 export const relayAddress = () => `http://arrmy:${RELAY_PORT}/abb/${audiobookBayToken(sessionSecret())}`

@@ -94,17 +94,20 @@ export async function findEdition(id: string) {
     // result costs a page fetch. Down or changed: Prowlarr's results still count, and the summary says it failed.
     let abbFound = 0
     let abbAnswered = false
+    let abbFailed = 0
     let abbError: string | undefined
     const abb = (query: string) =>
       searchAudiobookBay(query).then(
         (r) => ((abbAnswered = true), (abbFound += r.length), r),
         (err) => {
+          abbFailed++
           abbError = (err as Error).message.slice(0, 120)
           console.warn(`[editions] AudioBook Bay: ${abbError}`)
           return [] as Release[]
         },
       )
-    const found = await Promise.all([...queries.map(search), ...queries.filter((q) => q.endsWith(` ${edition}`)).map(abb)])
+    const abbQueries = queries.filter((q) => q.endsWith(` ${edition}`))
+    const found = await Promise.all([...queries.map(search), ...abbQueries.map(abb)])
     const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
     const candidates = editionCandidates(releases, titles, edition, series)
     const summary: EditionSearch = {
@@ -113,8 +116,11 @@ export async function findEdition(id: string) {
       singles: candidates.filter((c) => c.kind !== 'pack').length,
       seeded: candidates.filter((c) => c.kind === 'single').length,
       packs: candidates.filter((c) => c.kind === 'pack').length,
-      // Failed only when no AudioBook Bay search answered: one that did still counts its results.
-      ...(abbError && !abbAnswered ? { abb: 'failed' as const, abbError } : { abb: abbFound }),
+      // Failed only when no AudioBook Bay search answered: one that did still counts its results, and the error says
+      // how many didn't (the series search that finds packs may be among them).
+      ...(abbError && !abbAnswered
+        ? { abb: 'failed' as const, abbError }
+        : { abb: abbFound, ...(abbError && { abbError: `${abbFailed} of ${abbQueries.length} searches failed: ${abbError}` }) }),
     }
     for (const { release, kind } of candidates) {
       if (kind === 'pack' ? !(await grabPack(release, tagOf(id), titles).catch(() => false)) : !(await grab(release, tagOf(id)).then(() => true, () => false))) continue

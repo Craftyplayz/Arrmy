@@ -165,6 +165,10 @@ test('an audiobook still not found an hour after its Request is Missing, and say
   })
   assert.equal(bookProblem({ ...book, search: { ...search, abb: 4 } }, now)?.detail, 'AudioBook Bay and Prowlarr found 19 releases; none of this book read by Andy Serkis.')
   assert.equal(
+    bookProblem({ ...book, search: { ...search, abb: 4, abbError: '1 of 2 searches failed: fetch failed' } }, now)?.detail,
+    'AudioBook Bay answered only partly (1 of 2 searches failed: fetch failed); found 19 releases in all; none of this book read by Andy Serkis.',
+  )
+  assert.equal(
     bookProblem({ ...book, narrator: 'Full Cast', search: { ...search, packs: 2 } }, now)?.detail,
     'AudioBook Bay and Prowlarr found 19 releases; 2 looked like the Full Cast edition of this book, but none could be sent to qBittorrent.',
   )

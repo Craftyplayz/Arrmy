@@ -262,8 +262,13 @@ Find the cause. Read anything with \`${tool} get <app> <path>\`:
   how many AudioBook Bay results, or 'failed'); \`get arrmy /abb?s=<words>\` searches AudioBook Bay through the VPN now
 
 A Problem with service 'editions' is an Edition whose search found nothing. Check \`get arrmy /editions\` and
-\`get arrmy /abb?s=<title>\`. If AudioBook Bay fails through the VPN while other sites work, it is refusing this VPN
-region: run \`fix reconnect-vpn\` (give the command a 10-minute timeout), then \`fix edition-search <id>\`.
+\`get arrmy /abb?s=<title> <narrator>\` and \`get arrmy /abb?s=<series> <narrator>\`. Arrmy uses a narrator's
+whole-series upload too ("The Lord of the Rings - Narrated by Andy Serkis"): it downloads only this book's files, and
+counts it under packs. So if AudioBook Bay lists a single or series upload by this narrator but the Edition's search
+shows singles 0 and packs 0, or abbError says searches failed, Arrmy's AudioBook Bay requests failed during that search.
+That is not "nothing to find". If AudioBook Bay fails or drops requests through the VPN while other sites work, this
+VPN region is the cause: run \`fix reconnect-vpn\` (give the command a 10-minute timeout), then
+\`fix edition-search <id>\`. If AudioBook Bay works now, just run \`fix edition-search <id>\`.
 
 Fix it only when you're sure, and only with \`${tool} fix <name> <args...>\`:
 ${Object.values(FIXES)

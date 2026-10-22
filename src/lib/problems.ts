@@ -183,7 +183,12 @@ export function bookProblem(b: WaitingBook, now = Date.now()): Problem | undefin
   const s = b.search
   if (!s || s.grabbed) return // not searched yet, or found
   const n = `${s.found} release${s.found === 1 ? '' : 's'}`
-  const found = s.abb === 'failed' ? `AudioBook Bay didn't answer (${s.abbError}); Prowlarr found ${n}` : `AudioBook Bay and Prowlarr found ${n}`
+  const found =
+    s.abb === 'failed'
+      ? `AudioBook Bay didn't answer (${s.abbError}); Prowlarr found ${n}`
+      : s.abbError
+        ? `AudioBook Bay answered only partly (${s.abbError}); found ${n} in all`
+        : `AudioBook Bay and Prowlarr found ${n}`
   const which = b.narrator.toLowerCase() === 'full cast' ? 'the Full Cast edition of this book' : `this book read by ${b.narrator}`
   const why = s.singles || s.packs ? `${s.singles + s.packs} looked like ${which}, but none could be sent to qBittorrent` : `none of ${which}`
   return { ...base, service: 'editions', detail: `${found}${s.abb === 'failed' ? ',' : ';'} ${why}.` }
