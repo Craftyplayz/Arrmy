@@ -13,7 +13,8 @@ export function Nav({ links }: { links: [href: string, label: string, icon: stri
       <ul className="side-list">
         {links.map(([href, label, icon]) => (
           <li key={href}>
-            <Link href={href} aria-current={current(href) ? 'page' : undefined}>
+            {/* fully prefetched, so a click shows the page at once instead of Loading... */}
+            <Link href={href} prefetch aria-current={current(href) ? 'page' : undefined}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d={icon} />
               </svg>
