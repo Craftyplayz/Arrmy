@@ -4,6 +4,7 @@
 import { createHash } from 'node:crypto'
 import { link, mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
+import { searchAudiobookBay } from './abb'
 import { arr } from './arr'
 import { commonDir, editionCandidates, editionOf, packFiles, safeName, searchText, seriesOf, titleVariants, type EditionSearch, type Release } from './bookrules'
 import { abs, owned, scanLibrary } from './books'
@@ -18,8 +19,8 @@ const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
 export const EDITIONS_CATEGORY = 'editions'
 const SEARCH_EVERY = 6 * 3_600_000
 
-/** What Arrmy keeps per Edition id. `folder` (Author/Title (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. */
-type Edition = { title: string; author: string; folder?: string; searchedAt?: number; search?: EditionSearch }
+/** What Arrmy keeps per Edition id. `series` is OpenLibrary's name for it (null: it has none). `folder` (Author/Title (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. */
+type Edition = { title: string; author: string; series?: string | null; folder?: string; searchedAt?: number; search?: EditionSearch }
 
 // shortcut: kept in one settings row, read and rewritten whole; fine for a family's few dozen Editions.
 const editions = () => getSetting<Record<string, Edition>>('editions') ?? {}
@@ -37,7 +38,7 @@ export const editionForTags = (tags: string) => Object.keys(editions()).find((id
 const editionTorrents = async (): Promise<Torrent[]> => (await qbit(`/torrents/info?category=${EDITIONS_CATEGORY}`)).json()
 const torrentOf = (list: Torrent[], id: string) => list.find((t) => t.tags.split(', ').includes(tagOf(id)))
 
-/** A work's title, first author and cover from OpenLibrary, the same source as the search. */
+/** A work's title, first author, series and cover from OpenLibrary, the same source as the search. */
 async function openLibraryWork(bookId: string) {
   const get = async <T>(p: string): Promise<T> => {
     const res = await fetch(`${OPENLIBRARY_URL}${p}.json`, {
@@ -48,41 +49,54 @@ async function openLibraryWork(bookId: string) {
     if (!res.ok) throw new Error(`OpenLibrary ${p} → ${res.status}`)
     return res.json()
   }
-  const work = await get<{ title: string; authors?: { author: { key: string } }[]; covers?: number[] }>(`/works/${bookId}`)
+  const work = await get<{ title: string; authors?: { author: { key: string } }[]; covers?: number[]; series?: { series: { key: string } }[] }>(`/works/${bookId}`)
   const key = work.authors?.[0]?.author.key
   const author = key ? (await get<{ name: string }>(key).catch(() => undefined))?.name : undefined
+  const seriesKey = work.series?.[0]?.series.key
+  const series = seriesKey ? (await get<{ name: string }>(seriesKey).catch(() => undefined))?.name : undefined
   const cover = work.covers?.find((c) => c > 0)
-  return { title: work.title, author: author ?? 'Unknown author', poster: cover ? `https://covers.openlibrary.org/b/id/${cover}-M.jpg` : undefined }
+  return { title: work.title, author: author ?? 'Unknown author', series, poster: cover ? `https://covers.openlibrary.org/b/id/${cover}-M.jpg` : undefined }
 }
 
 /** Remembers a new Edition and starts looking for it in the background. */
 export async function addEdition(id: string) {
   const { bookId } = editionOf(id)!
   const work = await openLibraryWork(bookId)
-  if (!editions()[id]) update(id, { title: work.title, author: work.author })
+  if (!editions()[id]) update(id, { title: work.title, author: work.author, series: work.series ?? null })
   void findEdition(id)
   return work
 }
 
 const searching = new Set<string>()
 
-/** Searches Prowlarr for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
+/** Searches Prowlarr and AudioBook Bay for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
 async function findEdition(id: string) {
-  const e = editions()[id]
+  let e = editions()[id]
   const edition = editionOf(id)?.edition
   if (!e || !edition || searching.has(id)) return
   searching.add(id)
   try {
+    if (!('series' in e)) {
+      // Saved before series were kept: look it up once (a failure just means the guess from the title).
+      const series = await openLibraryWork(editionOf(id)!.bookId).then((w) => w.series ?? null, () => undefined)
+      if (series !== undefined) update(id, { series })
+      e = editions()[id] ?? e
+    }
     update(id, { searchedAt: Date.now() })
     // Indexers match words loosely: the edition's own words with each title the book goes by, the series (for packs) and the
     // title alone, with the edition checked here. Audio/Audiobook, and Audio for the indexers that file audiobooks there.
     const search = (query: string) =>
       arr<Release[]>('prowlarr', `/search?${new URLSearchParams({ query, type: 'search' })}&categories=3030&categories=3000`)
     const titles = titleVariants(e.title)
-    const series = seriesOf(e.title)
+    const series = e.series ?? seriesOf(e.title)
     const queries = [...new Set([...titles.map((t) => `${t} ${edition}`), ...(series !== e.title ? [`${series} ${edition}`] : []), ...titles])]
-    const releases = [...new Map((await Promise.all(queries.map(search))).flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
-    const candidates = editionCandidates(releases, titles, edition)
+    // AudioBook Bay isn't in Prowlarr and has narrated editions it lacks; only the queries with the edition, as each
+    // result costs a page fetch. Down or changed: Prowlarr's results still count.
+    const abb = (query: string) =>
+      searchAudiobookBay(query).catch((err) => (console.warn(`[editions] AudioBook Bay: ${(err as Error).message}`), [] as Release[]))
+    const found = await Promise.all([...queries.map(search), ...queries.filter((q) => q.endsWith(` ${edition}`)).map(abb)])
+    const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
+    const candidates = editionCandidates(releases, titles, edition, series)
     const summary: EditionSearch = {
       at: Date.now(),
       found: releases.filter((r) => r.protocol === 'torrent').length,

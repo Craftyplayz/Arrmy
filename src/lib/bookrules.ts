@@ -161,13 +161,17 @@ export function titleVariants(title: string) {
 /** A series name taken from a book's title: what comes before "and the", a colon, a dash or a bracket. */
 export const seriesOf = (title: string) => title.split(/:| and the | - |\(/i)[0].trim()
 
-const PACK = /\b\d+\s*-\s*\d+\b|\b(complete|collection|series|saga|box ?set|books)\b/i
-/** A release of the whole series by this narrator (name has the series' words, the edition and a sign of several books). */
-export function isPack(release: string, title: string, edition: string) {
+const PACK = /\b\d+\s*-\s*\d+\b|\b(complete|collection|series|saga|box ?set|books|trilogy)\b/i
+/**
+ * A release of the whole series by this narrator: name has the series' words (`series`: its real name, or seriesOf the
+ * title), the edition, and a sign of several books or the series' name up front ("The Lord of the Rings - Narrated by
+ * Andy Serkis"). A single book that starts with the series name passes too; packFiles then finds none of its files.
+ */
+export function isPack(release: string, series: string, edition: string) {
   const name = padded(release)
   const e = padded(edition)
   const narrated = FULL_CAST.test(e) ? FULL_CAST.test(name) : e.trim().split(' ').every((w) => name.includes(` ${w} `))
-  return PACK.test(release) && narrated && matchesTitle(name, seriesOf(title))
+  return (PACK.test(release) || name.startsWith(padded(series))) && narrated && matchesTitle(name, series)
 }
 
 /** The files of a pack that belong to this book: their path (folders included) has every word of one of its titles. */
@@ -194,16 +198,18 @@ export const bestEdition = (releases: Release[], title: string, edition: string)
 /**
  * What to try for an edition, best first: a seeded release of the book itself, then a seeded series pack by the narrator
  * (only the book's files are downloaded), and only if neither exists, a release of the book nobody is seeding.
+ * AudioBook Bay shows no seeders and sometimes no size: unknown counts as worth a try, after the known-seeded ones.
  */
 export type Candidate = { release: Release; kind: 'single' | 'pack' | 'seedless' }
-export function editionCandidates(releases: Release[], titles: string[], edition: string): Candidate[] {
-  const ok = releases.filter((r) => r.protocol === 'torrent' && r.size >= 50e6 && (r.magnetUrl || r.downloadUrl))
+export function editionCandidates(releases: Release[], titles: string[], edition: string, series: string): Candidate[] {
+  const ok = releases.filter((r) => r.protocol === 'torrent' && (r.size >= 50e6 || r.size === 0) && (r.magnetUrl || r.downloadUrl))
   const seeders = (r: Release) => r.seeders ?? 0
+  const alive = (r: Release) => r.seeders === undefined || r.seeders > 0
   const bySeeders = (a: Release, b: Release) => seeders(b) - seeders(a)
   const single = ok.filter((r) => isEdition(r.title, titles, edition))
   return [
-    ...single.filter((r) => seeders(r) > 0).sort(bySeeders).map((release) => ({ release, kind: 'single' as const })),
-    ...ok.filter((r) => seeders(r) > 0 && !single.includes(r) && isPack(r.title, titles[0], edition)).sort(bySeeders).map((release) => ({ release, kind: 'pack' as const })),
+    ...single.filter(alive).sort(bySeeders).map((release) => ({ release, kind: 'single' as const })),
+    ...ok.filter((r) => alive(r) && !single.includes(r) && isPack(r.title, series, edition)).sort(bySeeders).map((release) => ({ release, kind: 'pack' as const })),
     ...single.filter((r) => seeders(r) === 0).sort((a, b) => b.size - a.size).map((release) => ({ release, kind: 'seedless' as const })),
   ]
 }

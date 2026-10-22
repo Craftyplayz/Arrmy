@@ -123,9 +123,9 @@ test('Edition search: retitled books, packs by the narrator, the order to try, a
   assert.ok(isEdition("Harry Potter and The Sorcerer\'s Stone Audiobook by Jim Dale", titles, 'Jim Dale'), 'the US title with the same narrator')
   assert.ok(!isEdition("Harry Potter and The Sorcerer's Stone Audiobook by Stephen Fry", titles, 'Jim Dale'), 'not another narrator')
   assert.equal(seriesOf("Harry Potter and the Philosopher's Stone"), 'Harry Potter')
-  assert.ok(isPack('Harry Potter Audio Books 1-7; Read by Jim Dale [MP3]', titles[0], 'Jim Dale'))
-  assert.ok(!isPack('Harry Potter Audio Books 1-7; Read by Stephen Fry', titles[0], 'Jim Dale'), 'another narrator')
-  assert.ok(!isPack('Twilight Complete Collection Jim Dale', titles[0], 'Jim Dale'), 'another series')
+  assert.ok(isPack('Harry Potter Audio Books 1-7; Read by Jim Dale [MP3]', seriesOf(titles[0]), 'Jim Dale'))
+  assert.ok(!isPack('Harry Potter Audio Books 1-7; Read by Stephen Fry', seriesOf(titles[0]), 'Jim Dale'), 'another narrator')
+  assert.ok(!isPack('Twilight Complete Collection Jim Dale', seriesOf(titles[0]), 'Jim Dale'), 'another series')
 
   const r = (title: string, seeders: number, size = 1e9) => ({ title, seeders, size, protocol: 'torrent', downloadUrl: 'x' })
   const releases = [
@@ -134,8 +134,17 @@ test('Edition search: retitled books, packs by the narrator, the order to try, a
     r('Complete Harry Potter Audiobook by Jim Dale [MP3]', 19),
     r("Harry Potter and The Sorcerer's Stone Audiobook by Jim Dale", 5),
   ]
-  assert.deepEqual(editionCandidates(releases, titles, 'Jim Dale').map((c) => [c.kind, c.release.seeders]), [['single', 5], ['pack', 28], ['pack', 19], ['seedless', 0]])
-  assert.deepEqual(editionCandidates(releases.slice(0, 3), titles, 'Jim Dale').map((c) => c.kind), ['pack', 'pack', 'seedless'])
+  assert.deepEqual(editionCandidates(releases, titles, 'Jim Dale', 'Harry Potter').map((c) => [c.kind, c.release.seeders]), [['single', 5], ['pack', 28], ['pack', 19], ['seedless', 0]])
+  assert.deepEqual(editionCandidates(releases.slice(0, 3), titles, 'Jim Dale', 'Harry Potter').map((c) => c.kind), ['pack', 'pack', 'seedless'])
+
+  const lotr = 'The Lord of the Rings Trilogy, Andy Serkis, Chapterized - J. R. R. Tolkien'
+  assert.ok(isPack(lotr, 'The Lord of the Rings', 'andy serkis'), 'a trilogy under its real series name')
+  assert.ok(!isPack(lotr, 'The Lord of the Rings', 'Phil Dragash'))
+  assert.deepEqual(editionCandidates([r(lotr, 3)], ['The Fellowship of the Ring'], 'andy serkis', 'The Lord of the Rings').map((c) => c.kind), ['pack'])
+  assert.ok(isPack('The Lord of the Rings - Narrated by Andy Serkis - Mp3 64 kbps - J R R Tolkien', 'The Lord of the Rings', 'andy serkis'), 'named after the series')
+  // AudioBook Bay: no seeders, and "?" for a size; worth a try after the seeded ones, never as seedless.
+  const abb = { title: lotr, size: 0, protocol: 'torrent', magnetUrl: 'magnet:?xt=urn:btih:x' }
+  assert.deepEqual(editionCandidates([abb, r(lotr, 3)], ['The Fellowship of the Ring'], 'andy serkis', 'The Lord of the Rings').map((c) => [c.kind, c.release.seeders]), [['pack', 3], ['pack', undefined]])
 
   const files = [
     { name: "Harry Potter Audio Books 1-7/1 Sorcerer's Stone/01.mp3" },

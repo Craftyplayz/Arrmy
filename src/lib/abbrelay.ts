@@ -9,8 +9,8 @@ import { createServer } from 'node:http'
 // .ts so plain node (the tests) can load this file too
 import { audiobookBayToken, safeEqual, sessionSecret } from './token.ts'
 
-const ABB_URL = process.env.ABB_URL ?? 'https://audiobookbay.lu'
-const BROWSER = 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
+export const ABB_URL = process.env.ABB_URL ?? 'https://audiobookbay.lu'
+export const BROWSER = 'Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0'
 export const RELAY_PORT = Number(process.env.ABB_RELAY_PORT ?? 3001)
 
 /** The address LazyLibrarian's AudioBook Bay setting gets. scripts/init.mjs writes the same for fresh installs. */
