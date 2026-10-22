@@ -240,6 +240,26 @@ The current look (Sidebar dashboard colours and pages, Search-first Home) was pi
 - **Better Movies + TV.** Anime routed to anime-tuned Radarr and Sonarr, Recyclarr quality profiles, Bazarr subtitles.
 - **YouTube channels** (TubeArchivist), once its Plex plugin is confirmed to work.
 
+### Possible integrations
+
+Chosen 2026-10-22 from a longer list, in the order they'd be built: cheap ones that others build on first (Tautulli's watch history feeds the Request page, the Admin view and Discord; watchlists share their code with the Plex Watchlist auto-request), Tdarr last since it encodes on the CPU only. Left off: Maintainerr, cross-seed, other notification apps, Home Assistant, and Jellyfin or Emby. FlareSolverr is already in the stack (Prowlarr sends indexers tagged `flaresolverr` through it), and the Admin runs Uptime Kuma separately.
+
+1. **Tautulli.** Watch history from Plex, used for:
+   - The Request page: who has watched it, and when.
+   - The Admin view: most watched, who watches what, Requests nobody has watched.
+   - Discord: a weekly summary of what got watched.
+   - Unwatched Requests: anything nobody has watched after a few weeks is listed for the Admin to remove by hand. Nothing is deleted by itself.
+2. **Watchlists and lists** from Trakt, Letterboxd and IMDb, checked every few hours, with anything new requested. Size Limits (and quotas, once built) apply as if it were clicked in Arrmy. All three ways are wanted:
+   - Each person connects their own account in Settings, and what they add to their watchlist becomes their Request. The Admin can turn this off for Requesters, leaving it to the Admin only.
+   - The Admin pastes public lists (IMDb Top 250, someone's Letterboxd list): everything on them is requested in the Admin's name, and new entries as they appear.
+   - How: Trakt has an API with sign-in. Letterboxd (movies only) and IMDb have none, so their public list pages or RSS are read instead.
+   - Same idea as the Plex Watchlist auto-request under Requester features, so they share the code.
+3. **Kometa** (formerly Plex Meta Manager). In Plex: franchise collections (Marvel, Star Wars), a "Requested by …" collection per person, quality overlays on posters (4K, HDR, audio) and status overlays (New, Leaving soon, the Request's status). Titles missing from a collection are not downloaded by themselves: they show for the Admin to approve, and an approved one becomes a normal Request.
+4. **Podcasts** (Audiobookshelf). A Podcasts tab in Search; a Request subscribes in Audiobookshelf, which then downloads new episodes by itself.
+5. **YouTube playlists** (TubeArchivist, with YouTube channels under Other planned). A Request subscribes to the playlist, and TubeArchivist's scheduled rescan downloads new videos as they are added.
+6. **autobrr.** Grabs new releases the moment a tracker announces them on IRC, instead of waiting for Radarr's and Sonarr's next RSS check. Works best with private trackers.
+7. **Tdarr.** Re-encodes big files to H.265 to save disk space. The server's Ryzen 5 5500 has no graphics, so it encodes on the CPU (about as long as the film or longer, for 1080p) and runs overnight only, so Plex isn't slowed.
+
 ## Not planned
 
 - Usenet (SABnzbd) and Unpackerr.
