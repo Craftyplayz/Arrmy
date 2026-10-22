@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite'
 import type { LogEvent, LogKind } from './logrules'
+import { DEAD_DEFAULTS, type DeadLimits } from './problems.ts'
 
 export type MediaType = 'movie' | 'tv' | 'audiobook'
 export type User = { id: number; username: string; is_admin: number }
@@ -165,6 +166,8 @@ export function setSetting(key: string, value: unknown) {
 
 /** The Admin's Size Limits in GB; 0 = no limit. episodeGb is per hour of episode. */
 export type Limits = { movieGb: number; episodeGb: number; showGb: number }
+export const getDeadLimits = (): DeadLimits => ({ ...DEAD_DEFAULTS, ...getSetting<DeadLimits>('dead') })
+
 export const getLimits = (): Limits => ({ movieGb: 0, episodeGb: 0, showGb: 0, ...getSetting<Limits>('limits') })
 
 export const waitingRequests = (type: MediaType, externalId: number | string) =>

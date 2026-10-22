@@ -2,12 +2,12 @@
 import { arr, queueOf, type QueueRecord } from './arr'
 import { coverUrl } from './bookrules'
 import { CATEGORY_APPS, duration, size } from './botrules'
-import { keptDeadReleases, requestsFor } from './db'
+import { getDeadLimits, keptDeadReleases, requestsFor } from './db'
 import { speed, type DownloadMeta } from './embeds'
 import { downloadMeta } from './media'
 import {
   byDownload,
-  DEAD_DETAIL,
+  deadDetail,
   missingProblems,
   nameOf,
   posterIn,
@@ -37,11 +37,12 @@ export async function adminOverview() {
     liveProgress().catch(() => new Map<string, unknown>()),
   ])
 
-  // The last of STRIKES dead releases in a row (see dead.ts), while it's still in qBittorrent.
+  // The last of the Admin's allowed dead releases in a row (see dead.ts), while it's still in qBittorrent.
   const dead = [...new Map(keptDeadReleases().map((d) => [d.hash, d])).values()].filter((d) => live.has(d.hash.toUpperCase()))
+  const strikes = getDeadLimits().strikes
   const deadProblem = (service: Service, g: QueueRecord[]): Problem | undefined =>
     dead.some((d) => d.hash === g[0].downloadId?.toLowerCase())
-      ? { kind: 'Failed Download', service, title: nameOf(g[0]), detail: DEAD_DETAIL, fix: 'retry', ids: g.map((r) => r.id), poster: posterIn(g[0].movie?.images ?? g[0].series?.images) }
+      ? { kind: 'Failed Download', service, title: nameOf(g[0]), detail: deadDetail(strikes), fix: 'retry', ids: g.map((r) => r.id), poster: posterIn(g[0].movie?.images ?? g[0].series?.images) }
       : undefined
   const groups = [
     ...byDownload(movieQueue).map((g) => ({ service: 'radarr' as const, g })),
@@ -54,7 +55,7 @@ export async function adminOverview() {
       .map((d): Problem => {
         const book = d.item.replace('book:', '')
         const poster = requestsFor('audiobook', book)[0]?.poster ?? coverUrl(undefined, book)
-        return { kind: 'Failed Download', service: 'lazylibrarian', title: d.title, detail: DEAD_DETAIL, fix: 'retry', ids: [], hash: d.hash, poster }
+        return { kind: 'Failed Download', service: 'lazylibrarian', title: d.title, detail: deadDetail(strikes), fix: 'retry', ids: [], hash: d.hash, poster }
       }),
     ...missingProblems(missingMovies.records, missingEpisodes.records, movieQueue, tvQueue),
   ]

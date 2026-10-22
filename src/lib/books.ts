@@ -14,6 +14,7 @@ import {
   type OpenLibraryDoc,
   type Removed,
 } from './bookrules'
+import { absKey } from './keys'
 import { addLog, getSetting, setPoster, logItem, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { watchEditions } from './editions'
 import { tellDiscord } from './notify'
@@ -52,7 +53,6 @@ export async function ll<T>(cmd: string, params: Record<string, string> = {}, se
   return body as T
 }
 
-const absKey = () => process.env.ABS_API_KEY
 
 export async function abs<T>(path: string, method = 'GET'): Promise<T> {
   const res = await fetch(`${ABS_URL}/api${path}`, {

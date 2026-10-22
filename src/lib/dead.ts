@@ -1,12 +1,12 @@
-// Dead releases: a torrent that never starts is swapped for another release. After STRIKES dead releases in a row for
+// Dead releases: a torrent that never starts is swapped for another release. After the Admin's number of dead releases in a row for
 // the same title, the last one is left alone and the Admin gets a Problem and a Discord ping instead.
 import { queueOf, retryRelease } from './arr'
 import { audiobookTorrents, dropAudiobookRelease, searchDroppedBooks } from './books'
-import { addDeadRelease, addLog, deadReleaseCount, isDeadRelease, logItem, pendingBookSearches, requestsFor, setSearchPending } from './db'
+import { addDeadRelease, addLog, deadReleaseCount, getDeadLimits, isDeadRelease, logItem, pendingBookSearches, requestsFor, setSearchPending } from './db'
 import { coverUrl } from './bookrules'
 import { announce } from './discord'
 import { embed } from './embeds'
-import { byDownload, deadReason, nameOf, posterIn, STRIKES } from './problems'
+import { byDownload, deadReason, nameOf, posterIn } from './problems'
 import { torrents } from './qbit'
 
 // The qBittorrent categories Radarr, Sonarr and LazyLibrarian file their torrents under. Anything else is left alone.
@@ -64,9 +64,10 @@ async function targets(categories: Set<string>) {
 }
 
 export async function checkDeadReleases(now = Date.now()) {
+  const limits = getDeadLimits()
   const dead = (await torrents()).flatMap((t) => {
     // A dead release grabbed again (LazyLibrarian can) is a new grab, so it's handled, and counted, again.
-    const reason = CATEGORIES.has(t.category) && !isDeadRelease(t.hash.toLowerCase(), t.added_on) && deadReason(t, now)
+    const reason = CATEGORIES.has(t.category) && !isDeadRelease(t.hash.toLowerCase(), t.added_on) && deadReason(t, now, limits)
     return reason ? [{ hash: t.hash.toLowerCase(), category: t.category, reason }] : []
   })
   if (dead.length) {
@@ -75,7 +76,7 @@ export async function checkDeadReleases(now = Date.now()) {
       const target = found.get(t.hash)
       if (!target) continue // not handed to its Service yet, or not one of theirs
       const strike = deadReleaseCount(target.item) + 1
-      const last = strike >= STRIKES
+      const last = strike >= limits.strikes
       // Swapped before it's recorded, so a swap that fails is tried again next minute.
       if (!last) await target.swap()
       addDeadRelease({ hash: t.hash, item: target.item, title: target.title, kept: last, searchPending: !last && !!target.book })
@@ -83,7 +84,7 @@ export async function checkDeadReleases(now = Date.now()) {
       // The last one becomes a Problem, which #problems announces with a ping (see feeds.ts).
       if (last) console.warn(`[dead] ${target.title}: ${t.reason}. ${strike} dead releases in a row, so it's a Problem now`)
       else {
-        console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${STRIKES})`)
+        console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${limits.strikes})`)
         announce(
           'problems',
           embed({
@@ -92,7 +93,7 @@ export async function checkDeadReleases(now = Date.now()) {
             title: target.title,
             art: target.art,
             description: `${t.reason}, so Arrmy is trying another release.`,
-            fields: [['Try', `${strike} of ${STRIKES}`]],
+            fields: [['Try', `${strike} of ${limits.strikes}`]],
           }),
         )
       }
