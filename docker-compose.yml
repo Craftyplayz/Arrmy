@@ -52,6 +52,7 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
       - ${BACKUP_DIR:-/opt/arrmy-backups}:/backups:ro # so the Discord bot can report the nightly backup
       - ${DATA_DIR:-/data}:/data # Audiobook Editions: hard-linked from torrents/ into media/audiobooks/
+      - ${CONFIG_DIR:-/opt/arrmy}/kometa:/kometa # Arrmy writes Kometa's config.yml and "Requested by" collections
     ports:
       - ${ARRMY_PORT:-7654}:3000 # only the port on the box changes; inside Docker it's always 3000
     depends_on: *after-init
@@ -223,6 +224,20 @@ services:
       - ${TDARR_PORT:-7662}:8265
     depends_on: *after-init
 
+  # Plex collections (franchises, "Requested by <name>") and poster overlays (resolution, HDR, audio, New, Leaving
+  # soon), nightly at 06:00 in TZ: after the 04:00 UTC backup even in summer time. Arrmy writes its config into this
+  # folder (it has the Plex token and the Requests). It has no Radarr or Sonarr, so it never downloads anything.
+  kometa:
+    image: kometateam/kometa:latest
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    environment:
+      TZ: ${TZ}
+      KOMETA_TIMES: "06:00"
+    volumes:
+      - ${CONFIG_DIR:-/opt/arrmy}/kometa:/config
+    depends_on: *after-init
+
   # Audiobooks, podcasts and ebooks. The paths inside the container never change, so ABS keeps
   # listening progress and stats when the files move on the server. Follows latest: it's public, so it
   # needs security fixes. ABS upgrades its database on start (one-way); the nightly backup holds the old one.
@@ -262,7 +277,8 @@ services:
             --exclude='audiobookshelf/metadata/cache' --exclude='audiobookshelf/metadata/logs' \
             --exclude='audiobookshelf/metadata/backups' --exclude='audiobookshelf/metadata/streams' \
             --exclude='tautulli/cache' --exclude='tautulli/logs' --exclude='tautulli/backups' \
-            --exclude='tdarr/temp' --exclude='tdarr/logs' --exclude='tdarr/server/Tdarr/Backups' .; then
+            --exclude='tdarr/temp' --exclude='tdarr/logs' --exclude='tdarr/server/Tdarr/Backups' \
+            --exclude='kometa/logs' --exclude='kometa/config.cache' .; then
           mv "$$name.part" "$$name" && echo "[backup] saved $$name ($$(du -h "$$name" | cut -f1))"
         else
           rm -f "$$name.part" && echo "[backup] FAILED, kept the older backups"

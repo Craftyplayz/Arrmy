@@ -39,6 +39,7 @@ export const ICONS: Record<string, string> = {
   Tautulli: ICON('tautulli'),
   autobrr: ICON('autobrr'),
   Tdarr: ICON('tdarr'),
+  Kometa: ICON('kometa'),
   gluetun: ICON('gluetun'),
   cloudflared: ICON('cloudflare'),
   GitHub: ICON('github'),

@@ -573,6 +573,7 @@ const RELEASE_PAGES: Record<string, Releases> = {
   autobrr: onGitHub('autobrr/autobrr'),
   // Its GitHub releases stopped at v1.x; the docs site has the changelog and package.json the current version.
   Tdarr: { changelog: TDARR_NOTES, page: () => TDARR_NOTES, notes: async () => '' },
+  Kometa: onGitHub('Kometa-Team/Kometa'),
   qBittorrent: {
     // Tags without GitHub releases; each tag's Changelog file starts with its own version.
     changelog: 'https://www.qbittorrent.org/news',
@@ -646,6 +647,7 @@ const RELEASES: Record<string, () => Promise<{ version: string; url: string }>> 
   Tautulli: () => latest('Tautulli/Tautulli'),
   autobrr: () => latest('autobrr/autobrr'),
   Tdarr: async () => ({ version: (await json<{ version: string }>('https://raw.githubusercontent.com/HaveAGitGat/Tdarr/master/package.json')).version, url: TDARR_NOTES }),
+  Kometa: () => latest('Kometa-Team/Kometa'), // a nightly job with no API, so any new release counts
   gluetun: () => latest('qdm12/gluetun'),
   cloudflared: () => latest('cloudflare/cloudflared'),
   Plex: async () => {

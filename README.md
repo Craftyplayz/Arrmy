@@ -53,6 +53,8 @@ On first start, the `init` container creates the `/data` folders and qBittorrent
 | Tdarr | `http://<box>:7662` | none |
 If a port is already taken on your box, change it with the `*_PORT` settings in [.env.example](.env.example).
 
+**Kometa** has no page: it runs every night at 06:00 (the stack's `TZ`) and makes Plex collections (franchises like Marvel and Star Wars, and "Requested by <name>" from Arrmy's Requests) and poster overlays (resolution with HDR and Dolby Vision, audio codec, a show's airing status, and New, More coming and Leaving soon from Arrmy). It never downloads anything: titles missing from a collection go into its report, `CONFIG_DIR/kometa/Movies_report.yml` and `TV Shows_report.yml`. Arrmy writes its config into `CONFIG_DIR/kometa` once the Admin has signed in and `TMDB_API_KEY` (the v3 key) is set; its log is in `CONFIG_DIR/kometa/logs`. To run it now: `docker exec <kometa container> /.venv/bin/python3 kometa.py --run`.
+
 **Media on your PC:** share `DATA_DIR/media` with the box's own Samba (the stack doesn't run one, since port 445 can only be used once).
 
 Plex runs on Docker's bridge network. Set **Plex → Settings → Network → LAN Networks** to your home subnet (e.g. `192.168.1.0/24`); otherwise Plex treats devices at home as remote.
