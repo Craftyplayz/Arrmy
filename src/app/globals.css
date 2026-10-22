@@ -83,7 +83,7 @@ body {
 /* phones: the brand and Sign out across the top, the links as a tab bar along the bottom */
 @media (max-width: 760px) {
     .shell { flex-direction: column; }
-    .side { flex-direction: row; align-items: center; width: auto; height: var(--header-h); padding: 0 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+    .side { box-sizing: border-box; flex-direction: row; align-items: center; width: auto; height: calc(var(--header-h) + env(safe-area-inset-top)); padding: env(safe-area-inset-top) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)); border-right: 0; border-bottom: 1px solid var(--line); }
     .side-brand { padding: 0; }
     .side-user { margin: 0 0 0 auto; padding: 0; border: 0; }
     .side-who { display: none; }
@@ -91,7 +91,7 @@ body {
     .side-list { grid-auto-columns: 1fr; grid-auto-flow: column; }
     .side-list a { flex-direction: column; justify-content: center; gap: 3px; padding: 6px 2px; font-size: 11px; }
     .side-list a[aria-current] { box-shadow: inset 0 2px 0 var(--accent); }
-    .shell-main { padding-bottom: 60px; }
+    .shell-main { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
 }
 
 /* ---------- footer ---------- */
