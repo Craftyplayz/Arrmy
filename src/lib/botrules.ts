@@ -39,8 +39,10 @@ export function plexUsers(xml: string) {
 /** Identifies a Problem across checks; the title rather than ids, which change as episodes are found. */
 export const problemKey = (p: Problem) => `${p.service}:${p.kind}:${p.title}`
 
-// Keys that change by themselves (free space, timestamps) or say nothing about settings.
-const NOISE = /^(freeSpace|totalSpace|unmappedFolders|accessible|added|capabilities|listen_port|lastExecution|message|infoLink)$/
+// Keys that change by themselves (free space, timestamps) or say nothing about settings. qBittorrent's port and network
+// interface are set by gluetun's port-forwarding hooks (docker-compose.yml) every time the VPN goes down or up.
+const NOISE =
+  /^(freeSpace|totalSpace|unmappedFolders|accessible|added|capabilities|listen_port|random_port|upnp|current_network_interface|current_interface_name|lastExecution|message|infoLink)$/
 const SECRET = /password|apikey|api_key|token|secret|passkey|cookie/i
 
 const label = (item: unknown, i: number) => {

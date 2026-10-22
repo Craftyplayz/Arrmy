@@ -98,6 +98,10 @@ test('settings snapshots: provider fields by name, lists by name, secrets hidden
   assert.equal(lines[1], 'downloadclient › qBittorrent › fields › movieCategory: movies → films')
   assert.match(lines[0], /^downloadclient › qBittorrent › fields › password: \(hidden \w+\) → \(hidden \w+\)$/)
   assert.ok(!lines.join().includes('hunter2') && !lines.join().includes('correct horse'))
+
+  // gluetun rebinds qBittorrent on every VPN restart: not a settings change
+  const qbit = (iface: string, random: boolean) => flatten({ preferences: { current_network_interface: iface, current_interface_name: iface, random_port: random, save_path: '/data' } })
+  assert.deepEqual(changes(qbit('lo', true), qbit('tun0', false)), [])
   assert.deepEqual(changes({ a: '1' }, { b: '2' }), ['b: added (2)', 'a: removed'])
   assert.equal(changes({}, Object.fromEntries([...Array(20)].map((_, i) => [`k${i}`, '1']))).at(-1), '…and 5 more')
 })
