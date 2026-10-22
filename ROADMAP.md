@@ -1,6 +1,6 @@
 # Roadmap
 
-What Arrmy does, how well each part is tested, and what comes next. Last checked against the server on 2026-10-21 (release v1.1.0-rc.35).
+What Arrmy does, how well each part is tested, and what comes next. Last checked against the server on 2026-10-22 (release v1.1.0-rc.41).
 
 **Tested** means:
 
@@ -17,7 +17,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Sign in with Plex | Plex PIN sign-in. The Plex server's owner is the Admin, people it's shared with are Requesters, anyone else is turned away. | Unit, Fake, Live for the Admin. **Not yet live:** a Requester signing in. |
 | Search and Request | Search movies and shows; request a movie, or chosen seasons of a show. Radarr or Sonarr starts searching straight away. | Fake, Live |
 | Status | Requested → Downloading (live %, read from qBittorrent every 5 seconds) → Available. | Unit, Fake, Live up to Downloading. **Not yet live:** Available (nothing has finished importing yet). |
-| Episode files | A show's panel lists every episode of its requested seasons with its file, its state (Available, Downloading, Queued, Waiting for a release, Not aired yet…) and a progress bar, read live from Sonarr and qBittorrent while the panel is open. Files are matched to episodes by `S01E03`, else by Sonarr's own parser (`1x03`, anime numbering, double episodes). The poster's % covers every file of the Request, weighted by size. | Unit (the poster %), Live (Sonarr's parser). **Not yet live:** the panel itself. |
+| Episode files | A show's Request page lists every episode of its requested seasons with its file, its state (Available, Downloading, Queued, Waiting for a release, Not aired yet…) and a progress bar, read live from Sonarr and qBittorrent every 5 seconds. (Until v1.1.0-rc.39 it waited for a drawer the page doesn't have and stayed on Loading files.) Files are matched to episodes by `S01E03`, else by Sonarr's own parser (`1x03`, anime numbering, double episodes). The poster's % covers every file of the Request, weighted by size. | Unit (the poster %), Live (Sonarr's parser). **Not yet live:** the panel itself. |
 | Edit seasons | Add or remove seasons of a requested show. Removed seasons are deleted unless someone else requested them. | Fake. **Not yet live.** |
 | Remove | Cancels a Request if nothing has downloaded; otherwise deletes the download and the files, keeping whatever another Request still wants. | Fake. **Not yet live.** |
 | Discord message | Posts in #requests when a Request becomes Available (see Discord bot). | Fake. **Not yet live.** |
@@ -25,8 +25,17 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 | Request Log | Each Request's page (Requests → Request Log) lists every step with when it started and how long it took, a ticking timer on the step running now, and the total from Request to playable. Searching, then per release: Downloading (release, indexer, size and quality for the Admin; average speed, most seeders and peers), dead releases swapped, Importing (file, quality, resolution, codec, audio languages, subtitles), and Showing up in Plex until Plex lists it. Copy log copies it as text. The Admin can download each grabbed release's .torrent, saved when it was grabbed. Requesters see their own Request's steps without release names, indexers or errors. | Unit (the steps), Local (Radarr-shaped Grab and Download webhooks, the page as Admin and as another Requester). **Not yet live.** |
 | Request Log: Arrmy's own movie search | Movies are added with Radarr's search off; Arrmy asks Radarr for every release (`GET /release`), logs them all with why each was turned down, and grabs the first acceptable one, which is Radarr's own pick. The Admin sees every release (Every release, and in Copy log) and how each indexer answered, from Prowlarr's history: results and time, or failed. Everyone sees how many were found and acceptable, or the commonest reasons none was; the log then waits for a release, which Radarr keeps watching for. Nothing acceptable for a released movie goes to #problems. If the search itself fails, Radarr searches by itself. Search again in the Admin view runs the same search. Stuck shows Arrmy's last search and why it found nothing. | Unit (the steps), Live (the API shapes: Radarr 6's releases with their rejections, Prowlarr's query history). **Not yet live:** a Request searched this way. |
 | Request Log: edits and fixes | Seasons added or removed (in that Request's log only, with who), Search again and Try another release from the Admin view (with who; Try another release ends that download's step). | Unit. **Not yet live.** |
-| Request page | Clicking a Request opens its own page. Title side: poster, synopsis, rating, genres, runtime, studio or network, dates, IMDb, TMDB, TheTVDB and trailer links (Radarr's and Sonarr's lookups), and the first 12 of the cast with headshots (Radarr's credits for movies, Sonarr's `actors` for shows when its version has them). Log side: who and when, status, Request to playable, size downloaded, average speed and best swarm, then the steps, with Edit seasons, Remove and the episode files. | Unit (the totals, the title facts, the cast). Live since v1.1.0-rc.29 (audiobook details). **Not yet seen live:** movie and show cast. |
+| Request page | Clicking a Request opens its own page: stat cards for who and when, status, Request to playable, size downloaded, average speed and best swarm; then the Request Log, the episode files (TV) and Manage (Edit seasons, Remove) on the left, and the title on the right: poster, facts (rating, genres, runtime, studio or network, dates), synopsis, IMDb, TMDB, TheTVDB and trailer links (Radarr's and Sonarr's lookups), and the first 12 of the cast with headshots (Radarr's credits for movies, Sonarr's `actors` for shows when its version has them). In the new look since v1.1.0-rc.39. | Unit (the totals, the title facts, the cast). Local (the layout, desktop and phone). Live since v1.1.0-rc.29 (audiobook details). **Not yet seen live:** movie and show cast. |
 | English-only audio | At the same quality, Radarr and Sonarr pick a release with only English audio over MULTi, Dual Audio or another language, so files are smaller. Untagged releases count as the original language, so foreign films and anime are left alone. | Unit, Live (the rule is in Radarr and Sonarr) |
+
+### The site
+
+| Feature | What it does | Tested |
+|---|---|---|
+| Look | Picked 2026-10-22 from the Layouts mockups: the Sidebar dashboard's bluer greys and a menu down the left (on phones a top bar and a bottom tab bar), Requests as a table, Admin as two columns of panels with disks as bars, Settings and the Request page as panels. Search is the Search-first design: one centred column with a big search field. Live since v1.1.0-rc.38. | Local (every page at desktop and phone width), Live. **Not yet seen live:** Admin with real data. |
+| Search: All | All, the default tab, searches movies, TV shows and audiobooks at once. Each result carries a Media Type tag, the searches' best hits take turns, and a search that is down only drops its own results. Movies, TV Shows and Audiobooks stay for finer control. Live since v1.1.0-rc.40. | Local (with Radarr and Sonarr down). **Not yet seen live:** all three answering. |
+| Instant pages | The sidebar's pages are fetched in the background as soon as any page opens, and a page seen in the last 30 seconds opens from memory, so clicks show the page at once instead of Loading. Pages with live numbers refresh themselves straight after. Live since v1.1.0-rc.41. | Local (a production build: 40–240 ms a click) |
+| Layouts | Fifteen static mockups of other ways Arrmy could look, on made-up data, each with Home, Requests, Admin and Settings tabs and phone pictures. Admin → Layouts. Kept for a future redesign or Themes. | Live |
 
 ### Audiobooks
 
@@ -180,7 +189,7 @@ Chosen 2026-10-21. A Request (or a person's default) names a preferred resolutio
 From the Seerr and Requestarr comparison, 2026-10-21. In this order:
 
 1. **Per-user approval, quotas and permissions.** Auto-approve stays the default. A per-person "Approve first" switch, and a quota such as N movies a week, protect the disk and the VPN.
-2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB.
+2. **Discover and item pages.** Trending, upcoming, genres, cast, ratings, trailers and similar titles, from TMDB. The Request page's title side (see Done) can share this data.
 3. **Library scan.** Anything Plex already has shows Available without a Request (audiobooks already do this).
 4. **Plex Watchlist auto-request.** Whatever a person adds to their Plex watchlist is requested for them.
 5. **Per-user notifications.** A Discord DM or email when your Request is Available, with an opt-out.
@@ -189,20 +198,9 @@ From the Seerr and Requestarr comparison, 2026-10-21. In this order:
 
 A form for Requesters to report issues ("this episode has no audio") was considered and dropped on 2026-10-21: see Not planned. Arrmy's own reporting to the Admin stays.
 
-### Request page
-
-Asked for 2026-10-21. Clicking a Request in All requests opens its own full page, in two halves:
-
-- **Title side.** Everything about the title, pulled from TMDB, IMDb and similar: poster, synopsis, cast, ratings, runtime, release dates, trailer.
-- **Log side.** The Request Log already built, laid out beside it: who asked and when, every step the apps took, the time from clicking Request to showing in Plex, the average download speed, and the rest of the totals.
-
-The Request Log page (`/requests/[id]`) becomes this page; the title side shares its data with the Discover and item pages above.
-
-**Built 2026-10-21, live since v1.1.0-rc.29** (see Done): the All Requests posters now open the page. Title side: poster, synopsis, rating, genres, runtime, studio or network, dates and IMDb, TMDB, TheTVDB and trailer links, from Radarr's and Sonarr's lookups, plus the first 12 of the cast with headshots (Radarr's credits for movies, Sonarr's actors for shows if its version has them). Audiobooks get a description, author, edition, first published year, rating and subjects from OpenLibrary. Log side: who and when, status, Request to playable, size downloaded, average speed and best swarm, then the steps, with Edit seasons, Remove and the episode files moved onto it. Unit tests cover the totals and the title facts.
-
 ### Search rework
 
-Asked for 2026-10-21. Search works like Overseerr's:
+Asked for 2026-10-21. The All tab (searching every Media Type at once) is built: see The site under Done. Still to come, so Search works like Overseerr's:
 
 - Suggestions appear as you type, and only for the Media Type tab you are on (Movies shows only movies, and the same for TV, Books and every later type). Never people or companies mixed in.
 - A small control on each tab switches what is searched, so a person can look for something other than a title:
