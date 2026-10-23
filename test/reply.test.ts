@@ -13,6 +13,7 @@ import {
   meanwhile,
   newMessages,
   numbered,
+  otherQuality,
   parseButton,
   releaseLine,
   replyable,
@@ -169,4 +170,25 @@ test("the reply prompt: the Admin's words as the only instructions, the news, an
   for (const f of Object.values(REPLY_FIXES) as { usage: string }[]) assert.ok(text.includes(f.usage))
   assert.ok(!text.includes('Arrmy just raised this Problem'), 'a resumed conversation has the Problem already')
   assert.ok(replyPrompt({ kind: 'Missing', title: 'Dune (2021)' }, 'hi', [], false).includes('Arrmy just raised this Problem'))
+})
+
+test('otherQuality: the most seeded release turned down only for its quality, when nothing wanted can be had', () => {
+  const q = ['WEBRip-720p is not wanted in profile']
+  const list = numbered([
+    found('1080p dead', { seeders: 51, dead: true }),
+    found('1080p blocklisted', { seeders: 6, rejections: ['Release is blocklisted'] }),
+    found('720p too big', { seeders: 90, rejections: [...q, 'Too big'] }),
+    found('720p few', { seeders: 2, rejections: q }),
+    found('720p many', { seeders: 28, rejections: q }),
+    found('720p none', { seeders: 0, rejections: q }),
+  ])
+  assert.equal(otherQuality(list)?.title, '720p many')
+  // Something wanted is still there: Radarr grabs that itself.
+  assert.equal(otherQuality(numbered([found('1080p', { seeders: 1 }), found('720p', { seeders: 28, rejections: q })])), undefined)
+  // Nobody seeding the other quality either.
+  assert.equal(otherQuality(numbered([found('720p none', { seeders: 0, rejections: q })])), undefined)
+  // A show: only a whole season, never a single episode that might be the wrong one.
+  const tv = (title: string, fullSeason: boolean) => found(title, { seeders: 9, rejections: q, fullSeason, grab: { app: 'sonarr', guid: title, indexerId: 1 } })
+  assert.equal(otherQuality(numbered([tv('S01E05', false)])), undefined)
+  assert.equal(otherQuality(numbered([tv('S01E05', false), tv('S01', true)]))?.title, 'S01')
 })

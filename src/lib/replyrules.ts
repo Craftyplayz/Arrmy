@@ -26,6 +26,8 @@ export type Found = {
   rejections: string[]
   /** Tried already, and it never started. */
   dead?: boolean
+  /** Sonarr: the whole season in one release. */
+  fullSeason?: boolean
   grab: Grab
 }
 export type Listed = Found & { n: number }
@@ -38,6 +40,23 @@ export function numbered(found: Found[]): Listed[] {
   return [...found]
     .sort((a, b) => rank(a) - rank(b) || (b.seeders ?? -1) - (a.seeders ?? -1))
     .map((f, i) => ({ ...f, n: i + 1 }))
+}
+
+/**
+ * The release to grab in another quality when nothing wanted can be had: none acceptable and alive, so the most seeded
+ * one turned down only for its quality ("WEBRip-720p is not wanted in profile"). For a show only a whole season, so it
+ * can't be the wrong episode. `list` is in numbered() order.
+ */
+export function otherQuality(list: Listed[]) {
+  if (list.some((r) => !r.rejections.length && !r.dead)) return undefined
+  return list.find(
+    (r) =>
+      !r.dead &&
+      (r.seeders ?? 0) > 0 &&
+      r.rejections.length > 0 &&
+      r.rejections.every((x) => / is not wanted in profile$/.test(x)) &&
+      (r.grab.app === 'radarr' || (r.grab.app === 'sonarr' && r.fullSeason)),
+  )
 }
 
 /** Release names are full of _ and *, which Discord would read as italics and bold. */

@@ -10,7 +10,7 @@ import { post } from './discord'
 import { grabEditionRelease, pickBookRelease, searchEditionReleases } from './editions'
 import { embed } from './embeds'
 import type { Problem } from './problems'
-import { listCards, listFile, listIntro, numbered, type Found, type Listed, type ReleaseList } from './replyrules'
+import { escape, listCards, listFile, listIntro, numbered, otherQuality, type Found, type Listed, type ReleaseList } from './replyrules'
 
 type ArrRelease = {
   guid: string
@@ -23,6 +23,7 @@ type ArrRelease = {
   protocol?: string
   quality?: { quality?: { name: string } }
   rejections?: (string | { reason: string })[]
+  fullSeason?: boolean
 }
 type ProwlarrRelease = Release & { indexer?: string; infoHash?: string }
 
@@ -58,6 +59,7 @@ async function search(p: Problem): Promise<Found[]> {
         quality: r.quality?.quality?.name,
         rejections: (r.rejections ?? []).map((x) => (typeof x === 'string' ? x : x.reason)),
         dead: dead.has(hashOf(r) ?? ''),
+        fullSeason: r.fullSeason,
         grab: { app, guid: r.guid, indexerId: r.indexerId },
       }))
   }
@@ -115,6 +117,28 @@ export async function postReleaseList(p: Problem, posted: (id: string) => void =
   posted(await post(thread, embed({ colour: 'info', app: 'Arrmy', title: 'Every release found', description: listIntro(list, shown) }), false, { file }))
   for (const c of cards) posted(await post(thread, embed({ colour: 'neutral', description: c, at: false })))
   return list
+}
+
+/**
+ * When nothing in a wanted quality can be had, grabs the best release in another one (otherQuality) and says so in the
+ * thread: a watchable copy now beats waiting. Only on the doctor's first look.
+ */
+export async function grabOtherQuality(p: Problem, list: Stored, posted: (id: string) => void = () => {}) {
+  const pick = otherQuality(list.entries)
+  if (!pick) return
+  const done = await grabListed(problemKey(p), pick.n)
+  const facts = [pick.quality, pick.seeders !== undefined && `${pick.seeders} seeders`].filter(Boolean).join(', ')
+  posted(
+    await post(
+      problemThread(p),
+      embed({
+        colour: 'ok',
+        app: 'Arrmy',
+        title: 'Grabbed another quality',
+        description: `Nothing in the wanted quality can be downloaded, so Arrmy grabbed number ${pick.n} instead (${facts}).\n${escape(done)}\nReply if you'd rather wait for the wanted quality.`,
+      }),
+    ),
+  )
 }
 
 /** The latest list as the doctor reads it (`get arrmy /releases`): one line per release, without the grab details. */

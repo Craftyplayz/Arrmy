@@ -8,7 +8,7 @@ import { announce, botEnabled, post } from './discord'
 import { getSetting, setSetting } from './db'
 import { embed } from './embeds'
 import type { Problem } from './problems'
-import { postReleaseList } from './releaselist'
+import { grabOtherQuality, postReleaseList } from './releaselist'
 import { OPEN_FOR } from './replyrules'
 import { doctorToken, sessionSecret } from './token'
 
@@ -159,7 +159,9 @@ export function investigate(p: Problem) {
     started: (id) => {
       updateState(key, (s) => s && { ...s, seen: id })
       if (botEnabled())
-        postReleaseList(p, (id) => remember(key, id)).catch((e: Error) => console.warn(`[doctor] releases for ${p.title}: ${e.message}`))
+        postReleaseList(p, (id) => remember(key, id))
+          .then((list) => grabOtherQuality(p, list, (id) => remember(key, id)))
+          .catch((e: Error) => console.warn(`[doctor] releases for ${p.title}: ${e.message}`))
     },
   })
 }
