@@ -102,6 +102,8 @@ export type MissingEpisode = {
 }
 
 const HOUR = 3_600_000
+/** How long a fresh Request's first search gets before nothing found is a Problem. */
+const FIRST_SEARCH = 15 * 60_000
 const age = (iso?: string) => (iso ? Date.now() - Date.parse(iso) : 0)
 
 export function nameOf(r: QueueRecord) {
@@ -135,12 +137,12 @@ export function queueProblem(service: Service, group: QueueRecord[]): Problem | 
   return { kind, service, title: nameOf(r), detail, fix: 'retry', ids: group.map((g) => g.id), poster: posterIn(r.movie?.images ?? r.series?.images) }
 }
 
-/** Missing = nothing found for over an hour (a fresh Request's first search gets that long), and not downloading. */
+/** Missing = nothing found for over FIRST_SEARCH (a fresh Request's first search gets that long), and not downloading. */
 export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode[], movieQueue: QueueRecord[], tvQueue: QueueRecord[]) {
   const downloadingMovies = new Set(movieQueue.map((q) => q.movieId))
   const downloadingEpisodes = new Set(tvQueue.map((q) => q.episodeId))
   const problems: Problem[] = movies
-    .filter((m) => m.isAvailable && !downloadingMovies.has(m.id) && age(m.added) > HOUR)
+    .filter((m) => m.isAvailable && !downloadingMovies.has(m.id) && age(m.added) > FIRST_SEARCH)
     .map((m) => ({
       kind: 'Missing',
       service: 'radarr',
@@ -154,7 +156,7 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
   const seasons = new Map<string, MissingEpisode[]>()
   for (const e of episodes) {
     // A day's grace after airing: new episodes usually take hours to be released.
-    if (downloadingEpisodes.has(e.id) || age(e.airDateUtc) < 24 * HOUR || age(e.series?.added) < HOUR) continue
+    if (downloadingEpisodes.has(e.id) || age(e.airDateUtc) < 24 * HOUR || age(e.series?.added) < FIRST_SEARCH) continue
     const key = `${e.seriesId}:${e.seasonNumber}`
     seasons.set(key, [...(seasons.get(key) ?? []), e])
   }
@@ -175,9 +177,9 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
 /** An audiobook Request still waiting with nothing downloading. An Edition has its narrator and last search. */
 export type WaitingBook = { book: string; title: string; poster?: string | null; requestedAt: number; narrator?: string; search?: EditionSearch }
 
-/** Missing = still nothing an hour after the Request: an Edition whose last search grabbed nothing, or a book LazyLibrarian still wants. */
+/** Missing = still nothing FIRST_SEARCH after the Request: an Edition whose last search grabbed nothing, or a book LazyLibrarian still wants. */
 export function bookProblem(b: WaitingBook, now = Date.now()): Problem | undefined {
-  if (now - b.requestedAt < HOUR) return
+  if (now - b.requestedAt < FIRST_SEARCH) return
   const base = { kind: 'Missing' as const, title: b.title, fix: 'search' as const, ids: [], book: b.book, poster: b.poster }
   if (!b.narrator) return { ...base, service: 'lazylibrarian', detail: 'LazyLibrarian has found no release yet.' }
   const s = b.search
@@ -228,7 +230,7 @@ export function movieStuck(m: MissingMovie, now = Date.now()): Stuck {
     return { ...base, reason: 'Not released yet', detail }
   }
   if (!m.lastSearchTime) return { ...base, reason: 'Searching', detail: `Not searched yet, added ${ago(m.added, now)}`, fix: 'search' }
-  if (now - Date.parse(m.added) < HOUR) return { ...base, reason: 'Searching', detail: `Searched ${ago(m.lastSearchTime, now)}` }
+  if (now - Date.parse(m.added) < FIRST_SEARCH) return { ...base, reason: 'Searching', detail: `Searched ${ago(m.lastSearchTime, now)}` }
   return { ...base, reason: 'Nothing found', detail: `No release found. Last searched ${ago(m.lastSearchTime, now)}`, fix: 'search' }
 }
 
@@ -249,7 +251,7 @@ export function seasonStuck(eps: MissingEpisode[], now = Date.now()): Stuck {
     .sort()
     .at(-1)
   // A day's grace after airing: new episodes usually take hours to be released.
-  const fresh = eps.every((x) => now - Date.parse(x.airDateUtc ?? '') < 24 * HOUR) || now - Date.parse(e.series?.added ?? '') < HOUR
+  const fresh = eps.every((x) => now - Date.parse(x.airDateUtc ?? '') < 24 * HOUR) || now - Date.parse(e.series?.added ?? '') < FIRST_SEARCH
   if (fresh) return { ...base, reason: 'Searching', detail: `${count} aired recently; releases usually take a few hours` }
   return { ...base, reason: 'Nothing found', detail: `${count} with no release found${searched ? `. Last searched ${ago(searched, now)}` : ''}`, fix: 'search' }
 }

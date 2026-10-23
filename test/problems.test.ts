@@ -93,7 +93,8 @@ test('Stuck: why a movie Radarr wants isn’t downloading', () => {
   assert.equal(movieStuck(movie({ isAvailable: false, inCinemas: '2027-01-05T00:00:00Z' }), now).detail, 'In cinemas 5 Jan 2027')
   assert.equal(movieStuck(movie({ isAvailable: false }), now).detail, 'No release date yet')
   assert.deepEqual([movieStuck(movie({}), now).reason, movieStuck(movie({}), now).fix], ['Searching', 'search'], 'never searched')
-  assert.equal(movieStuck(movie({ added: '2026-10-20T11:30:00Z', lastSearchTime: '2026-10-20T11:31:00Z' }), now).reason, 'Searching', 'added under an hour ago')
+  assert.equal(movieStuck(movie({ added: '2026-10-20T11:50:00Z', lastSearchTime: '2026-10-20T11:51:00Z' }), now).reason, 'Searching', 'added under 15 minutes ago')
+  assert.equal(movieStuck(movie({ added: '2026-10-20T11:40:00Z', lastSearchTime: '2026-10-20T11:41:00Z' }), now).reason, 'Nothing found', 'after 15 minutes')
   const nothing = movieStuck(movie({ lastSearchTime: '2026-10-20T10:00:00Z' }), now)
   assert.deepEqual([nothing.reason, nothing.detail, nothing.ids], ['Nothing found', 'No release found. Last searched 2 h ago', [7]])
 })
@@ -152,11 +153,11 @@ test('ago reads in minutes, hours, then days', () => {
   assert.equal(agoText(now - 3 * 86_400_000, now), '3 days ago')
 })
 
-test('an audiobook still not found an hour after its Request is Missing, and says why', () => {
+test('an audiobook still not found 15 minutes after its Request is Missing, and says why', () => {
   const now = Date.parse('2026-10-20T12:00:00Z')
   const search = { at: now, found: 19, singles: 0, seeded: 0, packs: 0 }
   const book = { book: 'OL27513W~Andy Serkis', title: 'The Two Towers (Andy Serkis)', requestedAt: now - 2 * 3_600_000, narrator: 'Andy Serkis' }
-  assert.equal(bookProblem({ ...book, search }, now - 1.5 * 3_600_000), undefined) // within the hour
+  assert.equal(bookProblem({ ...book, search }, book.requestedAt + 10 * 60_000), undefined) // within 15 minutes
   assert.equal(bookProblem(book, now), undefined) // not searched yet
   assert.equal(bookProblem({ ...book, search: { ...search, singles: 1, seeded: 1, grabbed: 'Grabbed X.' } }, now), undefined)
   assert.deepEqual(bookProblem({ ...book, search: { ...search, abb: 'failed', abbError: 'fetch failed' } }, now), {

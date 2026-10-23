@@ -141,11 +141,12 @@ async function downloads() {
   if (JSON.stringify(tracked) !== saved) setSetting('bot:downloads', tracked)
 }
 
-// The Problems forum. Arrmy fixes most stalled downloads by itself within 15 minutes (dead.ts), so a Problem is only
-// announced once it has lasted 20; one Arrmy raised itself after its tries ran out is announced at once. The Admin is
+// The Problems forum. Arrmy fixes most stalled downloads by itself within 15 minutes (dead.ts), so a failure is only
+// announced once it has lasted 15; Missing, which has waited already, and one Arrmy raised itself after its tries ran
+// out are announced at once. The Admin is
 // only @mentioned when the doctor can't solve it (doctor.ts). A Problem that goes away gets "Issue resolved".
 type Seen = Record<string, { first: number; told: boolean; thread?: ThreadRef }>
-const GRACE = 20 * 60_000
+const GRACE = 15 * 60_000
 const SERVICE_APPS = { radarr: 'Radarr', sonarr: 'Sonarr', lazylibrarian: 'LazyLibrarian', editions: 'Arrmy' } // Arrmy: no app page to link
 
 async function problems() {
@@ -166,7 +167,8 @@ async function problems() {
     const s = (seen[key] = before?.[key] ?? { first: now, told: !before })
     if (before && !s.thread) s.told = false // told before the forums: it gets its thread now
     s.thread = problemThread(p)
-    if (s.told || (!raisedByArrmy && now - s.first < GRACE)) continue
+    // Missing has waited already (FIRST_SEARCH in problems.ts), so only failures get the grace.
+    if (s.told || (!raisedByArrmy && p.kind !== 'Missing' && now - s.first < GRACE)) continue
     s.told = true
     const admin = publicUrl('arrmy', '/admin#problems')
     // The doctor pings when it can't solve a Problem; without the doctor every Problem needs the Admin.
