@@ -6,8 +6,8 @@ import { link, mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { searchAudiobookBay } from './abb'
 import { arr } from './arr'
-import { commonDir, editionCandidates, editionOf, packFiles, safeName, searchText, seriesOf, titleVariants, type EditionSearch, type Release } from './bookrules'
-import { abs, owned, scanLibrary } from './books'
+import { commonDir, editionCandidates, editionOf, packFiles, safeName, searchText, seriesOf, titleVariants, type EditionSearch, type LLBook, type Release } from './bookrules'
+import { abs, ll, owned, scanLibrary } from './books'
 import { getSetting, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { tellDiscord } from './notify'
 import type { Torrent } from './problems'
@@ -19,8 +19,13 @@ const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
 export const EDITIONS_CATEGORY = 'editions'
 const SEARCH_EVERY = 6 * 3_600_000
 
-/** What Arrmy keeps per Edition id. `series` is OpenLibrary's name for it (null: it has none). `folder` (Author/Title (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. */
-type Edition = { title: string; author: string; series?: string | null; folder?: string; searchedAt?: number; search?: EditionSearch }
+/**
+ * What Arrmy keeps per Edition id. `series` is OpenLibrary's name for it (null: it has none). `folder` (Author/Title
+ * (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. `picked`: not an Edition but a book LazyLibrarian was looking
+ * for (keyed by its BookID), whose release the Admin picked from the doctor's list: Arrmy downloads and files it the
+ * same way, as Author/Title, and LazyLibrarian stops looking.
+ */
+type Edition = { title: string; author: string; series?: string | null; folder?: string; searchedAt?: number; search?: EditionSearch; picked?: boolean }
 
 // shortcut: kept in one settings row, read and rewritten whole; fine for a family's few dozen Editions.
 const editions = () => getSetting<Record<string, Edition>>('editions') ?? {}
@@ -34,6 +39,9 @@ function update(id: string, change: Partial<Edition> | undefined) {
 /** The qBittorrent tag that marks an Edition's torrent. */
 const tagOf = (id: string) => `edition-${createHash('sha1').update(id).digest('hex').slice(0, 12)}`
 export const editionForTags = (tags: string) => Object.keys(editions()).find((id) => tags.split(', ').includes(tagOf(id)))
+
+/** A LazyLibrarian book the Admin picked a release for, which Arrmy downloads and files itself. */
+export const isPicked = (id: number | string) => !!editions()[String(id)]?.picked
 
 const editionTorrents = async (): Promise<Torrent[]> => (await qbit(`/torrents/info?category=${EDITIONS_CATEGORY}`)).json()
 const torrentOf = (list: Torrent[], id: string) => list.find((t) => t.tags.split(', ').includes(tagOf(id)))
@@ -69,7 +77,57 @@ export async function addEdition(id: string) {
 
 const searching = new Set<string>()
 
-/** Searches Prowlarr and AudioBook Bay for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
+/**
+ * Searches Prowlarr and AudioBook Bay for the Edition: every release found, the ones that are this Edition (best
+ * first), and the search's summary. Nothing is grabbed.
+ */
+export async function searchEditionReleases(id: string) {
+  const e = editions()[id]
+  const edition = editionOf(id)?.edition
+  if (!e || !edition) throw new Error(`No Edition ${id}`)
+  // Indexers match words loosely: the edition's own words with each title the book goes by, the series (for packs) and the
+  // title alone, with the edition checked here. Audio/Audiobook, and Audio for the indexers that file audiobooks there.
+  const search = (query: string) =>
+    arr<(Release & { indexer?: string })[]>('prowlarr', `/search?${new URLSearchParams({ query, type: 'search' })}&categories=3030&categories=3000`)
+  const titles = titleVariants(e.title)
+  const series = e.series ?? seriesOf(e.title)
+  const queries = [...new Set([...titles.map((t) => `${t} ${edition}`), ...(series !== e.title ? [`${series} ${edition}`] : []), ...titles])]
+  // AudioBook Bay isn't in Prowlarr and has narrated editions it lacks; only the queries with the edition, as each
+  // result costs a page fetch. Down or changed: Prowlarr's results still count, and the summary says it failed.
+  let abbFound = 0
+  let abbAnswered = false
+  let abbFailed = 0
+  let abbError: string | undefined
+  const abb = (query: string) =>
+    searchAudiobookBay(query).then(
+      (r) => ((abbAnswered = true), (abbFound += r.length), r.map((x) => ({ ...x, indexer: 'AudioBook Bay' }))),
+      (err) => {
+        abbFailed++
+        abbError = (err as Error).message.slice(0, 120)
+        console.warn(`[editions] AudioBook Bay: ${abbError}`)
+        return [] as (Release & { indexer?: string })[]
+      },
+    )
+  const abbQueries = queries.filter((q) => q.endsWith(` ${edition}`))
+  const found = await Promise.all([...queries.map(search), ...abbQueries.map(abb)])
+  const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
+  const candidates = editionCandidates(releases, titles, edition, series)
+  const summary: EditionSearch = {
+    at: Date.now(),
+    found: releases.filter((r) => r.protocol === 'torrent').length,
+    singles: candidates.filter((c) => c.kind !== 'pack').length,
+    seeded: candidates.filter((c) => c.kind === 'single').length,
+    packs: candidates.filter((c) => c.kind === 'pack').length,
+    // Failed only when no AudioBook Bay search answered: one that did still counts its results, and the error says
+    // how many didn't (the series search that finds packs may be among them).
+    ...(abbError && !abbAnswered
+      ? { abb: 'failed' as const, abbError }
+      : { abb: abbFound, ...(abbError && { abbError: `${abbFailed} of ${abbQueries.length} searches failed: ${abbError}` }) }),
+  }
+  return { releases, candidates, summary, titles }
+}
+
+/** Searches for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
 export async function findEdition(id: string) {
   let e = editions()[id]
   const edition = editionOf(id)?.edition
@@ -83,45 +141,7 @@ export async function findEdition(id: string) {
       e = editions()[id] ?? e
     }
     update(id, { searchedAt: Date.now() })
-    // Indexers match words loosely: the edition's own words with each title the book goes by, the series (for packs) and the
-    // title alone, with the edition checked here. Audio/Audiobook, and Audio for the indexers that file audiobooks there.
-    const search = (query: string) =>
-      arr<Release[]>('prowlarr', `/search?${new URLSearchParams({ query, type: 'search' })}&categories=3030&categories=3000`)
-    const titles = titleVariants(e.title)
-    const series = e.series ?? seriesOf(e.title)
-    const queries = [...new Set([...titles.map((t) => `${t} ${edition}`), ...(series !== e.title ? [`${series} ${edition}`] : []), ...titles])]
-    // AudioBook Bay isn't in Prowlarr and has narrated editions it lacks; only the queries with the edition, as each
-    // result costs a page fetch. Down or changed: Prowlarr's results still count, and the summary says it failed.
-    let abbFound = 0
-    let abbAnswered = false
-    let abbFailed = 0
-    let abbError: string | undefined
-    const abb = (query: string) =>
-      searchAudiobookBay(query).then(
-        (r) => ((abbAnswered = true), (abbFound += r.length), r),
-        (err) => {
-          abbFailed++
-          abbError = (err as Error).message.slice(0, 120)
-          console.warn(`[editions] AudioBook Bay: ${abbError}`)
-          return [] as Release[]
-        },
-      )
-    const abbQueries = queries.filter((q) => q.endsWith(` ${edition}`))
-    const found = await Promise.all([...queries.map(search), ...abbQueries.map(abb)])
-    const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
-    const candidates = editionCandidates(releases, titles, edition, series)
-    const summary: EditionSearch = {
-      at: Date.now(),
-      found: releases.filter((r) => r.protocol === 'torrent').length,
-      singles: candidates.filter((c) => c.kind !== 'pack').length,
-      seeded: candidates.filter((c) => c.kind === 'single').length,
-      packs: candidates.filter((c) => c.kind === 'pack').length,
-      // Failed only when no AudioBook Bay search answered: one that did still counts its results, and the error says
-      // how many didn't (the series search that finds packs may be among them).
-      ...(abbError && !abbAnswered
-        ? { abb: 'failed' as const, abbError }
-        : { abb: abbFound, ...(abbError && { abbError: `${abbFailed} of ${abbQueries.length} searches failed: ${abbError}` }) }),
-    }
+    const { candidates, summary, titles } = await searchEditionReleases(id)
     for (const { release, kind } of candidates) {
       if (kind === 'pack' ? !(await grabPack(release, tagOf(id), titles).catch(() => false)) : !(await grab(release, tagOf(id)).then(() => true, () => false))) continue
       summary.grabbed =
@@ -140,6 +160,19 @@ export async function findEdition(id: string) {
   } finally {
     searching.delete(id)
   }
+}
+
+/**
+ * Sends one release the Admin picked to qBittorrent for the Edition, as findEdition would: a pack downloads only this
+ * book's files. Throws if it can't (a pack without this book in it is deleted again).
+ */
+export async function grabEditionRelease(id: string, release: Release, pack: boolean) {
+  if (!editions()[id]) throw new Error('That Edition is no longer requested')
+  if (pack) {
+    if (!(await grabPack(release, tagOf(id), titleVariants(editions()[id].title)))) throw new Error("None of that pack's files is this book, so it was deleted again")
+  } else await grab(release, tagOf(id))
+  const before = editions()[id].search ?? { at: Date.now(), found: 0, singles: 0, seeded: 0, packs: 0 }
+  update(id, { search: { ...before, grabbed: `The Admin picked ${release.title}.` } })
 }
 
 /**
@@ -201,9 +234,9 @@ async function grabPack(r: Release, tag: string, titles: string[]) {
   return false
 }
 
-/** Hard-links a finished torrent into Author/Title (Edition), without its own top folder, and has Audiobookshelf scan. */
+/** Hard-links a finished torrent into Author/Title (Edition), or Author/Title for a pick, without its own top folder, and has Audiobookshelf scan. */
 async function file(id: string, e: Edition, t: Torrent) {
-  const folder = `${safeName(e.author)}/${safeName(`${e.title} (${editionOf(id)!.edition})`)}`
+  const folder = `${safeName(e.author)}/${safeName(e.picked ? e.title : `${e.title} (${editionOf(id)!.edition})`)}`
   const dir = path.join(AUDIOBOOKS_ROOT, folder)
   const files = (await torrentFiles(t.hash)).filter((f) => (f.priority ?? 1) > 0) // a pack's other books are skipped
   const shared = commonDir(files.map((f) => f.name))
@@ -239,13 +272,43 @@ export async function watchEditions(waiting: RequestRow[]) {
     if (!e) continue
     const t = torrentOf(list, id)
     if (!e.folder && t && (t.progress >= 1 || t.completion_on > 0)) await file(id, e, t)
-    else if (!e.folder && !t && (!e.search || Date.now() - (e.searchedAt ?? 0) > SEARCH_EVERY)) void findEdition(id)
+    else if (e.picked && !e.folder && !t) {
+      // The pick's torrent was deleted before it finished: LazyLibrarian looks for the book again.
+      update(id, undefined)
+      await ll('queueBook', { id, type: 'AudioBook' })
+      await ll('searchBook', { id, type: 'AudioBook' })
+      console.log(`[editions] ${e.title}: the picked release is gone, so LazyLibrarian is looking again`)
+      continue
+    } else if (!e.folder && !t && !e.picked && (!e.search || Date.now() - (e.searchedAt ?? 0) > SEARCH_EVERY)) void findEdition(id)
     if (!editions()[id]?.folder) continue
     for (const r of waiting.filter((r) => String(r.external_id) === id)) {
       markAvailable(r.id)
       tellDiscord(r)
     }
   }
+}
+
+/**
+ * Downloads the release the Admin picked for a book LazyLibrarian was looking for, and files it into Audiobookshelf
+ * when it finishes (watchEditions), as Author/Title. LazyLibrarian stops looking, so it doesn't download a second copy.
+ * A pick made before replaces the earlier one.
+ */
+export async function pickBookRelease(bookId: string, release: Release) {
+  const before = editions()[bookId]
+  if (before && !before.picked) throw new Error('That id is an Edition, not a LazyLibrarian book')
+  if (before?.folder) throw new Error('It is in Audiobookshelf already')
+  const book = (await ll<LLBook[]>('getAllBooks')).find((b) => b.BookID === bookId)
+  if (!book) throw new Error('LazyLibrarian no longer has that book')
+  const earlier = before && torrentOf(await editionTorrents(), bookId)
+  if (earlier) await deleteTorrents([earlier.hash])
+  update(bookId, { title: book.BookName, author: book.AuthorName, picked: true, searchedAt: Date.now() })
+  try {
+    await grab(release, tagOf(bookId))
+  } catch (e) {
+    update(bookId, undefined)
+    throw e
+  }
+  await ll('unqueueBook', { id: bookId, type: 'AudioBook' })
 }
 
 /** Deletes the Edition's torrent and, once filed, its folder in Audiobookshelf. Its folder is always one Arrmy made. */

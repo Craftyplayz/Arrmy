@@ -11,8 +11,9 @@ import { adminThread, CATEGORY_APPS, changes, compareVersions, flatten, linked, 
 import { COMMANDS } from './commands'
 import { absKey } from './keys'
 import { getDeadLimits, getSetting, getThread, recentLog, setSetting } from './db'
-import { investigate } from './doctor'
+import { investigate, keepProblem } from './doctor'
 import { backfillRequests } from './notify'
+import { checkReplies } from './replies'
 import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, retag, syncAvatar, syncBarEmoji, threadLink } from './discord'
 import { downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
 import { downloadMeta } from './media'
@@ -168,6 +169,8 @@ async function problems() {
     const s = (seen[key] = before?.[key] ?? { first: now, told: !before })
     if (before && !s.thread) s.told = false // told before the forums: it gets its thread now
     s.thread = problemThread(p)
+    // The doctor's replies need the Problem as it is now (and a thread from before replies existed gets one).
+    if (s.asked && process.env.DOCTOR) keepProblem(s.thread.key, p)
     // A Problem told before toldAt was kept was handed to the doctor then, so it isn't asked again.
     if (s.told && !s.asked && s.toldAt !== undefined && (raisedByArrmy || now - s.toldAt >= DOCTOR_AFTER)) {
       s.asked = true
@@ -644,6 +647,8 @@ export function startBot() {
   // Problems also reach a plain webhook; everything else needs the bot.
   if (botEnabled() || process.env.DISCORD_WEBHOOK_URL) every(2, 'problems', problems)
   if (!botEnabled()) return
+  // The Admin's replies to the doctor in Problem threads: Discord doesn't send messages, so they're read.
+  if (process.env.DOCTOR) every(1 / 3, 'replies', () => checkReplies())
   registerCommands(COMMANDS).catch((e) => console.warn(`[bot] slash commands: ${e.message}`))
   syncBarEmoji().catch((e) => console.warn(`[bot] progress bar emoji: ${e.message}`))
   syncAvatar().catch((e) => console.warn(`[bot] avatar: ${e.message}`))

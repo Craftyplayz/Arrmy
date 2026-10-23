@@ -106,6 +106,9 @@ export function upsertUser(user: { id: number; username: string; isAdmin: boolea
 
 export const getUser = (id: number) => db().prepare('SELECT * FROM users WHERE id = ?').get(id) as User | undefined
 
+/** The Admin's own user, once they have signed in. */
+export const adminUser = () => db().prepare('SELECT * FROM users WHERE is_admin = 1 ORDER BY id LIMIT 1').get() as User | undefined
+
 export function addRequest(r: {
   userId: number
   type: MediaType
@@ -206,6 +209,10 @@ export const isDeadRelease = (hash: string, addedOn: number) =>
 /** Dead releases for one title in the last week, so a later Request for it starts with a clean slate. */
 export const deadReleaseCount = (item: string) =>
   (db().prepare("SELECT count(*) AS n FROM dead_releases WHERE item = ? AND at > datetime('now', '-7 days')").get(item) as { n: number }).n
+
+/** Torrent hashes of every release that died in the last 30 days, to mark them in the doctor's list of releases. */
+export const deadHashes = () =>
+  new Set((db().prepare("SELECT hash FROM dead_releases WHERE at > datetime('now', '-30 days')").all() as { hash: string }[]).map((r) => r.hash))
 
 export const keptDeadReleases = () => db().prepare('SELECT * FROM dead_releases WHERE kept = 1').all() as DeadRelease[]
 

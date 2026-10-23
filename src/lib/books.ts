@@ -16,7 +16,7 @@ import {
 } from './bookrules'
 import { absKey } from './keys'
 import { getSetting, setPoster, logItem, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
-import { watchEditions } from './editions'
+import { editionStatuses, isPicked, watchEditions } from './editions'
 import { log, tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
@@ -129,8 +129,11 @@ async function statusLookup() {
 
 export const audiobookStatuses = async (bookIds: string[]): Promise<(Status | null)[]> => {
   if (!bookIds.length) return []
-  const status = await statusLookup()
-  return bookIds.map(status)
+  // A book whose release the Admin picked is Arrmy's to download and file, like an Edition (editions.ts).
+  const picked = bookIds.filter(isPicked)
+  const [status, pickedStatuses] = await Promise.all([statusLookup(), editionStatuses(picked)])
+  const ofPicked = new Map(picked.map((id, i) => [id, pickedStatuses[i]]))
+  return bookIds.map((id) => ofPicked.get(id) ?? status(id))
 }
 
 /**
@@ -419,8 +422,9 @@ export function startAudiobookWatch() {
   setInterval(async () => {
     try {
       const all = waitingOfType('audiobook')
-      await watchEditions(all.filter((r) => editionOf(r.external_id))).catch((e) => console.warn(`[editions] ${(e as Error).message}`))
-      const waiting = all.filter((r) => !editionOf(r.external_id))
+      const arrmys = (r: RequestRow) => !!editionOf(r.external_id) || isPicked(r.external_id) // Arrmy downloads and files these itself
+      await watchEditions(all.filter(arrmys)).catch((e) => console.warn(`[editions] ${(e as Error).message}`))
+      const waiting = all.filter((r) => !arrmys(r))
       const books = await ll<LLBook[]>('getAllBooks')
       const statuses = await audiobookStatuses(waiting.map((r) => String(r.external_id)))
       for (const [i, r] of waiting.entries()) {

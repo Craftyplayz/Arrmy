@@ -91,7 +91,7 @@ What Arrmy does, how well each part is tested, and what comes next. Last checked
 
 ### Discord bot
 
-A Discord app with no live connection: Arrmy calls Discord's API with the bot's token, and Discord sends slash commands to `https://arrmy.<domain>/api/discord`, checked against the app's public key. Read-only: an update is something you start in Portainer (ADR 0001). Setup in the README. Without the bot, `DISCORD_WEBHOOK_URL` still gets #requests and #problems.
+A Discord app with no live connection: Arrmy calls Discord's API with the bot's token, and Discord sends slash commands and button clicks to `https://arrmy.<domain>/api/discord`, checked against the app's public key. It reports, and the Admin can reply to the doctor in a Problem's thread (ADR 0004); an update is still something you start in Portainer (ADR 0001). Setup in the README. Without the bot, `DISCORD_WEBHOOK_URL` still gets #requests and #problems.
 
 Every message is a card in DESIGN.md's colours (green for Available and success, red for failures, --info for Downloading and notes, the accent for something to act on) with art beside it: the poster or cover from Radarr, Sonarr or OpenLibrary, a Plex avatar, a committer's GitHub avatar, or the app's icon. The title links to the title's page on TMDB, TVDB or OpenLibrary, and the author line to the app on this server. No emoji; British English.
 
@@ -101,7 +101,7 @@ Every message is a card in DESIGN.md's colours (green for Available and success,
 | #requests | New Requests, edits and removals (who did it, and whose Request it was), Requests refused for the Size Limit, and Available. | Messages: Fake. **Not yet run:** the calls from Arrmy's pages. |
 | #downloads | One card per download, titled with the movie, show or book (the release name small underneath), updated every 5 seconds: a smooth progress bar in DESIGN.md's --btn → --accent gradient (its 50 pieces are drawn by Arrmy and uploaded once as the bot's own emoji), then speed, time left, seeders and who asked. When it finishes, the card moves to #downloaded with how long it took; a removed torrent's card is deleted, so #downloads only ever shows what's downloading. Discord allows about 5 edits per 5 seconds in a channel, so each round edits the 4 that waited longest. | Unit, Fake |
 | #problems | A new Problem once it has lasted 20 minutes (Arrmy fixes most stalled downloads within 15), or at once when Arrmy raised it after 3 dead releases. @mentions the Admin. Also each dead release Arrmy swaps. | Fake |
-| The doctor | Each Problem #problems announces goes to the `doctor` container, where Claude Code (on the Admin's Claude subscription, `CLAUDE_CODE_OAUTH_TOKEN`) reads Radarr's, Sonarr's, Prowlarr's and qBittorrent's APIs to find the cause. It can run only the safe fixes in `scripts/doctor.mjs` (search again, another release, test indexers, restart an app, recheck or start a torrent) and posts Cause, What I did and What you need to do under the Problem. Once a day per Problem, at most `DOCTOR_DAILY` (10) a day. Not LazyLibrarian or Arrmy's own log yet. | Unit (the limits, the fixes' checks). **Not yet live.** |
+| The doctor | Each Problem #problems announces goes to the `doctor` container, where Claude Code (on the Admin's Claude subscription, `CLAUDE_CODE_OAUTH_TOKEN`) reads Radarr's, Sonarr's, Prowlarr's and qBittorrent's APIs to find the cause. It can run only the safe fixes in `scripts/doctor.mjs` (search again, another release, test indexers, restart an app, recheck or start a torrent) and posts Cause, What I did and What you need to do under the Problem. Once a day per Problem, at most `DOCTOR_DAILY` (10) a day. Not LazyLibrarian or Arrmy's own log yet. Its first look posts every release found, numbered, and the Admin can reply in the thread (Replying to the doctor in Problems, under Later). | Unit (the limits, the fixes' checks), Local (replies). **Not yet live.** |
 | #admin-log | Size Limit changes and one-click fixes, with who. Settings changed inside Radarr, Sonarr, Prowlarr and qBittorrent, checked every 5 minutes, with passwords and keys hidden (not LazyLibrarian: its API reads one setting at a time). People given or losing access to Plex or Audiobookshelf. | Unit, Fake. **Not yet run:** the calls from Arrmy's pages. |
 | #system | An app down (two failed checks a minute apart), back or restarted. The VPN down, or its forwarded port changing. Health warnings from Radarr, Sonarr and Prowlarr (failing indexers). A disk under 10% free. Each nightly backup, or none for 26 hours. @mentions for down, disk and backup. | Fake |
 | #updates | Arrmy commits and releases, and when the server starts running a new one. New releases of Radarr, Sonarr, Prowlarr, qBittorrent, Audiobookshelf, FlareSolverr, gluetun, cloudflared and Plex, checked every 6 hours against what the server runs, with a link to Portainer. @mentions for app updates and full Arrmy releases. LazyLibrarian has no releases, only commits, so it isn't watched. | Unit (versions), Fake |
@@ -136,7 +136,7 @@ Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since t
 
 ### Discord bot rework
 
-Asked for 2026-10-22, choices settled 2026-10-23. **Built 2026-10-23, not yet deployed or run against Discord** (Unit only). A Request thread is per title, not per person: a second Request for the same title posts in the first one's thread. Instead of posting everything into channels, the bot opens a forum thread for each thing and posts everything about that thing inside it. It stays read-only for now (ADR 0001), but it will likely get buttons later (Search again, Approve…), so each thread's id is stored against its Request, Problem or media item, so that later code can find it.
+Asked for 2026-10-22, choices settled 2026-10-23. **Built 2026-10-23, not yet deployed or run against Discord** (Unit only). A Request thread is per title, not per person: a second Request for the same title posts in the first one's thread. Instead of posting everything into channels, the bot opens a forum thread for each thing and posts everything about that thing inside it. It stayed read-only (ADR 0001) until replying to the doctor (below), but it will likely get more buttons later (Search again, Approve…), so each thread's id is stored against its Request, Problem or media item, so that later code can find it.
 
 The new Arrmy category:
 
@@ -195,6 +195,57 @@ How: forum channels (type 15), threads opened with `POST /channels/<forum>/threa
 About 2–3 days (the first-run backfill and the status tags add most of a day). The order to build it in: forums and thread storage, Problems (it absorbs **The doctor's steps in Discord** under Other planned), Requests, Admin, Activity.
 
 **Later:** a page on the site with the weekly summary.
+
+### Replying to the doctor in Problems
+
+Asked for 2026-10-23. **Built 2026-10-23, not yet deployed or run against Discord** (Unit, and Local: the whole flow against a fake Discord, Radarr, qBittorrent, Arrmy and Claude Code). The first step away from a read-only bot (ADR 0004). When the doctor has looked into a Problem and couldn't solve it (the thread is tagged **Needs you**), the Admin just types a reply in that thread, in plain English: no slash command, no @mention, no special words. The doctor carries on from where it stopped and answers in the same thread. A reply can be a question ("why did the first two releases die?"), an instruction ("download number 4", "search again tomorrow", "leave it, I'll sort it myself") or extra facts ("the indexer's login changed, I've fixed it in Prowlarr").
+
+**Seeing the reply without a live connection** (`replies.ts`). Discord only sends Arrmy interactions (slash commands, buttons), never ordinary messages, so the bot keeps having no live connection and reads the threads instead:
+
+- Every 20 seconds, for each Problem thread tagged **Needs you**, Arrmy reads `GET /channels/<thread>/messages?after=<last seen>`. Usually that's zero or one thread, so zero or one call.
+- Only messages whose author is `DISCORD_ADMIN_ID` count; the bot's own and anyone else's are skipped. What the doctor last read is kept per thread with the Problem (the `doctor:threads` setting), so a restart doesn't answer the same reply twice.
+- A reply goes once the Admin has stopped typing for 20 seconds, so several messages in a row go as one. An @mention of the bot is taken out.
+- Discord hides what a message says from bots unless the app has the **Message Content Intent** switched on (README, Discord step 1). Without it the text comes back empty: Arrmy posts once in the thread that the switch is off, and a reply that @mentions the bot still works.
+- The Gateway was considered (ADR 0004): replies would arrive at once, but it means a connection that's always open. A `/reply` command would have saved about half a day, but means remembering a command.
+
+**What happens with the reply.**
+
+1. Arrmy shows "Arrmy is typing…", tags the thread **Doctor working** and posts "Got it, looking at this again."
+2. It sends the doctor (`POST /reply` on port 3002, same token) the Problem, the Admin's words and what the bot posted in the thread since the doctor last looked (a dead release swapped and the like), as news, not instructions. The doctor's own posts and the list of releases aren't sent back to it.
+3. The doctor carries on the same Claude Code conversation it had for this Problem (`claude -p --resume <session id>`), so Claude remembers what it checked and why it gave up. The session ids are kept per Problem in the doctor's `/config/sessions.json`, beside the conversations. If that conversation is gone, it starts again from the Problem and the first prompt.
+4. The steps (**Checked**, **Fixed**) and the answer are posted as before. `Solved: yes` goes back to **Open** until the feed marks it **Resolved**; no goes back to **Needs you**, without another @mention. The Admin can reply again, as many times as they like.
+5. Replying while the doctor is still working waits until the run ends, then goes as the next reply. A thread tagged **Open** takes replies for an hour after the doctor said solved ("no, it's still stuck"); **Resolved** never does.
+6. Arrmy restarting mid-run loses the answer: the thread goes back to **Needs you** with a note to reply. Problem threads from before this was built start taking replies from the first message after the update.
+
+**What the Admin can ask for.** Everything the doctor does by itself, plus a few it only does on a run answering the Admin, since it shouldn't decide them alone (`REPLY_FIXES` in `scripts/doctor.mjs`):
+
+| Fix | What it does |
+|---|---|
+| `grab <number>` | Downloads that release from the Problem's numbered list (below), e.g. "download number 36". |
+| `later <minutes> [note]` | The doctor looks at this Problem again then by itself ("check again tomorrow"), from 5 minutes to a week. In place of the planned `snooze`: stopping Arrmy raising a Problem would hide it, where this follows it up. |
+| `unmonitor <radarr\|sonarr> <ids>` | Stops Radarr or Sonarr looking for a movie or episodes. |
+| `remove-request` | Removes this Problem's Request as the Remove button does (for a show, just this season), deleting its files unless another Request wants them. Asks first. |
+| `delete-torrent <hash>` | Deletes a torrent and its files from qBittorrent. Asks first. |
+
+Plus `list-releases`, on any run: search again and post a new numbered list. Two checks keep the reply-only fixes to reply runs: the fix asks the doctor's server what it's working on (`GET /run`, only from inside its container), and Arrmy's doctor API refuses them unless it has a reply run open for that Problem. Every fix still checks its arguments, and there is still no shell, no file edits and no Docker (ADR 0001).
+
+**Every release found, numbered** (`releaselist.ts`). When the doctor first looks into a Problem by itself, the thread also gets a numbered list of every release found for the title, so the Admin can reply "download number 36", or anything else. Arrmy's own code builds it, not Claude, so it's exact and costs no tokens however long it is:
+
+- Movies and TV: Radarr's or Sonarr's own search for the movie or the season (`GET /release?movieId=`, or `?seriesId=&seasonNumber=`, as Interactive Search in their pages), with why each release would be turned down.
+- Edition audiobooks: everything Arrmy's Edition search finds on AudioBook Bay and Prowlarr. A book LazyLibrarian wants: the same Prowlarr search LazyLibrarian makes.
+- One line each: number, release name, size, seeders, where it came from, quality, and why it was turned down (or "tried already, never started" for a release that died). Acceptable first, then turned down, then dead; most seeders first within each, not Radarr's or Sonarr's own order (kept 2026-10-24).
+- A first card says how many were found and how to pick one, with the whole list attached as a text file, always, however short. Then the releases on compact cards, as many lines as fit in each, the first 200.
+- "Number 36" always means the latest list; `list-releases` makes a new one with new numbers. Claude reads it with `get arrmy /releases` only when it needs to.
+- Grabbing goes through `POST /release`, so Radarr or Sonarr track and import it as usual (they forget a search's releases after about 30 minutes, so an old number is searched for again first), or through Arrmy's own Edition download for Editions (a series pack downloads only this book's files). No button: grabbing deletes nothing.
+- A book LazyLibrarian wants (chosen 2026-10-24): LazyLibrarian only files a download it grabbed itself, so Arrmy downloads the pick and files it into Audiobookshelf as `Author/Title`, the way it does Editions, and LazyLibrarian stops looking for the book. The Request shows Downloading and then Available from Arrmy's download. If the pick's torrent is deleted before it finishes, LazyLibrarian wants the book and searches again; a second pick replaces the first; removing the Request deletes the pick and its files. Unit (unchanged), Local (against a fake LazyLibrarian and qBittorrent; the filing itself is the Editions' own).
+
+**Asking before it can't be undone** (`confirm.ts`). `remove-request` and `delete-torrent` post what they would do ("Delete the torrent Dune.2021.2160p from qBittorrent, with its files?") with **Go ahead** and **Cancel** buttons. Discord sends the click to `/api/discord`; only the Admin's click counts, anyone else is told so, and one left for a day expires. Replying instead of clicking cancels it, and the reply says what to do now. The bot's first buttons.
+
+**Limits.** Replies don't count towards `DOCTOR_DAILY`; they have their own `DOCTOR_REPLIES` (30) a day, after which the thread says so. Runs still go one at a time.
+
+**Safety.** The Admin's words are the only instructions: release names, logs, API answers and the bot's cards are data, and the prompt says so; the fixes' checks are the real limit, whatever the text says.
+
+**Later:** the same in Requests threads for the Admin ("get this in 4K instead"), and in Admin threads ("restart it"), once Problems has been used for a while. Starting replies to long investigations from a short summary was considered and turned down (2026-10-24): replies carry on the whole conversation.
 
 ### Request Log
 

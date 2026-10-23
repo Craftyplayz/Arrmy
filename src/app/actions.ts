@@ -3,13 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { addSeries, arr, removeMovie, removeSeasons, retryRelease } from '@/lib/arr'
+import { addSeries, arr, removeSeasons, retryRelease } from '@/lib/arr'
 import { cleanEdition, editionOf } from '@/lib/bookrules'
 import { adminThread } from '@/lib/botrules'
-import { audiobookTorrents, dropAudiobookRelease, ll, removeAudiobook } from '@/lib/books'
-import { findEdition, removeEdition } from '@/lib/editions'
+import { audiobookTorrents, dropAudiobookRelease, ll } from '@/lib/books'
+import { findEdition } from '@/lib/editions'
 import {
-  deleteRequest,
   getDeadLimits,
   getLimits,
   getRequest,
@@ -24,10 +23,10 @@ import {
 import { announce } from '@/lib/discord'
 import { embed } from '@/lib/embeds'
 import { applyLimits, showLimitProblem } from '@/lib/limits'
-import { log, tellRemoved, tellRequest } from '@/lib/notify'
+import { log, tellRequest } from '@/lib/notify'
 import { createPin } from '@/lib/plex'
 import { type DeadLimits } from '@/lib/problems'
-import { createAudiobookRequest, createMovieRequest, createTvRequest } from '@/lib/requests'
+import { by, createAudiobookRequest, createMovieRequest, createTvRequest, removeRequestAs } from '@/lib/requests'
 import { logEpisodeSearch, logRetry, searchMovie } from '@/lib/requestlog'
 import { PIN_COOKIE, requireUser, SESSION_COOKIE } from '@/lib/session'
 import { seasonLabel } from '@/lib/status'
@@ -213,27 +212,10 @@ async function ownRequest(form: FormData) {
   return { user, request }
 }
 
-/** "Mum removed Dune" also says whose it was when the Admin changes someone else's Request. */
-const by = (user: { id: number; username: string }, request: { user_id: number; username: string }) =>
-  `**${user.username}**${request.user_id !== user.id ? ` (for ${request.username})` : ''}`
-
 /** Cancels the Request, or deletes its download and files, keeping whatever another Request still wants. */
 export async function removeRequest(form: FormData) {
   const { user, request } = await ownRequest(form)
-  const others = otherRequests(request)
-  let note: string | undefined
-  if (editionOf(request.external_id)) {
-    if (!others.length) await removeEdition(String(request.external_id))
-  } else if (request.media_type === 'audiobook') {
-    if (!others.length) note = await removeAudiobook(request)
-  } else if (request.media_type === 'movie') {
-    if (!others.length) await removeMovie(Number(request.external_id))
-  } else {
-    const wanted = new Set(others.flatMap(seasonsOf))
-    await removeSeasons(Number(request.external_id), seasonsOf(request).filter((n) => !wanted.has(n)))
-  }
-  deleteRequest(request.id)
-  tellRemoved(request, `${by(user, request)} removed this Request.${others.length ? ' Its files stay: someone else requested it too.' : ''}`, others.length > 0)
+  const note = await removeRequestAs(user, request)
   if (note) redirect(`/requests?notice=${encodeURIComponent(note)}`)
   revalidatePath('/requests')
 }

@@ -6,6 +6,7 @@ import { CHANNELS, FORUMS, forumPermissions, threadUrl, type Channel, type Forum
 import { forgetThread, getSetting, getThread, saveThread, setSetting } from './db'
 import { compact, distinctLinks, type Embed } from './embeds'
 import { drawLogo, LOGO_VERSION } from './logo'
+import { byId, type Message } from './replyrules'
 
 const API = 'https://discord.com/api/v10'
 
@@ -133,14 +134,31 @@ function serial<T>(job: () => Promise<T>): Promise<T> {
 }
 
 /** Message body. `ping` @mentions the Admin (DISCORD_ADMIN_ID): mentions only notify from the text, never an embed. */
-function message(embeds: Embed | Embed[], ping = false) {
+function message(embeds: Embed | Embed[], ping = false, components?: object[]) {
   const admin = ping ? process.env.DISCORD_ADMIN_ID : undefined
   return {
     ...(admin && { content: `<@${admin}>` }),
     embeds: distinctLinks([embeds].flat().slice(0, 10)),
     allowed_mentions: { parse: [], users: admin ? [admin] : [] },
+    ...(components && { components }),
   }
 }
+
+/** What else a post can carry: a text file attached (the doctor's list of releases), and buttons. */
+export type Extra = { file?: { name: string; text: string }; components?: object[] }
+
+type Upload = { blob: Blob; name: string }
+
+/** The body as JSON, or with files as multipart: Discord wants the JSON in payload_json and each file as files[n]. */
+function withFiles(body: Record<string, unknown>, files: Upload[], attach: (attachments: object[]) => Record<string, unknown>) {
+  if (!files.length) return body
+  const form = new FormData()
+  form.append('payload_json', JSON.stringify(attach(files.map((f, id) => ({ id, filename: f.name })))))
+  files.forEach((f, i) => form.append(`files[${i}]`, f.blob, f.name))
+  return form
+}
+
+const textFile = (extra?: Extra): Upload[] => (extra?.file ? [{ blob: new Blob([extra.file.text], { type: 'text/plain' }), name: extra.file.name }] : [])
 
 /** Where a post goes: one of the bot's channels, or a forum thread. */
 export type Target = Channel | ThreadRef
@@ -165,30 +183,25 @@ const tagIds = async (forum: Forum, tags: readonly string[] = []) => {
 }
 
 /** Opens the thread with `card` as its first post, the full card with the cover attached. Returns the post's id. */
-async function openThread(ref: ThreadRef, card: Embed, ping: boolean) {
+async function openThread(ref: ThreadRef, card: Embed, ping: boolean, extra?: Extra) {
   const forum = (await getIds()).forums[ref.forum].id
   const image = await cover(ref.art ?? card.thumbnail?.url)
-  const first = message(image ? { ...card, thumbnail: undefined } : card, ping)
+  const first = message(image ? { ...card, thumbnail: undefined } : card, ping, extra?.components)
   const body = { name: ref.name.slice(0, 100), auto_archive_duration: WEEK, applied_tags: await tagIds(ref.forum, ref.tags), message: first }
-  let payload: unknown = body
-  if (image) {
-    const form = new FormData()
-    form.append('payload_json', JSON.stringify({ ...body, message: { ...first, attachments: [{ id: 0, filename: image.name }] } }))
-    form.append('files[0]', image.blob, image.name)
-    payload = form
-  }
+  const payload = withFiles(body, [...(image ? [image] : []), ...textFile(extra)], (attachments) => ({ ...body, message: { ...first, attachments } }))
   const thread = await discord<{ id: string }>(`/channels/${forum}/threads`, 'POST', payload)
   saveThread({ key: ref.key, forum: ref.forum, id: thread.id, tags: [...(ref.tags ?? [])] })
   return thread.id // a forum thread's first post has the thread's id
 }
 
 /** Posts a compact card in a thread that's open already, bringing it back if it was archived. */
-async function threadPost(ref: ThreadRef, id: string, tags: string, card: Embed, ping: boolean) {
+async function threadPost(ref: ThreadRef, id: string, tags: string, card: Embed, ping: boolean, extra?: Extra) {
   if (ref.tags && JSON.stringify(ref.tags) !== tags) {
     await discord(`/channels/${id}`, 'PATCH', { archived: false, applied_tags: await tagIds(ref.forum, ref.tags) })
     saveThread({ key: ref.key, forum: ref.forum, id, tags: [...ref.tags] })
   }
-  const send = async () => (await discord<{ id: string }>(`/channels/${id}/messages`, 'POST', message(compact(card), ping))).id
+  const body = message(compact(card), ping, extra?.components)
+  const send = async () => (await discord<{ id: string }>(`/channels/${id}/messages`, 'POST', withFiles(body, textFile(extra), (attachments) => ({ ...body, attachments })))).id
   try {
     return await send()
   } catch (e) {
@@ -202,10 +215,12 @@ async function threadPost(ref: ThreadRef, id: string, tags: string, card: Embed,
  * Posts to a channel or a thread and returns the message id. A thread's first post opens it; a channel or thread
  * deleted by hand is made again.
  */
-export function post(target: Target, embed: Embed, ping = false) {
+export function post(target: Target, embed: Embed, ping = false, extra?: Extra) {
   return serial(async () => {
     if (typeof target === 'string') {
-      const send = async () => (await discord<{ id: string }>(`/channels/${await channelId(target)}/messages`, 'POST', message(embed, ping))).id
+      const body = message(embed, ping, extra?.components)
+      const send = async () =>
+        (await discord<{ id: string }>(`/channels/${await channelId(target)}/messages`, 'POST', withFiles(body, textFile(extra), (attachments) => ({ ...body, attachments })))).id
       try {
         return await send()
       } catch (e) {
@@ -215,13 +230,13 @@ export function post(target: Target, embed: Embed, ping = false) {
       }
     }
     const row = getThread(target.key)
-    if (!row) return openThread(target, embed, ping)
+    if (!row) return openThread(target, embed, ping, extra)
     try {
-      return await threadPost(target, row.id, row.tags, embed, ping)
+      return await threadPost(target, row.id, row.tags, embed, ping, extra)
     } catch (e) {
       if (!gone(e)) throw e
       forgetThread(target.key)
-      return openThread(target, embed, ping)
+      return openThread(target, embed, ping, extra)
     }
   })
 }
@@ -263,6 +278,38 @@ export function remove(channel: Channel, id: string) {
       if (!gone(e)) throw e
     }
   })
+}
+
+let me: Promise<string> | undefined
+/** The bot's own user id. */
+export const botUserId = () =>
+  (me ??= discord<{ id: string }>('/users/@me').then(
+    (u) => u.id,
+    (e) => {
+      me = undefined
+      throw e
+    },
+  ))
+
+/**
+ * A thread's messages after `after` (oldest first, up to 100), or its latest 50 without it. Undefined for a thread that
+ * was never opened or was deleted by hand. Reading isn't queued behind posts: it changes nothing.
+ */
+export async function threadMessages(key: string, after?: string) {
+  const row = getThread(key)
+  if (!row) return
+  try {
+    const list = await discord<Message[]>(`/channels/${row.id}/messages?${after ? `after=${after}&limit=100` : 'limit=50'}`)
+    return list.sort(byId)
+  } catch (e) {
+    if (!gone(e)) throw e
+  }
+}
+
+/** Shows "Arrmy is typing…" in a thread for about 10 seconds. */
+export async function typing(key: string) {
+  const row = getThread(key)
+  if (row) await discord(`/channels/${row.id}/typing`, 'POST').catch(() => {})
 }
 
 /** The bot's own recent messages in a channel (the last 100), newest first. */
@@ -349,6 +396,21 @@ export async function syncAvatar() {
 /** The bar's emoji ids by name; empty until syncBarEmoji has run, and the bar falls back to text. */
 export const barEmoji = () => getSetting<Record<string, string>>('bot:emoji') ?? {}
 
-/** Replaces the "thinking…" placeholder of a slash command with its answer. */
-export const answerInteraction = (applicationId: string, interactionToken: string, embeds: Embed[]) =>
-  discord(`/webhooks/${applicationId}/${interactionToken}/messages/@original`, 'PATCH', message(embeds), false)
+/** Replaces the "thinking…" placeholder of a slash command with its answer, or a clicked card with what came of it (no buttons). */
+export const answerInteraction = (applicationId: string, interactionToken: string, embeds: Embed[], components?: object[]) =>
+  discord(`/webhooks/${applicationId}/${interactionToken}/messages/@original`, 'PATCH', message(embeds, false, components), false)
+
+/** Takes the buttons off a message the bot posted in a thread, rewriting its card. False if it's gone. */
+export function closeButtons(key: string, id: string, embed: Embed) {
+  return serial(async () => {
+    const row = getThread(key)
+    if (!row) return false
+    try {
+      await discord(`/channels/${row.id}/messages/${id}`, 'PATCH', { embeds: [embed], components: [] })
+      return true
+    } catch (e) {
+      if (gone(e)) return false
+      throw e
+    }
+  })
+}
