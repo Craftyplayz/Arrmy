@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { admit, FIXES, nextRegion, prompt, stepOf, verdict } from '../scripts/doctor.mjs'
+import { admit, FIXES, mirrors, nextRegion, prompt, stepOf, verdict } from '../scripts/doctor.mjs'
 
 const HOUR = 3_600_000
 
@@ -22,6 +22,17 @@ test('fixes refuse bad arguments before sending anything', async () => {
   await assert.rejects(async () => FIXES.search.run('sonarr'), /positive whole numbers/)
   await assert.rejects(async () => FIXES.restart.run('qbittorrent'), /radarr, sonarr or prowlarr/)
   await assert.rejects(async () => FIXES.recheck.run('../torrents/delete'), /40-character/)
+  await assert.rejects(async () => FIXES.reannounce.run('abc'), /40-character/)
+  await assert.rejects(async () => FIXES['indexer-mirror'].run('1/../../system'), /positive whole numbers/)
+  await assert.rejects(async () => FIXES['indexer-flaresolverr'].run(), /positive whole numbers/)
+})
+
+test('mirrors: every web address but the one in use, which an empty baseUrl means is the first', () => {
+  const indexerUrls = ['https://a/', 'https://b/', 'https://c/']
+  const at = (value?: string) => ({ indexerUrls, fields: [{ name: 'baseUrl', value }] })
+  assert.deepEqual(mirrors(at()), ['https://b/', 'https://c/'])
+  assert.deepEqual(mirrors(at('https://b/')), ['https://a/', 'https://c/'])
+  assert.deepEqual(mirrors({ fields: [] }), [])
 })
 
 test('the prompt lists every fix and the Problem', () => {

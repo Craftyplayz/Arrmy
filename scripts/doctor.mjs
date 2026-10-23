@@ -97,6 +97,12 @@ const hash = (h) => {
   return h.toLowerCase()
 }
 
+/** An indexer's web addresses other than the one it uses now (an empty baseUrl means the first). */
+export const mirrors = (indexer) => {
+  const now = indexer.fields.find((f) => f.name === 'baseUrl')?.value || indexer.indexerUrls?.[0]
+  return (indexer.indexerUrls ?? []).filter((u) => u !== now)
+}
+
 const editionId = (words) => {
   const id = words.join(' ') // the agent may leave a narrator's name unquoted
   if (!/^[\p{L}\d ~.'-]{1,120}$/u.test(id)) throw new Error('id must be an Edition id like "OL27513W~andy serkis"')
@@ -198,6 +204,42 @@ export const FIXES = {
   'test-indexers': {
     usage: 'test-indexers: have Prowlarr test every indexer (re-enables ones that work again)',
     run: () => arr('prowlarr', '/indexer/testall', 'POST'),
+  },
+  'indexer-flaresolverr': {
+    usage: 'indexer-flaresolverr <indexerId>: send a Prowlarr indexer "blocked by CloudFlare" through FlareSolverr (Prowlarr tests it on save)',
+    run: async (id) => {
+      const [n] = ids([id])
+      const tag = JSON.parse(await arr('prowlarr', '/tag')).find((t) => t.label === 'flaresolverr')
+      if (!tag) throw new Error('Prowlarr has no flaresolverr tag: Arrmy’s wiring creates it')
+      const indexer = JSON.parse(await arr('prowlarr', `/indexer/${n}`))
+      if (indexer.tags.includes(tag.id)) return `${indexer.name} already goes through FlareSolverr`
+      await arr('prowlarr', `/indexer/${n}`, 'PUT', { ...indexer, tags: [...indexer.tags, tag.id] })
+      return `${indexer.name} now goes through FlareSolverr and passed Prowlarr’s test`
+    },
+  },
+  'indexer-mirror': {
+    usage: 'indexer-mirror <indexerId>: move a failing Prowlarr indexer to the first of its other web addresses that passes Prowlarr’s test',
+    run: async (id) => {
+      const [n] = ids([id])
+      const indexer = JSON.parse(await arr('prowlarr', `/indexer/${n}`))
+      const report = []
+      for (const url of mirrors(indexer)) {
+        const moved = { ...indexer, fields: indexer.fields.map((f) => (f.name === 'baseUrl' ? { ...f, value: url } : f)) }
+        try {
+          await arr('prowlarr', '/indexer/test', 'POST', moved)
+        } catch (e) {
+          report.push(`${url}: ${e.message.slice(0, 200)}`)
+          continue
+        }
+        await arr('prowlarr', `/indexer/${n}`, 'PUT', moved)
+        return [...report, `${indexer.name} moved to ${url}, which passed Prowlarr’s test`].join('\n')
+      }
+      throw new Error([...report, `none of ${indexer.name}’s other addresses passed`].join('\n'))
+    },
+  },
+  reannounce: {
+    usage: 'reannounce <hash>: have qBittorrent ask the trackers for peers again (a stalled torrent, e.g. after the VPN reconnected)',
+    run: (h) => qbit('/torrents/reannounce', new URLSearchParams({ hashes: hash(h) })),
   },
   restart: {
     usage: 'restart <radarr|sonarr|prowlarr>: restart the app',
@@ -336,6 +378,10 @@ shows singles 0 and packs 0, or abbError says searches failed, Arrmy's AudioBook
 That is not "nothing to find". If AudioBook Bay fails or drops requests through the VPN while other sites work, this
 VPN region is the cause: run \`fix reconnect-vpn\` (give the command a 10-minute timeout), then
 \`fix edition-search <id>\`. If AudioBook Bay works now, just run \`fix edition-search <id>\`.
+
+A failing indexer (\`get prowlarr /indexer\` for ids, \`get prowlarr /indexerstatus\`, \`get prowlarr /indexer/<id>\`):
+"blocked by CloudFlare" → \`fix indexer-flaresolverr <id>\`; unreachable, DNS, timeouts or errors from the site itself →
+\`fix indexer-mirror <id>\`. A torrent stalled with no peers while others download fine → \`fix reannounce <hash>\`.
 
 Fix it only when you're sure, and only with \`${tool} fix <name> <args...>\`:
 ${Object.values(FIXES)
