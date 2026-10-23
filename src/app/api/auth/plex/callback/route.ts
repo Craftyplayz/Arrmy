@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { adminThread } from '@/lib/botrules'
 import { setSetting, upsertUser } from '@/lib/db'
 import { announce } from '@/lib/discord'
 import { embed } from '@/lib/embeds'
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
       setSetting('plexToken', token)
     }
     const role = account.access === 'admin' ? 'the Admin' : 'a Requester'
-    announce('activity', embed({ colour: 'info', app: 'Arrmy', title: `${account.username} signed in`, description: `Signed in to Arrmy as ${role}.`, art: account.avatar }))
+    announce(adminThread('Sign-ins to Arrmy', 'Admin log'), embed({ colour: 'info', app: 'Arrmy', title: `${account.username} signed in`, description: `Signed in to Arrmy as ${role}.`, art: account.avatar }))
     await startSession(account.id, request.headers.get('x-forwarded-proto')?.startsWith('https') ?? false)
     return go('/')
   } catch (e) {

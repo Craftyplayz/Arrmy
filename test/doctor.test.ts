@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { admit, FIXES, nextRegion, prompt } from '../scripts/doctor.mjs'
+import { admit, FIXES, nextRegion, prompt, stepOf, verdict } from '../scripts/doctor.mjs'
 
 const HOUR = 3_600_000
 
@@ -53,4 +53,20 @@ test('edition-search refuses anything but an Edition id', async () => {
   await assert.rejects(async () => FIXES['edition-search'].run('OL1W~x/../../admin'), /Edition id/)
   await assert.rejects(async () => FIXES['edition-search'].run('x'.repeat(121)), /Edition id/)
   await assert.rejects(async () => FIXES['edition-search'].run(), /Edition id/)
+})
+
+test('stepOf: a get is Checked, a fix is Fixed, anything else is no step', () => {
+  assert.deepEqual(stepOf('node /app/doctor.mjs get radarr /queue?includeMovie=true'), { step: 'Checked', text: 'radarr /queue?includeMovie=true' })
+  assert.deepEqual(stepOf('node /app/doctor.mjs fix retry radarr 412'), { step: 'Fixed', text: 'retry radarr 412' })
+  assert.deepEqual(stepOf('node "/app/doctor.mjs" fix edition-search "OL27513W~andy serkis"'), { step: 'Fixed', text: 'edition-search "OL27513W~andy serkis"' })
+  assert.equal(stepOf('ls /config'), undefined)
+  assert.equal(stepOf(undefined), undefined)
+})
+
+test('verdict: the last Solved line says whether it worked, and is cut from the answer', () => {
+  assert.deepEqual(verdict('**Cause** x\n**What I did** y\n\nSolved: yes'), { answer: '**Cause** x\n**What I did** y', solved: true })
+  assert.deepEqual(verdict('**Cause** x\n**Solved:** No.'), { answer: '**Cause** x', solved: false })
+  assert.deepEqual(verdict('**Cause** x'), { answer: '**Cause** x', solved: false })
+  // Only a last line counts.
+  assert.equal(verdict('Solved: yes, then it broke again\nSolved: no').solved, false)
 })

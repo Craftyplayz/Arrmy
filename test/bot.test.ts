@@ -3,8 +3,8 @@ import { test } from 'node:test'
 import { inflateSync } from 'node:zlib'
 import { allCells, cellName, drawCell, progressBar } from '../src/lib/barart.ts'
 import { upstreamUrl } from '../src/lib/abbrelay.ts'
-import { changes, compareVersions, duration, flatten, plexUsers, releaseNotes } from '../src/lib/botrules.ts'
-import { COLOUR, distinctLinks, downloadEmbed, embed, speed } from '../src/lib/embeds.ts'
+import { changes, compareVersions, duration, flatten, forumPermissions, PERMS, plexUsers, problemThread, releaseNotes, requestThread, updatesSubject } from '../src/lib/botrules.ts'
+import { COLOUR, compact, distinctLinks, downloadEmbed, embed, speed } from '../src/lib/embeds.ts'
 
 const torrent = { hash: 'a', name: 'Dune.2021.1080p.BluRay', category: 'movies', tags: '', save_path: '/data/torrents', state: 'downloading', added_on: 0, downloaded: 1, progress: 0.456, size: 4.2e9, dlspeed: 3_355_443, num_seeds: 1234, num_leechs: 5, eta: 840, completion_on: -1, last_activity: 0 }
 const meta = { app: 'Radarr', appUrl: 'https://radarr.example.com/movie/438631', title: 'Dune (2021)', url: 'https://www.themoviedb.org/movie/438631', art: 'https://image.tmdb.org/p.jpg', by: ['Sam', 'Mum'] }
@@ -151,4 +151,40 @@ test('the AudioBook Bay relay: only its own key, only page paths, and LazyLibrar
   assert.equal(upstreamUrl('/other/k3y/', key), 403)
   assert.equal(upstreamUrl('/abb/k3y/..%2F..%2Fetc/', key), 400)
   assert.equal(upstreamUrl('/abb/k3y/a/../b/', key), 'https://audiobookbay.lu/b/', 'URL parsing already resolves ..')
+})
+
+test('a card of new versions goes to Arrmy releases, the one app updated, or App updates', () => {
+  assert.equal(updatesSubject(['Radarr', 'Arrmy']), 'Arrmy releases')
+  assert.equal(updatesSubject(['Radarr']), 'Radarr updates')
+  assert.equal(updatesSubject(['Radarr', 'Sonarr']), 'App updates')
+})
+
+test('forums: nobody but the bot opens threads, and private ones are hidden from everyone but the Admin', () => {
+  const has = (bits: string, p: bigint) => (BigInt(bits) & p) === p
+  const [everyone, bot, admin] = forumPermissions('problems', 'guild', 'bot', 'admin')
+  assert.ok(has(everyone.deny, PERMS.view) && has(everyone.deny, PERMS.send))
+  assert.ok(has(bot.allow, PERMS.view) && has(bot.allow, PERMS.manageThreads))
+  assert.equal(admin.id, 'admin')
+  assert.ok(has(admin.allow, PERMS.view) && has(admin.allow, PERMS.sendInThreads))
+  const [open, , ...rest] = forumPermissions('requests', 'guild', 'bot')
+  assert.ok(!has(open.deny, PERMS.view), 'everyone sees Requests')
+  assert.ok(has(open.allow, PERMS.sendInThreads), 'and can reply in its threads')
+  assert.deepEqual(rest, [], 'no Admin id, no overwrite for them')
+})
+
+test('thread names fit in 100 characters, keeping the media type and the issue whole', () => {
+  const p = { kind: 'Failed Download' as const, service: 'lazylibrarian' as const, title: 'Harry Potter and the Chamber of Secrets', detail: '', fix: 'retry' as const, ids: [] }
+  assert.equal(problemThread(p).name, 'Audiobook - Harry Potter and the Chamber of Secrets - failed download')
+  const long = problemThread({ ...p, title: 'x'.repeat(200) }).name
+  assert.equal(long.length, 100)
+  assert.match(long, /^Audiobook - x+… - failed download$/)
+  assert.equal(problemThread(p, 'Open').key, problemThread(p).key, 'the same Problem, the same thread')
+  const r = requestThread('tv:81189', 'Breaking Bad (2008)', 'tv', 'Downloading')
+  assert.deepEqual([r.key, r.name, r.tags], ['request:tv:81189', 'Breaking Bad (2008)', ['TV', 'Downloading']])
+  assert.equal(requestThread('movie:603', 'The Matrix', 'movie').tags, undefined, 'no status: tags left alone')
+})
+
+test('later posts in a thread drop the author line and the art', () => {
+  const c = compact(embed({ colour: 'info', app: 'Radarr', title: 'Picked', art: 'https://image.tmdb.org/p.jpg', at: false }))
+  assert.deepEqual(c, { color: COLOUR.info, title: 'Picked' })
 })

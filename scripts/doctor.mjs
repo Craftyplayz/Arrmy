@@ -1,4 +1,5 @@
-// The doctor: when Arrmy announces a Problem, a Claude Code agent looks into it, and Arrmy posts what it found to #problems.
+// The doctor: when Arrmy announces a Problem, a Claude Code agent looks into it, and Arrmy posts each step it takes and
+// what it found in the Problem's thread.
 // It runs on the Admin's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN, from `claude setup-token`). The agent can read every
 // app's API, but can only change things through the safe fixes in FIXES: no shell, no file edits, no Docker.
 //   node doctor.mjs                       the server Arrmy posts Problems to (port 3002, inside Docker only)
@@ -278,24 +279,63 @@ Nothing else can change anything, so don't try. Some things only the Admin can f
 a setting): say exactly what to do and where.
 
 Answer in under 1500 characters of Discord markdown, in plain words, with three parts: **Cause**, **What I did** (or
-"Nothing"), **What you need to do** (or "Nothing").`
+"Nothing"), **What you need to do** (or "Nothing").
 
-/** Runs the agent on one Problem and returns its answer. */
-function investigate(problem) {
+Then a last line of exactly \`Solved: yes\` or \`Solved: no\`. Yes only if you checked that the Problem's cause is gone
+now (a new release is downloading, the indexer answers again…), not just that a fix ran.`
+
+/** A Bash command the agent ran, as a step for Discord: Checked for each `get`, Fixed for each `fix`. */
+export function stepOf(command) {
+  const m = /\bdoctor\.mjs['"]?\s+(get|fix)\s+(.+)/s.exec(command ?? '')
+  return m ? { step: m[1] === 'get' ? 'Checked' : 'Fixed', text: m[2].trim().replace(/\s+/g, ' ').slice(0, 200) } : undefined
+}
+
+/** The answer without its last "Solved: yes|no" line, and whether it said yes. No such line counts as not solved. */
+export function verdict(text) {
+  const m = /\n?[*_\s]*Solved:?[*_\s]*(yes|no)\b[*_.\s]*$/i.exec(text)
+  return { answer: (m ? text.slice(0, m.index) : text).trim(), solved: m?.[1].toLowerCase() === 'yes' }
+}
+
+/**
+ * Runs the agent on one Problem, calling `emit` with each get or fix once its result is back (failed when it errored),
+ * and returns its answer and whether it solved the Problem.
+ */
+function investigate(problem, emit) {
   return new Promise((resolve, reject) => {
-    const child = spawn(CLAUDE, ['-p', '--output-format', 'json', '--max-turns', '40'], { cwd: `${HOME}/work`, timeout: 20 * 60_000 })
-    let out = ''
-    child.stdout.on('data', (c) => (out += c))
+    // stream-json needs --verbose with -p; it writes one JSON event per line.
+    const child = spawn(CLAUDE, ['-p', '--output-format', 'stream-json', '--verbose', '--max-turns', '40'], { cwd: `${HOME}/work`, timeout: 20 * 60_000 })
+    const pending = new Map() // tool_use id → its step, until its result arrives
+    let result
+    let rest = ''
+    const line = (l) => {
+      let e
+      try {
+        e = JSON.parse(l)
+      } catch {
+        return // not an event
+      }
+      for (const c of e.message?.content ?? []) {
+        if (e.type === 'assistant' && c.type === 'tool_use' && c.name === 'Bash') {
+          const s = stepOf(c.input?.command)
+          if (s) pending.set(c.id, s)
+        } else if (e.type === 'user' && c.type === 'tool_result' && pending.has(c.tool_use_id)) {
+          emit({ ...pending.get(c.tool_use_id), ...(c.is_error && { failed: true }) })
+          pending.delete(c.tool_use_id)
+        }
+      }
+      if (e.type === 'result') result = e
+    }
+    child.stdout.setEncoding('utf8').on('data', (c) => {
+      const lines = (rest + c).split('\n')
+      rest = lines.pop()
+      lines.forEach(line)
+    })
     child.stderr.on('data', (c) => process.stderr.write(c))
     child.on('error', reject)
     child.on('close', (code) => {
-      try {
-        const r = JSON.parse(out)
-        if (r.is_error || r.subtype !== 'success') throw new Error(r.result || r.subtype)
-        resolve(r.result)
-      } catch (e) {
-        reject(new Error(`claude exited ${code}: ${e.message}`))
-      }
+      line(rest)
+      if (result && !result.is_error && result.subtype === 'success') resolve(verdict(result.result ?? ''))
+      else reject(new Error(`claude exited ${code}: ${result?.result || result?.subtype || 'no result'}`))
     })
     child.stdin.end(prompt(problem))
   })
@@ -347,16 +387,19 @@ function serve() {
         return res.writeHead(204).end()
       }
       console.log(`[doctor] ${key}: looking into it`)
-      // One at a time: the subscription's limits are shared with the Admin's own use.
-      queue = queue.then(() =>
-        investigate(problem).then(
-          (answer) => res.writeHead(200, { 'Content-Type': 'text/plain' }).end(answer),
+      // One at a time: the subscription's limits are shared with the Admin's own use. The 200 goes out when the run
+      // starts, then one JSON line per step and a last one with the answer or the error (doctor.ts reads them).
+      queue = queue.then(() => {
+        res.writeHead(200, { 'Content-Type': 'application/x-ndjson' })
+        const send = (event) => res.write(`${JSON.stringify(event)}\n`)
+        return investigate(problem, send).then(
+          (r) => res.end(`${JSON.stringify(r)}\n`),
           (e) => {
             console.warn(`[doctor] ${key}: ${e.message}`)
-            res.writeHead(502).end(e.message)
+            res.end(`${JSON.stringify({ error: e.message })}\n`)
           },
-        ),
-      )
+        )
+      })
     })
   }).listen(3002, () => console.log(`[doctor] ready, at most ${cap} Problems a day`))
 }

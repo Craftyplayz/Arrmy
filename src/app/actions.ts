@@ -5,10 +5,10 @@ import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { addSeries, arr, removeMovie, removeSeasons, retryRelease } from '@/lib/arr'
 import { cleanEdition, editionOf } from '@/lib/bookrules'
+import { adminThread } from '@/lib/botrules'
 import { audiobookTorrents, dropAudiobookRelease, ll, removeAudiobook } from '@/lib/books'
 import { findEdition, removeEdition } from '@/lib/editions'
 import {
-  addLog,
   deleteRequest,
   getDeadLimits,
   getLimits,
@@ -24,7 +24,7 @@ import {
 import { announce } from '@/lib/discord'
 import { embed } from '@/lib/embeds'
 import { applyLimits, showLimitProblem } from '@/lib/limits'
-import { tellRequest } from '@/lib/notify'
+import { log, tellRemoved, tellRequest } from '@/lib/notify'
 import { createPin } from '@/lib/plex'
 import { type DeadLimits } from '@/lib/problems'
 import { createAudiobookRequest, createMovieRequest, createTvRequest } from '@/lib/requests'
@@ -50,7 +50,7 @@ export async function fixProblem(form: FormData) {
   if (!user.is_admin) throw new Error('Only the Admin can fix Problems')
   const service = form.get('service')
   const fixed = (what: string) =>
-    announce('admin-log', embed({ colour: 'info', app: 'Arrmy', title: String(form.get('title') ?? 'A Problem'), description: `**${user.username}** clicked **${what}** in the Admin view.` }))
+    announce(adminThread('One-click fixes', 'Admin log'), embed({ colour: 'info', app: 'Arrmy', title: String(form.get('title') ?? 'A Problem'), description: `**${user.username}** clicked **${what}** in the Admin view.` }))
   if (service === 'lazylibrarian' && form.get('fix') === 'retry') {
     // An audiobook's dead release (see dead.ts): drop it, and search again once LazyLibrarian has marked it Failed.
     const hash = String(form.get('hash'))
@@ -58,7 +58,7 @@ export async function fixProblem(form: FormData) {
     await logged(
       audiobookTorrents().then((books) => {
         const book = books.get(hash)
-        if (book) addLog(logItem('audiobook', book), 'dead', { downloadId: hash, reason: 'Try another release', by: user.username })
+        if (book) log(logItem('audiobook', book), 'dead', { downloadId: hash, reason: 'Try another release', by: user.username })
       }),
     )
     await dropAudiobookRelease(hash)
@@ -112,7 +112,7 @@ export async function saveLimits(form: FormData) {
   const names: Record<keyof Limits, string> = { movieGb: 'movie', episodeGb: 'hour of episode', showGb: 'show' }
   if (changed.length)
     announce(
-      'admin-log',
+      adminThread('Size Limits', 'Admin log'),
       embed({
         colour: 'info',
         app: 'Arrmy',
@@ -143,7 +143,7 @@ export async function saveDeadLimits(form: FormData) {
   const changed = (Object.keys(limits) as (keyof DeadLimits)[]).filter((k) => limits[k] !== before[k])
   if (changed.length)
     announce(
-      'admin-log',
+      adminThread('Dead releases settings', 'Admin log'),
       embed({
         colour: 'info',
         app: 'Arrmy',
@@ -168,7 +168,7 @@ export async function saveKeys(form: FormData) {
   }
   if (changed.length)
     announce(
-      'admin-log',
+      adminThread('Arrmy settings', 'Admin log'),
       embed({
         colour: 'info',
         app: 'Arrmy',
@@ -233,7 +233,7 @@ export async function removeRequest(form: FormData) {
     await removeSeasons(Number(request.external_id), seasonsOf(request).filter((n) => !wanted.has(n)))
   }
   deleteRequest(request.id)
-  tellRequest(request, 'neutral', `${by(user, request)} removed this Request.${others.length ? ' Its files stay: someone else requested it too.' : ''}`)
+  tellRemoved(request, `${by(user, request)} removed this Request.${others.length ? ' Its files stay: someone else requested it too.' : ''}`, others.length > 0)
   if (note) redirect(`/requests?notice=${encodeURIComponent(note)}`)
   revalidatePath('/requests')
 }
@@ -274,8 +274,8 @@ export async function editSeasons(form: FormData) {
   setSeasons(request.id, after, added.length > 0)
   const what = [added.length && `added ${seasonLabel(added)}`, removed.length && `removed ${seasonLabel(removed)}`].filter(Boolean).join(' and ')
   if (what) {
-    tellRequest(request, 'info', `${by(user, request)} ${what}.`, [['Seasons', after.join(', ')]])
-    addLog(logItem('tv', request.external_id), 'note', { text: what[0].toUpperCase() + what.slice(1), by: user.username, request: request.id })
+    tellRequest(request, 'info', `${by(user, request)} ${what}.`, [['Seasons', after.join(', ')]], added.length ? 'Requested' : undefined)
+    log(logItem('tv', request.external_id), 'note', { text: what[0].toUpperCase() + what.slice(1), by: user.username, request: request.id })
   }
   revalidatePath('/requests')
 }

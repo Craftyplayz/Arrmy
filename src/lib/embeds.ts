@@ -92,6 +92,9 @@ export function embed(e: {
   }
 }
 
+/** A later post in a thread: the colour, the text and the details, without the author line and art the first post has. */
+export const compact = ({ author: _, thumbnail: __, ...rest }: Embed): Embed => rest
+
 /** What a download is for, worked out once from Radarr, Sonarr or LazyLibrarian and the Requests. */
 export type DownloadMeta = { app: string; title: string; url?: string; appUrl?: string; art?: string | null; by: string[] }
 

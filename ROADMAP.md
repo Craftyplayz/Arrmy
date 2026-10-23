@@ -134,6 +134,68 @@ Tidy-up: `SMB_USER` and `SMB_PASSWORD` in the Portainer stack are unused since t
 
 ## Later
 
+### Discord bot rework
+
+Asked for 2026-10-22, choices settled 2026-10-23. **Built 2026-10-23, not yet deployed or run against Discord** (Unit only). A Request thread is per title, not per person: a second Request for the same title posts in the first one's thread. Instead of posting everything into channels, the bot opens a forum thread for each thing and posts everything about that thing inside it. It stays read-only for now (ADR 0001), but it will likely get buttons later (Search again, Approve…), so each thread's id is stored against its Request, Problem or media item, so that later code can find it.
+
+The new Arrmy category:
+
+| Channel | Kind | Holds |
+|---|---|---|
+| #downloading | Channel | Today's #downloads: one live card per download, updated every 5 seconds. A finished card is deleted (its stats go to the Request's thread). |
+| #weekly-summary | Channel | Today's #watched: who watched what that week, every Sunday from 18:00. |
+| Requests | Forum | One thread per Request. |
+| Activity | Forum | One thread per movie, show or book someone plays. |
+| Problems | Forum | One thread per Problem. |
+| Admin | Forum | One thread per subject, tagged **Admin log**, **System** or **Updates**. |
+
+These replace #requests, #downloads, #downloaded, #problems, #admin-log, #system, #updates, #activity and #watched. The bot leaves the old channels alone, and the Admin deletes them by hand. Without the bot, `DISCORD_WEBHOOK_URL` keeps working as it does today.
+
+Who sees what: Problems and Admin are the Admin's only. Requests, Activity, #downloading and #weekly-summary are for everyone. Only the bot opens threads; anyone who can see a Requests or Activity thread can reply in it. Every new post moves its thread back to the top.
+
+Every forum thread's first message is a full card with the cover art (Radarr, Sonarr, Plex or OpenLibrary) as an attached image, which Discord shows as the thread's preview. Later posts in the thread are compact cards: DESIGN.md's colour, one line and the details, without the cover or author line again. Links go through `publicUrl` (`*.craftyplayz.com`).
+
+**Requests forum.** The thread is titled with the media's name (`Dune: Part Two (2024)`). Tags: Movie, TV or Audiobook, plus one status tag the bot swaps: **Requested**, **Downloading**, **Available**, **Removed**. The first card's title links to the title's page in Arrmy (`arrmy.craftyplayz.com/discover/<type>/<id>`), and its author line names the app but links to Arrmy's Requests page, since Radarr, Sonarr and LazyLibrarian only open for the Admin. The requester shows with their Plex username and avatar. Inside, in order:
+
+1. Created: who requested it and what (for a show, which seasons).
+2. Search: the 10 best releases found, with size, seeders and why each was turned down, then how many more there were. This shows to everyone in Discord, even though the Request page hides it from Requesters.
+3. Picked: the release grabbed, with a link to the Request's page in Arrmy (`/requests/<id>`), where the Admin sees its torrent files.
+4. Downloaded: how long it took, average speed and file size.
+5. Importing into Radarr, Sonarr or LazyLibrarian.
+6. Available, with a link straight to the title: Plex (`plex.craftyplayz.com/web/index.html#!/server/<machineId>/details?key=/library/metadata/<ratingKey>`) or Audiobookshelf (`books.craftyplayz.com/item/<id>`). The thread is tagged **Available** and stays open; Discord archives it after a week without posts, and a new post (a later season) brings it back.
+
+A show gets one thread. Each season pack or episode torrent gets its own Search, Picked and Downloaded posts, and each season gets its own Available. Edits (seasons added or removed), dead releases swapped, and a refusal for the Size Limit go in the same thread. Problems don't: they stay in the Problems forum. A removed Request posts who removed it, is tagged **Removed**, then the thread is archived. The requester isn't @mentioned when it's Available until per-user notifications (Later, item 5) link Plex users to Discord users.
+
+**#downloading.** Each card's title links to its Request's thread.
+
+**Activity forum.** One thread per movie, show (all episodes together) or book, opened the first time someone plays it, even if it was never requested. Tagged Movie, TV or Audiobook. A play gets a card once it passes 1 minute: who, which episode or chapter, which device, and the start time. When playback stops, the same card is edited to add the end time and how long they watched. If the same person comes back to the same episode or book within 30 minutes, that card is edited again rather than a new one posted. Plex comes from its sessions (with Tautulli for the watched time), Audiobookshelf from `/api/sessions`, which gives the user, device, start time and time listened. Arrmy already polls both every 30 seconds for #activity.
+
+**#weekly-summary.** Today's #watched, with each title linking to its Activity thread.
+
+**Problems forum.** A thread opens once a Problem has lasted 20 minutes, as today (or at once after 3 dead releases). It is titled `<Media Type> - <title> - <issue>`, e.g. `Audiobook - Harry Potter and the Chamber of Secrets - no valid release found`, with the cover. Discord allows 100 characters, so a long media title is cut short with `…`, keeping the type and issue whole. Tags: **Open**, **Doctor working**, **Needs you**, **Resolved**.
+
+- When the doctor starts, it posts that it's looking into the Problem. Then it posts each step: **Checked** (each `get`, e.g. `radarr /queue`) and **Fixed** (each `fix`, e.g. `retry radarr 412`), from Claude Code's `stream-json` output. Last comes its answer: Cause, What I did, What you need to do, and whether it solved the Problem.
+- Not solved: the thread is tagged **Needs you** and the Admin is @mentioned (`DISCORD_ADMIN_ID`). This replaces today's @mention on every new Problem.
+- When the Problem goes away, the bot posts "Issue resolved", tags the thread **Resolved** and archives it, without locking it, so the Admin can still add notes. If the same Problem comes back, the same thread reopens.
+
+**Admin forum.** One thread per subject, kept over time.
+
+- **System**: one thread each for Radarr, Sonarr, Prowlarr, qBittorrent, Audiobookshelf, LazyLibrarian, Plex and the other apps (down, back, restarted, health warnings), plus VPN, Disk and Backups.
+- **Admin log**: one thread each for Size Limits, Dead releases settings, One-click fixes, each app's settings changes, Plex and Audiobookshelf access, and Sign-ins to Arrmy.
+- **Updates**: one thread for Arrmy releases and one per app's new versions.
+
+The @mentions stay as today: an app down, a disk, a backup, an app update and a full Arrmy release, each in its own thread.
+
+**Slash commands** answer as they do today.
+
+**First run.** The bot opens a thread for every Request ever made, Available ones included, filled with what Arrmy has kept: Created, edits, removals and Available. Search, Picked and Downloaded are skipped, since nothing was stored for them. Open Problems get their threads the same way.
+
+How: forum channels (type 15), threads opened with `POST /channels/<forum>/threads` and `applied_tags`. Each thread is its own channel, so Discord's rate limit of about 5 edits per 5 seconds applies to each thread separately, and only #downloading still needs to take turns. The `botrules` tests cover which thread and tag each event goes to.
+
+About 2–3 days (the first-run backfill and the status tags add most of a day). The order to build it in: forums and thread storage, Problems (it absorbs **The doctor's steps in Discord** under Other planned), Requests, Admin, Activity.
+
+**Later:** a page on the site with the weekly summary.
+
 ### Request Log
 
 Built (see Done): the log from Radarr's and Sonarr's webhooks, qBittorrent and Plex; Arrmy's own movie search with every release and indexer health; edits and one-click fixes; audiobooks; #problems when a movie search finds nothing acceptable (dead releases were already there). Still to come: Arrmy running TV searches (waits on the season pack question below), refused Requests (they have no Request to hang a log on yet), and removals (the log goes with the Request).
@@ -283,7 +345,7 @@ The current look (Sidebar dashboard colours and pages, Search-first Home) was pi
 - **More Media Types.** Music (Lidarr → Plex); Books and Periodicals (LazyLibrarian → Kavita); Comics (Kapowarr → Kavita); Manga (Mangarr → Kavita).
 - **Better Movies + TV.** Anime routed to anime-tuned Radarr and Sonarr, Recyclarr quality profiles, Bazarr subtitles.
 - **YouTube channels** (TubeArchivist), once its Plex plugin is confirmed to work.
-- **The doctor's steps in Discord** (chosen 2026-10-22, about 30 minutes). Today only Claude's final answer reaches #problems, and the container log says only "looking into it". Planned: post "Claude is looking into this…" when a run starts, then edit that card with the answer plus **Checked** (each `get` it made, e.g. `radarr /queue`) and **Fixed** (each `fix` it ran, e.g. `retry radarr 412`), so a fix can be confirmed rather than taken from Claude's summary. The doctor would record steps from Claude Code's `stream-json` output. An Admin panel with run history was considered and left for later.
+- **The doctor's steps in Discord** (chosen 2026-10-22, about 30 minutes; now part of the Discord bot rework's Problems forum). Today only Claude's final answer reaches #problems, and the container log says only "looking into it". Planned: post "Claude is looking into this…" when a run starts, then edit that card with the answer plus **Checked** (each `get` it made, e.g. `radarr /queue`) and **Fixed** (each `fix` it ran, e.g. `retry radarr 412`), so a fix can be confirmed rather than taken from Claude's summary. The doctor would record steps from Claude Code's `stream-json` output. An Admin panel with run history was considered and left for later.
 - **The doctor handles stuck Editions and a blocked VPN server** (chosen 2026-10-22). Seen live: the Andy Serkis Lord of the Rings Editions found nothing because AudioBook Bay never answered (the home connection times out; the VPN's Riga server was blocked too), yet nothing was raised: an Edition with no match isn't a Problem, and the doctor can't see Editions or AudioBook Bay. Reconnecting the VPN (new server, Montréal) fixed it by hand. Built (Arrmy side): each Edition search now records whether AudioBook Bay answered, and an Edition still unmatched an hour after its Request is a Missing Problem that says so ("AudioBook Bay didn't answer (fetch failed); Prowlarr found 19 releases, none of this book read by Andy Serkis."), with **Search again** on the Admin page; an audiobook LazyLibrarian still wants with nothing snatched an hour after its Request is one too. The doctor gets an internal API on the relay's port (`/doctor/editions`, `/doctor/abb?s=`, `POST /doctor/editions/<id>/search`, with its token). Still planned: the doctor using that API, and **reconnect the VPN** as a safe fix (gluetun's control server, which needs `HTTP_CONTROL_SERVER_AUTH` set up first: it answers 401 today).
 
 ### Possible integrations

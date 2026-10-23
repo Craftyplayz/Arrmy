@@ -2,19 +2,93 @@
 import { createHash } from 'node:crypto'
 import type { Problem } from './problems'
 
-/** The bot's channels and their topics, created in this order under an Arrmy category. */
+/** The bot's text channels and their topics, created first under an Arrmy category. */
 export const CHANNELS = {
-  requests: 'New Requests, edits and removals, refused Requests, and what became Available.',
-  downloads: "What's downloading now: one live card each, gone when it finishes.",
-  downloaded: 'Finished downloads, with how long each took.',
-  problems: 'New Problems and automatic fixes. @mentions the Admin.',
-  'admin-log': "Arrmy's settings and Admin actions, settings changed inside the apps, and who has access to Plex and Audiobookshelf.",
-  system: 'Apps and the VPN going down or coming back, health warnings, disk space and backups.',
-  updates: 'Arrmy commits and releases, and new versions of every app. @mentions the Admin.',
-  activity: 'Sign-ins to Arrmy, and who started watching or listening.',
-  watched: 'Every Sunday evening: who watched what in Plex that week, from Tautulli.',
+  downloading: "What's downloading now: one live card each, gone when it finishes.",
+  'weekly-summary': 'Every Sunday evening: who watched what in Plex that week, from Tautulli.',
 } as const
 export type Channel = keyof typeof CHANNELS
+
+/**
+ * The bot's forums, created after the channels: one thread per thing, with everything about it inside. Private ones
+ * only the Admin (and the bot) can see. Only the bot opens threads; whoever sees a forum can reply in its threads.
+ */
+export const FORUMS = {
+  requests: { name: 'Requests', private: false, topic: 'One thread per Request: the search, the download and when it became Available.', tags: ['Movie', 'TV', 'Audiobook', 'Requested', 'Downloading', 'Available', 'Removed'] },
+  activity: { name: 'Activity', private: false, topic: 'One thread per movie, show or book: who played it, on what, and for how long.', tags: ['Movie', 'TV', 'Audiobook'] },
+  problems: { name: 'Problems', private: true, topic: 'One thread per Problem, with what the doctor checked and fixed.', tags: ['Open', 'Doctor working', 'Needs you', 'Resolved'] },
+  admin: { name: 'Admin', private: true, topic: 'One thread per subject: the apps, the VPN, disks, backups, settings, access and updates.', tags: ['Admin log', 'System', 'Updates'] },
+} as const
+export type Forum = keyof typeof FORUMS
+export type Tag<F extends Forum = Forum> = (typeof FORUMS)[F]['tags'][number]
+
+/** A media type's tag in the Requests and Activity forums. */
+export const TYPE_TAGS = { movie: 'Movie', tv: 'TV', audiobook: 'Audiobook' } as const
+
+/** Discord's permission bits the forums need. */
+export const PERMS = { view: 1n << 10n, send: 1n << 11n, embed: 1n << 14n, attach: 1n << 15n, history: 1n << 16n, manageThreads: 1n << 34n, sendInThreads: 1n << 38n }
+
+/**
+ * A forum's permission overwrites: nobody opens threads but the bot, everyone who sees it can reply in them, and a
+ * private one is hidden from everyone but the bot and the Admin (DISCORD_ADMIN_ID).
+ */
+export function forumPermissions(forum: Forum, guildId: string, botId: string, adminId?: string) {
+  const p = PERMS
+  const everyoneDeny = p.send | (FORUMS[forum].private ? p.view : 0n)
+  const bot = p.view | p.send | p.sendInThreads | p.embed | p.attach | p.history | p.manageThreads
+  return [
+    { id: guildId, type: 0, allow: String(FORUMS[forum].private ? 0n : p.sendInThreads), deny: String(everyoneDeny) },
+    { id: botId, type: 1, allow: String(bot), deny: '0' },
+    ...(adminId ? [{ id: adminId, type: 1, allow: String(p.view | p.sendInThreads | p.history), deny: '0' }] : []),
+  ]
+}
+
+/** A thread's name: Discord allows 100 characters, so `title` is cut short with … and the rest is kept whole. */
+export function threadName(title: string, before = '', after = '') {
+  const room = 100 - before.length - after.length
+  return `${before}${title.length > room ? `${title.slice(0, Math.max(1, room - 1)).trimEnd()}…` : title}${after}`
+}
+
+/** A Problem thread's name: "Audiobook - Harry Potter and the Chamber of Secrets - no valid release found". */
+export const problemThreadName = (type: string, title: string, issue: string) => threadName(title, `${type} - `, ` - ${issue}`)
+
+/**
+ * A forum thread about one thing, found again by `key` (the threads table), opened by its first post with `name`.
+ * `tags` replaces the thread's tags when given; `art` is the cover attached to the first post, which Discord shows as
+ * the thread's preview.
+ */
+export type ThreadRef = { forum: Forum; key: string; name: string; tags?: readonly string[]; art?: string | null }
+
+/** The Admin forum's thread for one subject: "Radarr", "VPN", "Size Limits", "Arrmy releases"… */
+export const adminThread = (subject: string, tag: Tag<'admin'>): ThreadRef => ({ forum: 'admin', key: `admin:${subject}`, name: subject, tags: [tag] })
+
+/** The Admin thread for a card of new versions after a redeploy: Arrmy's own, one app's, or several apps'. */
+export const updatesSubject = (apps: string[]) => (apps.includes('Arrmy') ? 'Arrmy releases' : apps.length === 1 ? `${apps[0]} updates` : 'App updates')
+
+export type RequestStatus = 'Requested' | 'Downloading' | 'Available' | 'Removed'
+
+/** A Request's thread: one per title (`item` is the Request Log's, e.g. movie:603), whoever asked for it. */
+export const requestThread = (item: string, name: string, type: keyof typeof TYPE_TAGS, status?: RequestStatus, art?: string | null): ThreadRef => ({
+  forum: 'requests',
+  key: `request:${item}`,
+  name: threadName(name),
+  tags: status && [TYPE_TAGS[type], status],
+  art,
+})
+
+const PROBLEM_TYPES = { radarr: 'Movie', sonarr: 'TV', lazylibrarian: 'Audiobook', editions: 'Audiobook' } as const
+
+/** A Problem's thread, the same one each time the same Problem comes back. */
+export const problemThread = (p: Problem, tag?: Tag<'problems'>): ThreadRef => ({
+  forum: 'problems',
+  key: `problem:${problemKey(p)}`,
+  name: problemThreadName(PROBLEM_TYPES[p.service], p.title, p.kind.toLowerCase()),
+  tags: tag && [tag],
+  art: p.poster,
+})
+
+/** Where a thread opens in Discord. */
+export const threadUrl = (guildId: string, threadId: string) => `https://discord.com/channels/${guildId}/${threadId}`
 
 /** The qBittorrent categories Radarr, Sonarr and LazyLibrarian file their torrents under, and which app each is. */
 export const CATEGORY_APPS: Record<string, string> = { movies: 'Radarr', tv: 'Sonarr', books: 'LazyLibrarian', editions: 'Arrmy' }

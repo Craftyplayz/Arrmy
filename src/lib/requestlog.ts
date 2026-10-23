@@ -4,14 +4,13 @@
 // every release and why it was turned down is logged; audiobooks are followed through LazyLibrarian's history.
 import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
-import { arr, posterOf, queueOf, type Media } from './arr'
+import { arr, queueOf, type Media } from './arr'
 import { editionOf, sameBook, type LLBook } from './bookrules'
 import { ll, owned } from './books'
 import { absKey } from './keys'
-import { addLog, getSetting, listRequests, logItem, recentLog, requestsFor, waitingOfType } from './db'
-import { announce } from './discord'
-import { embed } from './embeds'
-import { utc, whyNothing, type Grabbed, type Imported, type IndexerHealth, type Note, type Release, type Searched } from './logrules'
+import { getSetting, listRequests, logItem, recentLog, requestsFor, waitingOfType } from './db'
+import { log } from './notify'
+import { utc, type Grabbed, type Imported, type IndexerHealth, type Note, type Release, type Searched } from './logrules'
 import { plex, plexLibrary, PLEX_URL, type PlexItem } from './plex'
 import { qbit, torrents } from './qbit'
 
@@ -59,13 +58,13 @@ async function indexerHealth(app: string, since: number): Promise<IndexerHealth[
 export async function searchMovie(movieId: number, note?: Note) {
   const movie = await arr<Media & { tmdbId: number; isAvailable: boolean }>('radarr', `/movie/${movieId}`)
   const item = logItem('movie', movie.tmdbId)
-  if (note) addLog(item, 'note', note)
+  if (note) log(item, 'note', note)
   const started = Date.now()
   let found: RadarrRelease[]
   try {
     found = await arr<RadarrRelease[]>('radarr', `/release?movieId=${movieId}`)
   } catch (e) {
-    addLog(item, 'searched', { releases: [], indexers: [], error: (e as Error).message } satisfies Searched)
+    log(item, 'searched', { releases: [], indexers: [], error: (e as Error).message } satisfies Searched)
     await arr('radarr', '/command', 'POST', { name: 'MoviesSearch', movieIds: [movieId] })
     return
   }
@@ -83,19 +82,9 @@ export async function searchMovie(movieId: number, note?: Note) {
     console.warn(`[log] indexer health: ${(e as Error).message}`)
     return []
   })
-  addLog(item, 'searched', { releases, indexers, picked: pick?.title } satisfies Searched)
+  log(item, 'searched', { releases, indexers, picked: pick?.title } satisfies Searched)
+  // Nothing to grab shows in the Request's thread, as its Search post.
   if (pick) await arr('radarr', '/release', 'POST', { guid: pick.guid, indexerId: pick.indexerId })
-  else if (movie.isAvailable)
-    announce(
-      'problems',
-      embed({
-        colour: 'danger',
-        app: 'Radarr',
-        title: `${movie.title}${movie.year ? ` (${movie.year})` : ''}`,
-        art: posterOf(movie),
-        description: `Nothing to grab. ${whyNothing(releases)} Radarr keeps watching for new releases.`,
-      }),
-    )
 }
 
 /** Where .torrent copies live: next to Arrmy's database, in the config folder that's backed up. */
@@ -150,7 +139,7 @@ async function followDownloads() {
     // completion_on survives a restart's recheck, when progress can briefly read under 100%.
     if (t.progress < 1 && !(t.completion_on > 0)) continue
     const finished = t.completion_on > 0 ? t.completion_on : Date.now() / 1000
-    addLog(e.item, 'downloaded', { downloadId: g.downloadId, seconds: Math.round(finished - t.added_on), size: t.size, ...peaks.get(g.downloadId), seasons: g.seasons })
+    log(e.item, 'downloaded', { downloadId: g.downloadId, seconds: Math.round(finished - t.added_on), size: t.size, ...peaks.get(g.downloadId), seasons: g.seasons })
     peaks.delete(g.downloadId)
   }
 }
@@ -186,16 +175,16 @@ async function followBooks() {
     if (!grabbed.has(downloadId)) {
       const feed = Number(h.NZBprov?.match(/\/(\d+)\/api$/)?.[1])
       const mb = Number(h.NZBsize)
-      addLog(item, 'grabbed', { downloadId, release: h.NZBtitle, indexer: indexers.get(feed) ?? h.NZBprov, size: mb ? mb * 1024 * 1024 : undefined } satisfies Grabbed)
+      log(item, 'grabbed', { downloadId, release: h.NZBtitle, indexer: indexers.get(feed) ?? h.NZBprov, size: mb ? mb * 1024 * 1024 : undefined } satisfies Grabbed)
       grabbed.add(downloadId)
     }
     if ((h.Status === 'Seeding' || h.Status === 'Processed') && !filed.has(downloadId)) {
-      addLog(item, 'imported', { downloadId, file: h.DLResult ? basename(h.DLResult) : undefined } satisfies Imported)
+      log(item, 'imported', { downloadId, file: h.DLResult ? basename(h.DLResult) : undefined } satisfies Imported)
       filed.add(downloadId)
       landing.add(item)
     }
     if ((h.Status === 'Failed' || h.Status === 'Aborted') && !dead.has(downloadId) && !filed.has(downloadId)) {
-      addLog(item, 'dead', { downloadId, reason: h.DLResult || `LazyLibrarian marked it ${h.Status}` })
+      log(item, 'dead', { downloadId, reason: h.DLResult || `LazyLibrarian marked it ${h.Status}` })
       dead.add(downloadId)
     }
   }
@@ -209,7 +198,7 @@ async function followBooks() {
     const there =
       !absKey() ||
       (!!request && !!book && (await owned(request.title)).some((i) => sameBook(i, { title: request.title, author: book.AuthorName })))
-    if (there) addLog(item, 'playable', { app: 'Audiobookshelf' })
+    if (there) log(item, 'playable', { app: 'Audiobookshelf' })
   }
 }
 
@@ -222,7 +211,7 @@ export async function logRetry(service: 'radarr' | 'sonarr', queueIds: number[],
     if (!id || logged.has(downloadId)) continue
     logged.add(downloadId)
     const seasons = r.seasonNumber === undefined ? undefined : [r.seasonNumber]
-    addLog(logItem(service === 'radarr' ? 'movie' : 'tv', id), 'dead', { downloadId, reason: 'Try another release', by, seasons })
+    log(logItem(service === 'radarr' ? 'movie' : 'tv', id), 'dead', { downloadId, reason: 'Try another release', by, seasons })
   }
 }
 
@@ -232,7 +221,7 @@ export async function logEpisodeSearch(episodeIds: number[], by: string) {
   const episodes = await arr<{ seasonNumber: number; series?: { tvdbId: number } }[]>('sonarr', `/episode?${query}&includeSeries=true`)
   const shows = new Map<number, Set<number>>()
   for (const e of episodes.filter((e) => e.series?.tvdbId)) shows.set(e.series!.tvdbId, (shows.get(e.series!.tvdbId) ?? new Set()).add(e.seasonNumber))
-  for (const [tvdbId, seasons] of shows) addLog(logItem('tv', tvdbId), 'note', { text: 'Search again', by, seasons: [...seasons] } satisfies Note)
+  for (const [tvdbId, seasons] of shows) log(logItem('tv', tvdbId), 'note', { text: 'Search again', by, seasons: [...seasons] } satisfies Note)
 }
 
 /** Imports not yet in Plex: logged as playable once Plex lists the movie, or every season of the show. */
@@ -262,7 +251,7 @@ async function followImports() {
       }
     }
     if (!playable) continue
-    addLog(e.item, 'playable', { app: 'Plex', seasons: d.seasons })
+    log(e.item, 'playable', { app: 'Plex', seasons: d.seasons })
     logged.add(key)
   }
 }

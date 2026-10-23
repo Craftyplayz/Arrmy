@@ -52,18 +52,24 @@ export function topPlays(plays: Play[], fromMs: number, count = 5) {
   }
 }
 
-/** One line per person for #watched: `**Sam**: Dune · Severance (4 episodes)`, busiest first. */
-export function weekSummary(plays: Play[], fromMs: number) {
-  const people = new Map<string, Map<string, number>>()
+/**
+ * One line per person for #weekly-summary: `**Sam**: Dune · Severance (4 episodes)`, busiest first. `url` links each
+ * title (its Activity thread) when it has somewhere to go.
+ */
+export function weekSummary(plays: Play[], fromMs: number, url: (p: Play) => string | undefined = () => undefined) {
+  const people = new Map<string, Map<string, { eps: number; url?: string }>>()
   for (const p of plays.filter((p) => p.date * 1000 >= fromMs).sort((a, b) => a.date - b.date)) {
-    const titles = people.get(p.friendly_name) ?? new Map<string, number>()
+    const titles = people.get(p.friendly_name) ?? new Map<string, { eps: number; url?: string }>()
     const title = p.media_type === 'episode' ? p.grandparent_title : p.title
-    titles.set(title, (titles.get(title) ?? 0) + (p.media_type === 'episode' ? 1 : 0))
+    const t = titles.get(title) ?? { eps: 0, url: url(p) }
+    if (p.media_type === 'episode') t.eps++
+    titles.set(title, t)
     people.set(p.friendly_name, titles)
   }
+  const shown = (title: string, link?: string) => (link ? `[${title}](<${link}>)` : title)
   return [...people]
     .sort((a, b) => b[1].size - a[1].size || a[0].localeCompare(b[0]))
-    .map(([name, titles]) => `**${name}**: ${[...titles].map(([t, eps]) => (eps ? `${t} (${eps} ${eps === 1 ? 'episode' : 'episodes'})` : t)).join(' · ')}`)
+    .map(([name, titles]) => `**${name}**: ${[...titles].map(([t, { eps, url }]) => shown(t, url) + (eps ? ` (${eps} ${eps === 1 ? 'episode' : 'episodes'})` : '')).join(' · ')}`)
 }
 
 /** The week's id (that Sunday's date) once it's Sunday from 18:00 in the server's time zone and the week isn't sent yet. */

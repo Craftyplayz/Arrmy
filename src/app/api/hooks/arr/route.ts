@@ -1,7 +1,7 @@
 import { requestDetails } from '@/lib/arr'
-import { addLog, logItem, markAvailable, waitingRequests } from '@/lib/db'
+import { logItem, markAvailable, waitingRequests } from '@/lib/db'
 import type { Grabbed, Imported } from '@/lib/logrules'
-import { tellDiscord } from '@/lib/notify'
+import { log, tellDiscord } from '@/lib/notify'
 import { hookToken, safeEqual, sessionSecret } from '@/lib/token'
 
 type MediaInfo = { videoCodec?: string; height?: number; audioLanguages?: string | string[]; subtitles?: string | string[] }
@@ -25,14 +25,14 @@ export async function POST(request: Request) {
   if (event.eventType === 'Grab') {
     if (downloadId) {
       const r = event.release ?? {}
-      addLog(logItem(type, id), 'grabbed', { downloadId, release: r.releaseTitle, indexer: r.indexer, size: r.size, quality: r.quality, seasons } satisfies Grabbed)
+      log(logItem(type, id), 'grabbed', { downloadId, release: r.releaseTitle, indexer: r.indexer, size: r.size, quality: r.quality, seasons } satisfies Grabbed)
     }
     return new Response(null, { status: 204 })
   }
 
   const file: File = event.movieFile ?? event.episodeFile ?? event.episodeFiles?.[0] ?? {}
   const m = file.mediaInfo ?? {}
-  addLog(logItem(type, id), 'imported', {
+  log(logItem(type, id), 'imported', {
     downloadId,
     file: file.relativePath,
     size: file.size,

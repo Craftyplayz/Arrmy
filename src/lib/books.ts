@@ -15,9 +15,9 @@ import {
   type Removed,
 } from './bookrules'
 import { absKey } from './keys'
-import { addLog, getSetting, setPoster, logItem, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
+import { getSetting, setPoster, logItem, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { watchEditions } from './editions'
-import { tellDiscord } from './notify'
+import { log, tellDiscord } from './notify'
 import { deleteTorrents, liveProgress } from './qbit'
 import type { Status } from './status'
 import { findCover } from './covers'
@@ -392,8 +392,8 @@ async function alreadyOwned(r: RequestRow, book: LLBook | undefined) {
   if ((book?.AudioStatus ?? book?.audiostatus) !== 'Wanted') return false
   if (!(await owned(r.title)).some((i) => sameBook(i, { title: r.title, author: book!.AuthorName }))) return false
   await ll('unqueueBook', { id: book!.BookID, type: 'AudioBook' })
-  addLog(logItem('audiobook', book!.BookID), 'note', { text: 'Already in Audiobookshelf, so nothing to download' })
-  addLog(logItem('audiobook', book!.BookID), 'playable', { app: 'Audiobookshelf' })
+  log(logItem('audiobook', book!.BookID), 'note', { text: 'Already in Audiobookshelf, so nothing to download' })
+  log(logItem('audiobook', book!.BookID), 'playable', { app: 'Audiobookshelf' })
   return true
 }
 

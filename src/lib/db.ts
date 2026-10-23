@@ -54,6 +54,14 @@ const REQUEST_LOG = `
     at TEXT NOT NULL DEFAULT (datetime('now'))
   )`
 
+const THREADS = `
+  CREATE TABLE IF NOT EXISTS threads (
+    key TEXT PRIMARY KEY,                  -- request:<media_type>:<external_id>, problem:<problemKey>, admin:<subject>, play:<app>:<id>
+    forum TEXT NOT NULL,                   -- requests, activity, problems or admin (see botrules.ts)
+    id TEXT NOT NULL,                      -- Discord's thread id
+    tags TEXT NOT NULL DEFAULT '[]'        -- JSON: the tag names it has now
+  )`
+
 // Opened lazily so `next build` never touches /config.
 function db() {
   if (!conn) {
@@ -72,6 +80,7 @@ function db() {
       );
       ${DEAD_RELEASES};
       ${REQUEST_LOG};
+      ${THREADS};
     `)
     // Before 1.1.0 media_type only allowed movie and tv. SQLite can't change a CHECK, so rebuild the table once.
     const sqlOf = (table: string) => (conn!.prepare('SELECT sql FROM sqlite_master WHERE name = ?').get(table) as { sql: string }).sql
@@ -216,3 +225,15 @@ export const logFor = (item: string) => db().prepare('SELECT kind, detail, at FR
 /** Recent events of one kind, for the watch that follows them up (see requestlog.ts). */
 export const recentLog = (kind: LogKind, days: number) =>
   db().prepare(`SELECT item, kind, detail, at FROM request_log WHERE kind = ? AND at > datetime('now', ?) ORDER BY id`).all(kind, `-${days} days`) as (LogEvent & { item: string })[]
+
+/** A Discord forum thread the bot opened for a Request, Problem, subject or media item (see discord.ts). */
+export type ThreadRow = { key: string; forum: string; id: string; tags: string }
+
+export const getThread = (key: string) => db().prepare('SELECT * FROM threads WHERE key = ?').get(key) as ThreadRow | undefined
+
+export const saveThread = (t: { key: string; forum: string; id: string; tags: string[] }) =>
+  db()
+    .prepare('INSERT INTO threads (key, forum, id, tags) VALUES (?, ?, ?, ?) ON CONFLICT(key) DO UPDATE SET forum = excluded.forum, id = excluded.id, tags = excluded.tags')
+    .run(t.key, t.forum, t.id, JSON.stringify(t.tags))
+
+export const forgetThread = (key: string) => db().prepare('DELETE FROM threads WHERE key = ?').run(key)

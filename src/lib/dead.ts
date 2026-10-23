@@ -2,10 +2,9 @@
 // the same title, the last one is left alone and the Admin gets a Problem and a Discord ping instead.
 import { queueOf, retryRelease } from './arr'
 import { audiobookTorrents, dropAudiobookRelease, searchDroppedBooks } from './books'
-import { addDeadRelease, addLog, deadReleaseCount, getDeadLimits, isDeadRelease, logItem, pendingBookSearches, requestsFor, setSearchPending } from './db'
+import { addDeadRelease, deadReleaseCount, getDeadLimits, isDeadRelease, logItem, pendingBookSearches, requestsFor, setSearchPending } from './db'
 import { coverUrl } from './bookrules'
-import { announce } from './discord'
-import { embed } from './embeds'
+import { log } from './notify'
 import { byDownload, deadReason, nameOf, posterIn } from './problems'
 import { torrents } from './qbit'
 
@@ -80,23 +79,10 @@ export async function checkDeadReleases(now = Date.now()) {
       // Swapped before it's recorded, so a swap that fails is tried again next minute.
       if (!last) await target.swap()
       addDeadRelease({ hash: t.hash, item: target.item, title: target.title, kept: last, searchPending: !last && !!target.book })
-      if (target.log && !last) addLog(target.log.item, 'dead', { downloadId: t.hash, reason: t.reason, seasons: target.log.seasons })
-      // The last one becomes a Problem, which #problems announces with a ping (see feeds.ts).
+      if (target.log && !last) log(target.log.item, 'dead', { downloadId: t.hash, reason: t.reason, seasons: target.log.seasons })
+      // The last one becomes a Problem with its own thread (see feeds.ts); a swap is posted in the Request's thread by log().
       if (last) console.warn(`[dead] ${target.title}: ${t.reason}. ${strike} dead releases in a row, so it's a Problem now`)
-      else {
-        console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${limits.strikes})`)
-        announce(
-          'problems',
-          embed({
-            colour: 'info',
-            app: target.app,
-            title: target.title,
-            art: target.art,
-            description: `${t.reason}, so Arrmy is trying another release.`,
-            fields: [['Try', `${strike} of ${limits.strikes}`]],
-          }),
-        )
-      }
+      else console.log(`[dead] ${target.title}: ${t.reason}. Trying another release (${strike} of ${limits.strikes})`)
     }
   }
 

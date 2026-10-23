@@ -3,23 +3,24 @@
 // and the first check after the bot is set up only records, so setting it up doesn't flood the channels.
 import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { audiobookshelfActivity, plexActivity, weeklySummary } from './activity'
 import { adminOverview } from './admin'
 import { arr } from './arr'
 import { abs, ABS_URL, ll } from './books'
-import { CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, releaseNotes, size } from './botrules'
+import { adminThread, CATEGORY_APPS, changes, compareVersions, flatten, linked, plexUsers, problemKey, problemThread, releaseNotes, size, updatesSubject, type ThreadRef } from './botrules'
 import { COMMANDS } from './commands'
 import { absKey } from './keys'
-import { getDeadLimits, getSetting, setSetting } from './db'
+import { getDeadLimits, getSetting, getThread, recentLog, setSetting } from './db'
 import { investigate } from './doctor'
-import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, syncAvatar, syncBarEmoji } from './discord'
-import { COLOUR, downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
-import { bookArt, downloadMeta, plexArt } from './media'
+import { backfillRequests } from './notify'
+import { announce, barEmoji, botEnabled, edit, ownMessages, post, publicUrl, registerCommands, remove, retag, syncAvatar, syncBarEmoji, threadLink } from './discord'
+import { downloadEmbed, embed, ICONS, sentence, type DownloadMeta, type Embed } from './embeds'
+import { downloadMeta } from './media'
 import { plex, PLEX_URL } from './plex'
 import { deadDetail } from './problems'
 import { qbit, torrents } from './qbit'
 import { autobrrVersion } from './autobrr'
-import { history, tautulli } from './tautulli'
-import { summaryDue, weekSummary } from './watchrules'
+import { tautulli } from './tautulli'
 
 /** What a check saw last time (undefined the first time), remembering what it sees now. */
 function since<T>(key: string, now: T): T | undefined {
@@ -63,40 +64,24 @@ const APP_URLS: Record<string, string | undefined> = {
 }
 const appCard = (name: string) => ({ app: name, appUrl: APP_URLS[name], art: ICONS[name] })
 
-// #downloads: one card per torrent while it downloads, updated every 5 seconds. Discord allows about 5 edits per 5 seconds
-// in a channel, so each round edits the 4 that waited longest; with more downloads each one updates a little less often.
-// A finished download's card moves to #downloaded; a removed torrent's card just goes.
+// #downloading: one card per torrent while it downloads, updated every 5 seconds. Discord allows about 5 edits per 5
+// seconds in a channel, so each round edits the 4 that waited longest; with more downloads each one updates a little less
+// often. A finished or removed torrent's card goes; the Request's thread gets the finished one's stats.
 const EDITS_PER_ROUND = 4
 type Tracked = Record<string, { id: string; sig: string; edited: number; started: number; name: string; meta?: DownloadMeta; tried?: number }>
 
-/** A card as Discord returns it, cut back to what can be posted again (no proxy addresses, sizes or type). */
-const repostable = (e: Embed): Embed => ({
-  title: e.title,
-  url: e.url,
-  description: e.description,
-  color: e.color,
-  author: e.author && { name: e.author.name, url: e.author.url, icon_url: e.author.icon_url },
-  thumbnail: e.thumbnail && { url: e.thumbnail.url },
-  fields: e.fields,
-  footer: e.footer && { text: e.footer.text },
-  timestamp: e.timestamp,
-})
-
-/**
- * Once after a start: cards in #downloads that aren't live (from before #downloaded existed, or finished while Arrmy was
- * down) move to #downloaded if they're Done cards, and go either way.
- */
+/** Once after a start: cards in #downloading that aren't live (finished while Arrmy was down) go. */
 let tidied = false
 const looked = new Set<string>() // torrents whose details were looked up since this start
 async function tidyDownloads(tracked: Tracked) {
   tidied = true
   const live = new Set(Object.values(tracked).map((s) => s.id))
-  for (const m of await ownMessages('downloads')) {
-    if (live.has(m.id)) continue
-    if (m.embeds[0]?.color === COLOUR.ok) await post('downloaded', repostable(m.embeds[0]))
-    await remove('downloads', m.id)
-  }
+  for (const m of await ownMessages('downloading')) if (!live.has(m.id)) await remove('downloading', m.id)
 }
+
+/** Each grabbed torrent's Request thread (by lowercase hash), from the Request Log. */
+const requestThreads = () =>
+  new Map(recentLog('grabbed', 14).map((e) => [String(JSON.parse(e.detail).downloadId).toLowerCase(), threadLink(`request:${e.item}`)]))
 
 async function downloads() {
   const list = (await torrents()).filter((t) => t.category in CATEGORY_APPS)
@@ -109,6 +94,7 @@ async function downloads() {
   const unknown = list.filter((t) => t.progress < 1 && !looked.has(t.hash.toLowerCase()) && now - (tracked[t.hash.toLowerCase()]?.tried ?? 0) > 30_000)
   const metas = unknown.length ? await downloadMeta(unknown).catch(() => new Map<string, DownloadMeta>()) : new Map<string, DownloadMeta>()
   const emoji = barEmoji()
+  const threads = requestThreads()
 
   const due: { hash: string; card: Embed; sig: string; done: boolean }[] = []
   for (const t of list) {
@@ -127,37 +113,38 @@ async function downloads() {
       looked.add(hash)
     } else if (unknown.includes(t)) s.tried = now
     const card = downloadEmbed(finished ? { ...t, progress: 1 } : t, s.meta, emoji, s.started)
+    card.url = threads.get(hash) ?? card.url
     const { timestamp: _, ...rest } = card
     const sig = JSON.stringify(rest)
     const done = finished
     if (done || (sig !== s.sig && s.id !== 'gone')) due.push({ hash, card, sig, done })
   }
-  // Finished ones first (their move to #downloaded is news), then new cards, then whichever has waited longest.
+  // Finished ones first (their card going is news), then new cards, then whichever has waited longest.
   const rank = (d: (typeof due)[0]) => (d.done ? 0 : !tracked[d.hash].id ? 1 : 2)
   due.sort((a, b) => rank(a) - rank(b) || tracked[a.hash].edited - tracked[b.hash].edited)
   for (const d of due.slice(0, EDITS_PER_ROUND)) {
     const s = tracked[d.hash]
     if (d.done) {
-      await post('downloaded', d.card)
-      if (s.id && s.id !== 'gone') await remove('downloads', s.id)
+      if (s.id && s.id !== 'gone') await remove('downloading', s.id)
       delete tracked[d.hash]
       continue
     }
-    if (!s.id) s.id = await post('downloads', d.card)
-    else if (!(await edit('downloads', s.id, d.card))) s.id = 'gone' // deleted by hand: leave it be
+    if (!s.id) s.id = await post('downloading', d.card)
+    else if (!(await edit('downloading', s.id, d.card))) s.id = 'gone' // deleted by hand: leave it be
     Object.assign(s, { sig: d.sig, edited: now })
   }
   for (const [hash, s] of Object.entries(tracked)) {
     if (list.some((t) => t.hash.toLowerCase() === hash)) continue
-    if (s.id && s.id !== 'gone') await remove('downloads', s.id) // removed from qBittorrent: its card goes
+    if (s.id && s.id !== 'gone') await remove('downloading', s.id) // removed from qBittorrent: its card goes
     delete tracked[hash]
   }
   if (JSON.stringify(tracked) !== saved) setSetting('bot:downloads', tracked)
 }
 
-// #problems. Arrmy fixes most stalled downloads by itself within 15 minutes (dead.ts), so a Problem is only announced
-// once it has lasted 20; one Arrmy raised itself after its tries ran out is announced at once.
-type Seen = Record<string, { first: number; told: boolean }>
+// The Problems forum. Arrmy fixes most stalled downloads by itself within 15 minutes (dead.ts), so a Problem is only
+// announced once it has lasted 20; one Arrmy raised itself after its tries ran out is announced at once. The Admin is
+// only @mentioned when the doctor can't solve it (doctor.ts). A Problem that goes away gets "Issue resolved".
+type Seen = Record<string, { first: number; told: boolean; thread?: ThreadRef }>
 const GRACE = 20 * 60_000
 const SERVICE_APPS = { radarr: 'Radarr', sonarr: 'Sonarr', lazylibrarian: 'LazyLibrarian', editions: 'Arrmy' } // Arrmy: no app page to link
 
@@ -166,15 +153,26 @@ async function problems() {
   const before = getSetting<Seen>('bot:problems')
   const now = Date.now()
   const seen: Seen = {}
+  // A Problem that turned into its dead-release one keeps its thread open, so only threads no Problem has any more close.
+  const open = new Set(list.map((p) => problemThread(p).key))
+  for (const s of Object.values(before ?? {})) {
+    if (!s.thread || open.has(s.thread.key) || !getThread(s.thread.key)) continue
+    announce(s.thread, embed({ colour: 'ok', app: 'Arrmy', title: 'Issue resolved', description: 'The Problem went away.' }))
+    retag(s.thread.key, { tags: ['Resolved'], archived: true })
+  }
   for (const p of list) {
     const raisedByArrmy = p.detail === deadDetail(getDeadLimits().strikes)
     const key = problemKey(p) + (raisedByArrmy ? ':dead' : '')
     const s = (seen[key] = before?.[key] ?? { first: now, told: !before })
+    if (before && !s.thread) s.told = false // told before the forums: it gets its thread now
+    s.thread = problemThread(p)
     if (s.told || (!raisedByArrmy && now - s.first < GRACE)) continue
     s.told = true
     const admin = publicUrl('arrmy', '/admin#problems')
+    // The doctor pings when it can't solve a Problem; without the doctor every Problem needs the Admin.
+    const doctor = !!process.env.DOCTOR
     announce(
-      'problems',
+      problemThread(p, doctor ? 'Open' : 'Needs you'),
       embed({
         colour: 'danger',
         app: SERVICE_APPS[p.service],
@@ -188,7 +186,7 @@ async function problems() {
           ['Fix', admin && linked(p.fix === 'retry' ? 'Try another release' : 'Search again', admin)],
         ],
       }),
-      true,
+      !doctor,
     )
     investigate(p)
   }
@@ -230,16 +228,16 @@ async function apps() {
       try {
         const now = await check()
         if (s.version && now.version && s.version !== now.version) updated(name, s.version, now.version)
-        if (s.down) announce('system', embed({ colour: 'ok', ...appCard(name), title: `${name} is back`, description: 'It answers again.' }))
+        if (s.down) announce(adminThread(name, 'System'), embed({ colour: 'ok', ...appCard(name), title: `${name} is back`, description: 'It answers again.' }))
         else if (s.started && now.started && s.started !== now.started)
-          announce('system', embed({ colour: 'info', ...appCard(name), title: `${name} restarted`, description: 'It started again by itself or after an update.' }))
+          announce(adminThread(name, 'System'), embed({ colour: 'info', ...appCard(name), title: `${name} restarted`, description: 'It started again by itself or after an update.' }))
         Object.assign(s, { fails: 0, down: false }, now)
       } catch (e) {
         if (++s.fails !== 2) return
         s.down = true
         const vpn = name === 'qBittorrent' ? ' It runs inside the VPN container, so the VPN may be down too.' : ' Check its container in Portainer.'
         const error = sentence((e as Error).message)
-        announce('system', embed({ colour: 'danger', ...appCard(name), title: `${name} is down`, description: `Arrmy can't reach it.${vpn}`, footer: error }), true)
+        announce(adminThread(name, 'System'), embed({ colour: 'danger', ...appCard(name), title: `${name} is down`, description: `Arrmy can't reach it.${vpn}`, footer: error }), true)
       }
     }),
   )
@@ -263,17 +261,17 @@ async function vpn() {
   const port = since('vpnPort', prefs.listen_port)
   if (port && port !== prefs.listen_port)
     announce(
-      'system',
+      adminThread('VPN', 'System'),
       embed({ colour: 'info', ...vpnCard, title: "The VPN's forwarded port changed", description: 'qBittorrent listens on the new one.', fields: [['Was', String(port)], ['Now', String(prefs.listen_port)]] }),
     )
   const down = info.connection_status === 'disconnected'
   const s = getSetting<{ fails: number; down: boolean }>('bot:vpn') ?? { fails: 0, down: false }
   if (down && ++s.fails === 2) {
     s.down = true
-    announce('system', embed({ colour: 'danger', ...vpnCard, title: 'The VPN is down', description: 'qBittorrent has no connection, so downloads have stopped.' }), true)
+    announce(adminThread('VPN', 'System'), embed({ colour: 'danger', ...vpnCard, title: 'The VPN is down', description: 'qBittorrent has no connection, so downloads have stopped.' }), true)
   }
   if (!down) {
-    if (s.down) announce('system', embed({ colour: 'ok', ...vpnCard, title: 'The VPN is back', description: 'qBittorrent is connected again.' }))
+    if (s.down) announce(adminThread('VPN', 'System'), embed({ colour: 'ok', ...vpnCard, title: 'The VPN is back', description: 'qBittorrent is connected again.' }))
     Object.assign(s, { fails: 0, down: false })
   }
   setSetting('bot:vpn', s)
@@ -297,8 +295,8 @@ async function health() {
     const [app, ...message] = item.split(': ')
     return embed({ colour: resolved ? 'ok' : 'danger', ...appCard(app), title: resolved ? 'Health warning resolved' : 'Health warning', description: sentence(message.join(': ')) })
   }
-  for (const h of items.filter((x) => !before.includes(x))) announce('system', card(h, false))
-  for (const h of before.filter((x) => !items.includes(x))) announce('system', card(h, true))
+  for (const h of items.filter((x) => !before.includes(x))) announce(adminThread(h.split(': ')[0], 'System'), card(h, false))
+  for (const h of before.filter((x) => !items.includes(x))) announce(adminThread(h.split(': ')[0], 'System'), card(h, true))
 }
 
 const LOW = 0.1 // disks warn under 10% free
@@ -317,8 +315,8 @@ async function disks() {
       ['Used', `${Math.round((1 - disk.freeSpace / disk.totalSpace) * 100)}%`],
     ]
     if (low && !before?.[name])
-      announce('system', embed({ colour: 'danger', app: 'Arrmy', title: `The ${name} disk is nearly full`, description: 'Under 10% is free. Remove something, or add space.', fields }), true)
-    if (!low && before?.[name]) announce('system', embed({ colour: 'ok', app: 'Arrmy', title: `The ${name} disk has room again`, fields }))
+      announce(adminThread('Disk', 'System'), embed({ colour: 'danger', app: 'Arrmy', title: `The ${name} disk is nearly full`, description: 'Under 10% is free. Remove something, or add space.', fields }), true)
+    if (!low && before?.[name]) announce(adminThread('Disk', 'System'), embed({ colour: 'ok', app: 'Arrmy', title: `The ${name} disk has room again`, fields }))
   }
 }
 
@@ -337,12 +335,12 @@ async function backups() {
   const newest = files.sort((a, b) => b.time - a.time)[0]
   const before = since('backup', newest?.name ?? '')
   if (newest && before !== undefined && before !== newest.name)
-    announce('system', embed({ colour: 'ok', app: 'Arrmy', title: 'Config backup saved', description: "Every app's settings, kept for a week.", fields: [['File', newest.name], ['Size', size(newest.bytes)]] }))
+    announce(adminThread('Backups', 'System'), embed({ colour: 'ok', app: 'Arrmy', title: 'Config backup saved', description: "Every app's settings, kept for a week.", fields: [['File', newest.name], ['Size', size(newest.bytes)]] }))
   const late = !newest || Date.now() - newest.time > 26 * 3_600_000 // one a night at 04:00
   const wasLate = since('backupLate', late)
   if (late && !wasLate)
     announce(
-      'system',
+      adminThread('Backups', 'System'),
       embed({
         colour: 'danger',
         app: 'Arrmy',
@@ -351,75 +349,6 @@ async function backups() {
       }),
       true,
     )
-}
-
-// #activity: who started watching or listening. Plex needs the Admin's Plex token, saved when they sign in.
-const playing: Record<string, Set<string>> = {}
-
-/** Posts sessions that weren't there last time; the first look after a restart only records. */
-async function newSessions<T>(app: string, sessions: T[], id: (s: T) => string, card: (s: T) => Promise<Embed>) {
-  const before = playing[app]
-  playing[app] = new Set(sessions.map(id))
-  if (before) for (const s of sessions.filter((x) => !before.has(id(x)))) announce('activity', await card(s))
-}
-
-type PlexSession = {
-  sessionKey: string
-  type: string
-  title: string
-  year?: number
-  grandparentTitle?: string
-  parentIndex?: number
-  index?: number
-  User?: { title: string }
-  Player?: { title?: string; product?: string }
-}
-const plexTitle = (s: PlexSession) =>
-  s.type === 'episode'
-    ? `${s.grandparentTitle} · S${s.parentIndex}E${s.index} · ${s.title}`
-    : s.type === 'track'
-      ? `${s.grandparentTitle} · ${s.title}`
-      : `${s.title}${s.year ? ` (${s.year})` : ''}`
-
-async function plexSessions() {
-  const token = getSetting<string>('plexToken')
-  if (!token) return
-  const list = (await plex<{ MediaContainer: { Metadata?: PlexSession[] } }>(`${PLEX_URL}/status/sessions`, token)).MediaContainer.Metadata ?? []
-  await newSessions('plex', list, (s) => s.sessionKey, async (s) => {
-    const verb = s.type === 'track' ? 'listening' : 'watching'
-    return embed({
-      colour: 'info',
-      app: 'Plex',
-      appUrl: APP_URLS.Plex,
-      title: plexTitle(s),
-      ...(await plexArt(s)),
-      description: `**${s.User?.title ?? 'Someone'}** started ${verb} on ${s.Player?.title ?? s.Player?.product ?? 'a device'}.`,
-    })
-  })
-}
-
-type AbsSession = { id: string; userId: string; displayTitle: string; displayAuthor?: string; deviceInfo?: { deviceName?: string; clientName?: string; browserName?: string; model?: string } }
-
-async function audiobookshelfSessions() {
-  if (!absKey()) return
-  const [{ openSessions }, { users }] = await Promise.all([
-    abs<{ openSessions: AbsSession[] }>('/users/online'),
-    abs<{ users: { id: string; username: string }[] }>('/users'),
-  ])
-  await newSessions('abs', openSessions, (s) => s.id, async (s) => {
-    const d = s.deviceInfo
-    const device = d?.deviceName ?? d?.model ?? d?.clientName ?? d?.browserName ?? 'a device'
-    const who = users.find((u) => u.id === s.userId)?.username ?? 'Someone'
-    return embed({
-      colour: 'info',
-      app: 'Audiobookshelf',
-      appUrl: APP_URLS.Audiobookshelf,
-      title: s.displayTitle,
-      ...(await bookArt(s.displayTitle, s.displayAuthor)),
-      description: `**${who}** started listening on ${device}.`,
-      fields: [['Author', s.displayAuthor]],
-    })
-  })
 }
 
 // #admin-log: settings changed inside the apps, found by comparing them every few minutes, so without who did it.
@@ -441,7 +370,7 @@ function reportChanges(app: string, url: string | undefined, now: Record<string,
     if (!m) return `• ${l}` // "…and 5 more"
     return m[2] === 'added' || m[2] === 'removed' ? `• ${m[1]}: ${m[2]}${m[3] ? ` ${code(m[3])}` : ''}` : `• ${m[1]}: ${code(m[2])} → ${code(m[3])}`
   })
-  announce('admin-log', embed({ colour: 'info', ...appCard(app), appUrl: url, title: 'Settings changed', url, description: shown.join('\n') }))
+  announce(adminThread(`${app} settings`, 'Admin log'), embed({ colour: 'info', ...appCard(app), appUrl: url, title: 'Settings changed', url, description: shown.join('\n') }))
 }
 
 async function settingsChanges() {
@@ -471,19 +400,10 @@ async function accessChanges() {
     const before = since(`access:${app}`, now)
     if (!before) continue
     for (const p of list.filter((x) => !before.includes(x.name)))
-      announce('admin-log', embed({ colour: 'ok', app, appUrl: APP_URLS[app], title: `${p.name} got access to ${app}`, art: p.avatar ?? ICONS[app] }))
+      announce(adminThread(`${app} access`, 'Admin log'), embed({ colour: 'ok', app, appUrl: APP_URLS[app], title: `${p.name} got access to ${app}`, art: p.avatar ?? ICONS[app] }))
     for (const name of before.filter((x) => !now.includes(x)))
-      announce('admin-log', embed({ colour: 'neutral', app, appUrl: APP_URLS[app], title: `${name} lost access to ${app}`, art: ICONS[app] }))
+      announce(adminThread(`${app} access`, 'Admin log'), embed({ colour: 'neutral', app, appUrl: APP_URLS[app], title: `${name} lost access to ${app}`, art: ICONS[app] }))
   }
-}
-
-// #watched: once a week, Sunday from 18:00 in the server's time zone (TZ), who watched what in Plex in the last 7 days.
-async function watchedWeek() {
-  const week = summaryDue(new Date(), getSetting<string>('bot:watchedWeek'))
-  if (!week) return
-  const lines = weekSummary(await history(), Date.now() - 7 * 24 * 60 * 60 * 1000)
-  setSetting('bot:watchedWeek', week)
-  announce('watched', embed({ colour: 'info', ...appCard('Tautulli'), title: 'Watched this week', description: lines.join('\n') || 'Nothing was played in Plex this week.' }))
 }
 
 // #updates
@@ -501,7 +421,7 @@ async function arrmyChanges() {
       const [subject, ...body] = c.commit.message.split('\n')
       const details = body.join('\n').replace(/^Co-Authored-By:.*$/gim, '').trim()
       announce(
-        'updates',
+        adminThread('Arrmy releases', 'Updates'),
         embed({
           colour: 'info',
           app: 'GitHub',
@@ -520,7 +440,7 @@ async function arrmyChanges() {
   const lastRelease = since('arrmyRelease', release?.tag_name ?? '')
   if (release && lastRelease !== undefined && lastRelease !== release.tag_name)
     announce(
-      'updates',
+      adminThread('Arrmy releases', 'Updates'),
       embed({
         colour: 'accent',
         app: 'GitHub',
@@ -618,7 +538,7 @@ async function announceUpdates(apps: Updated['apps']) {
   const arrmy = apps.Arrmy
   const others = entries.length - (arrmy ? 1 : 0)
   announce(
-    'updates',
+    adminThread(updatesSubject(Object.keys(apps)), 'Updates'),
     embed({
       colour: 'ok',
       app: 'Arrmy',
@@ -669,7 +589,7 @@ async function appUpdates() {
       const isNew = current ? compareVersions(version, current) > 0 : before !== undefined
       if (before === version || !isNew) continue
       announce(
-        'updates',
+        adminThread(`${app} updates`, 'Updates'),
         embed({
           colour: 'accent',
           ...appCard(app),
@@ -699,13 +619,13 @@ export const checks = {
   health,
   disks,
   backups,
-  plexSessions,
-  audiobookshelfSessions,
+  plexActivity,
+  audiobookshelfActivity,
   settingsChanges,
   accessChanges,
   arrmyChanges,
   appUpdates,
-  watchedWeek,
+  weeklySummary,
 }
 
 export function startBot() {
@@ -722,11 +642,12 @@ export function startBot() {
   every(5, 'health', health)
   every(10, 'disks', disks)
   every(30, 'backups', backups)
-  every(0.5, 'Plex sessions', plexSessions)
-  every(0.5, 'Audiobookshelf sessions', audiobookshelfSessions)
+  every(0.5, 'Plex activity', plexActivity)
+  every(0.5, 'Audiobookshelf activity', audiobookshelfActivity)
   every(5, 'settings', settingsChanges)
   every(10, 'access', accessChanges)
   every(15, 'Arrmy on GitHub', arrmyChanges)
-  every(15, 'watched this week', watchedWeek)
+  every(15, 'weekly summary', weeklySummary)
+  backfillRequests().catch((e) => console.warn(`[bot] backfill: ${e.message}`))
   every(360, 'app releases', appUpdates, 3) // after `apps` has read what the server runs
 }
