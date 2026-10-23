@@ -144,7 +144,7 @@ async function downloads() {
 
 // The Problems forum. A failure is only announced once it has lasted GRACE, giving Arrmy's own fixes (dead.ts) a go;
 // Missing, which has waited already, and one Arrmy raised itself after its tries ran out are announced at once. The
-// doctor looks DOCTOR_AFTER later (at once for the dead-release ones), and the Admin is only @mentioned when it can't
+// Doctarr looks DOCTOR_AFTER later (at once for the dead-release ones), and the Admin is only @mentioned when it can't
 // solve it (doctor.ts). A Problem that goes away gets "Issue resolved".
 type Seen = Record<string, { first: number; told: boolean; toldAt?: number; asked?: boolean; thread?: ThreadRef }>
 const GRACE = 10 * 60_000
@@ -169,9 +169,9 @@ async function problems() {
     const s = (seen[key] = before?.[key] ?? { first: now, told: !before })
     if (before && !s.thread) s.told = false // told before the forums: it gets its thread now
     s.thread = problemThread(p)
-    // The doctor's replies need the Problem as it is now (and a thread from before replies existed gets one).
+    // The Doctarr's replies need the Problem as it is now (and a thread from before replies existed gets one).
     if (s.asked && process.env.DOCTOR) keepProblem(s.thread.key, p)
-    // A Problem told before toldAt was kept was handed to the doctor then, so it isn't asked again.
+    // A Problem told before toldAt was kept was handed to The Doctarr then, so it isn't asked again.
     if (s.told && !s.asked && s.toldAt !== undefined && (raisedByArrmy || now - s.toldAt >= DOCTOR_AFTER)) {
       s.asked = true
       investigate(p)
@@ -181,7 +181,7 @@ async function problems() {
     s.told = true
     s.toldAt = now
     const admin = publicUrl('arrmy', '/admin#problems')
-    // The doctor pings when it can't solve a Problem; without the doctor every Problem needs the Admin.
+    // The Doctarr pings when it can't solve a Problem; without The Doctarr every Problem needs the Admin.
     const doctor = !!process.env.DOCTOR
     announce(
       problemThread(p, doctor ? 'Open' : 'Needs you'),
@@ -647,7 +647,7 @@ export function startBot() {
   // Problems also reach a plain webhook; everything else needs the bot.
   if (botEnabled() || process.env.DISCORD_WEBHOOK_URL) every(2, 'problems', problems)
   if (!botEnabled()) return
-  // The Admin's replies to the doctor in Problem threads: Discord doesn't send messages, so they're read.
+  // The Admin's replies to The Doctarr in Problem threads: Discord doesn't send messages, so they're read.
   if (process.env.DOCTOR) every(1 / 3, 'replies', () => checkReplies())
   registerCommands(COMMANDS).catch((e) => console.warn(`[bot] slash commands: ${e.message}`))
   syncBarEmoji().catch((e) => console.warn(`[bot] progress bar emoji: ${e.message}`))

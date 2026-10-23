@@ -210,7 +210,7 @@ export const isDeadRelease = (hash: string, addedOn: number) =>
 export const deadReleaseCount = (item: string) =>
   (db().prepare("SELECT count(*) AS n FROM dead_releases WHERE item = ? AND at > datetime('now', '-7 days')").get(item) as { n: number }).n
 
-/** Torrent hashes of every release that died in the last 30 days, to mark them in the doctor's list of releases. */
+/** Torrent hashes of every release that died in the last 30 days, to mark them in The Doctarr's list of releases. */
 export const deadHashes = () =>
   new Set((db().prepare("SELECT hash FROM dead_releases WHERE at > datetime('now', '-30 days')").all() as { hash: string }[]).map((r) => r.hash))
 

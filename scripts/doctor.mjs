@@ -1,4 +1,4 @@
-// The doctor: when Arrmy announces a Problem, a Claude Code agent looks into it, and Arrmy posts each step it takes and
+// The Doctarr: when Arrmy announces a Problem, a Claude Code agent looks into it, and Arrmy posts each step it takes and
 // what it found in the Problem's thread. When the Admin replies in the thread, the agent carries on the same
 // conversation (`--resume`) and does what they ask, if a fix can.
 // It runs on the Admin's Claude subscription (CLAUDE_CODE_OAUTH_TOKEN, from `claude setup-token`). The agent can read every
@@ -31,7 +31,7 @@ const DAY = 24 * 3_600_000
 const SECRET = process.env.SESSION_SECRET ?? ''
 // token.ts doctorToken derives the same; this server and Arrmy's /doctor API both check it.
 const doctorToken = () => createHmac('sha256', SECRET).update('doctor').digest('base64url')
-/** The doctor's key to gluetun's control server; init.mjs writes the same into /gluetun/auth/config.toml. */
+/** The Doctarr's key to gluetun's control server; init.mjs writes the same into /gluetun/auth/config.toml. */
 export const gluetunKey = (secret) => createHmac('sha256', secret).update('gluetun').digest('hex').slice(0, 32)
 
 async function arr(app, path, method = 'GET', body) {
@@ -71,7 +71,7 @@ async function gluetun(path, method = 'GET', body) {
   return text
 }
 
-/** Arrmy's internal API for the doctor: waiting Editions, an AudioBook Bay check, a new search, a Problem's releases. */
+/** Arrmy's internal API for The Doctarr: waiting Editions, an AudioBook Bay check, a new search, a Problem's releases. */
 async function arrmy(path, method = 'GET') {
   const res = await fetch(`${ARRMY_URL}/doctor${path}`, {
     method,
@@ -265,7 +265,7 @@ export const FIXES = {
 }
 
 /**
- * What the doctor is working on now, from the server in this container (the agent's fix commands run as their own
+ * What The Doctarr is working on now, from the server in this container (the agent's fix commands run as their own
  * processes): the Problem's key, and whether it's answering the Admin.
  */
 async function current() {
@@ -284,7 +284,7 @@ async function problem(reply = false) {
 const confirm = async (action, arg) =>
   arrmy(`/confirm/${await problem(true)}?${new URLSearchParams({ action, ...(arg && { arg }) })}`, 'POST')
 
-/** Fixes only for a run answering the Admin's reply: things the Admin decides, not the doctor. */
+/** Fixes only for a run answering the Admin's reply: things the Admin decides, not The Doctarr. */
 export const REPLY_FIXES = {
   grab: {
     usage: 'grab <number>: download that release from the numbered list ("download number 36"); Radarr or Sonarr import it as usual, and Arrmy files an audiobook into Audiobookshelf',
@@ -512,7 +512,7 @@ const readJson = (file) => {
 
 function serve() {
   if (!process.env.CLAUDE_CODE_OAUTH_TOKEN) {
-    console.log('[doctor] no CLAUDE_CODE_OAUTH_TOKEN set, so nothing to do. README → The doctor sets it up.')
+    console.log('[doctarr] no CLAUDE_CODE_OAUTH_TOKEN set, so nothing to do. README → The Doctarr sets it up.')
     return
   }
   if (SECRET.length < 16) throw new Error('SESSION_SECRET is missing or shorter than 16 characters')
@@ -524,7 +524,7 @@ function serve() {
   try {
     execFileSync('npm', ['install', '--prefix', `${HOME}/cli`, '--no-audit', '--no-fund', '@anthropic-ai/claude-code@latest'], { stdio: 'inherit' })
   } catch {
-    console.warn('[doctor] updating Claude Code failed; using the copy already installed, if any')
+    console.warn('[doctarr] updating Claude Code failed; using the copy already installed, if any')
   }
   // The agent's only ways to change anything. Read, Grep and Glob stay: they need no permission and change nothing.
   mkdirSync(`${HOME}/.claude`, { recursive: true })
@@ -558,7 +558,7 @@ function serve() {
         }
         res.end(`${JSON.stringify({ answer, solved })}\n`)
       } catch (e) {
-        console.warn(`[doctor] ${key}: ${e.message}`)
+        console.warn(`[doctarr] ${key}: ${e.message}`)
         res.end(`${JSON.stringify({ error: e.message })}\n`)
       } finally {
         run = { key: null, reply: false }
@@ -588,30 +588,30 @@ function serve() {
       if (req.url === '/investigate') {
         const verdict = admit(state, key, Date.now(), cap)
         if (verdict !== 'ok') {
-          console.log(`[doctor] ${key}: skipped (${verdict === 'seen' ? 'looked into today already' : `${cap} today already`})`)
+          console.log(`[doctarr] ${key}: skipped (${verdict === 'seen' ? 'looked into today already' : `${cap} today already`})`)
           return res.writeHead(204).end()
         }
-        console.log(`[doctor] ${key}: looking into it`)
+        console.log(`[doctarr] ${key}: looking into it`)
         return start(res, key, false, (send) => runAgent(prompt(problem), send))
       }
       if (!admitReply(state, Date.now(), replyCap)) {
-        console.log(`[doctor] ${key}: reply skipped (${replyCap} today already)`)
+        console.log(`[doctarr] ${key}: reply skipped (${replyCap} today already)`)
         return res.writeHead(429).end()
       }
-      console.log(`[doctor] ${key}: answering the Admin`)
+      console.log(`[doctarr] ${key}: answering the Admin`)
       const fresh = (send) => runAgent(replyPrompt(problem, reply, meanwhile, false), send)
       // Carry on the conversation about this Problem; if Claude Code no longer has it, start again from the Problem.
       start(res, key, true, (send) =>
         sessions[key]
           ? runAgent(replyPrompt(problem, reply, meanwhile, true), send, sessions[key]).catch((e) => {
               if (e.steps) throw e
-              console.warn(`[doctor] ${key}: couldn't carry on (${e.message}); starting again`)
+              console.warn(`[doctarr] ${key}: couldn't carry on (${e.message}); starting again`)
               return fresh(send)
             })
           : fresh(send),
       )
     })
-  }).listen(PORT, () => console.log(`[doctor] ready, at most ${cap} Problems and ${replyCap} replies a day`))
+  }).listen(PORT, () => console.log(`[doctarr] ready, at most ${cap} Problems and ${replyCap} replies a day`))
 }
 
 if (process.argv[1] === SELF) {

@@ -110,16 +110,16 @@ test('attachments are named, and an empty message means Discord is hiding it (th
   assert.equal(contentHidden([]), false)
 })
 
-test("the bot's cards since the doctor last looked become lines of news", () => {
+test("the bot's cards since The Doctarr last looked become lines of news", () => {
   assert.deepEqual(meanwhile([msg('1', 'bot', '', 10, { embeds: [{ title: 'Dead release', description: 'Swapped Dune.2021' }, {}] })]), ['Dead release: Swapped Dune.2021'])
 })
 
-test('replies count in Needs you, and in Open for an hour after the doctor said solved; never in Resolved', () => {
+test('replies count in Needs you, and in Open for an hour after The Doctarr said solved; never in Resolved', () => {
   assert.equal(replyable(['Needs you'], undefined, NOW), true)
   assert.equal(replyable(['Open'], NOW + 1000, NOW), true)
   assert.equal(replyable(['Open'], NOW - 1000, NOW), false)
   assert.equal(replyable(['Open'], undefined, NOW), false)
-  assert.equal(replyable(['Doctor working'], NOW + 1000, NOW), false)
+  assert.equal(replyable(['Doctarr working'], NOW + 1000, NOW), false)
   assert.equal(replyable(['Resolved'], NOW + 1000, NOW), false)
 })
 
@@ -157,10 +157,10 @@ test('reply-only fixes check their arguments, and refuse outside a run answering
   await assert.rejects(async () => REPLY_FIXES.grab.run('36; rm'), /release number/)
   await assert.rejects(async () => REPLY_FIXES.later.run('soon'), /whole number/)
   await assert.rejects(async () => REPLY_FIXES['delete-torrent'].run('../x'), /40-character/)
-  // No doctor server here, so no run: nothing reaches Arrmy.
+  // No Doctarr server here, so no run: nothing reaches Arrmy.
   await assert.rejects(async () => REPLY_FIXES.grab.run('36'), /no Problem is being worked on/)
   await assert.rejects(async () => REPLY_FIXES.unmonitor.run('radarr', '1'), /no Problem is being worked on/)
-  assert.ok(!('grab' in FIXES), "the doctor's own runs can't grab")
+  assert.ok(!('grab' in FIXES), "The Doctarr's own runs can't grab")
 })
 
 test("the reply prompt: the Admin's words as the only instructions, the news, and the reply-only fixes", () => {

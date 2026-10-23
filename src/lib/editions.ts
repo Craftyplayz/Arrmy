@@ -22,7 +22,7 @@ const SEARCH_EVERY = 6 * 3_600_000
 /**
  * What Arrmy keeps per Edition id. `series` is OpenLibrary's name for it (null: it has none). `folder` (Author/Title
  * (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. `picked`: not an Edition but a book LazyLibrarian was looking
- * for (keyed by its BookID), whose release the Admin picked from the doctor's list: Arrmy downloads and files it the
+ * for (keyed by its BookID), whose release the Admin picked from The Doctarr's list: Arrmy downloads and files it the
  * same way, as Author/Title, and LazyLibrarian stops looking.
  */
 type Edition = { title: string; author: string; series?: string | null; folder?: string; searchedAt?: number; search?: EditionSearch; picked?: boolean }
@@ -329,7 +329,7 @@ export async function removeEdition(id: string) {
 }
 
 /**
- * The Edition Requests still waiting with nothing downloading, for Problems and the doctor. requestedAt is the first
+ * The Edition Requests still waiting with nothing downloading, for Problems and The Doctarr. requestedAt is the first
  * Request for it (ms); search is what the last search found.
  */
 export async function waitingEditions() {

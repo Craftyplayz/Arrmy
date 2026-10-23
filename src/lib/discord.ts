@@ -144,7 +144,7 @@ function message(embeds: Embed | Embed[], ping = false, components?: object[]) {
   }
 }
 
-/** What else a post can carry: a text file attached (the doctor's list of releases), and buttons. */
+/** What else a post can carry: a text file attached (The Doctarr's list of releases), and buttons. */
 export type Extra = { file?: { name: string; text: string }; components?: object[] }
 
 type Upload = { blob: Blob; name: string }

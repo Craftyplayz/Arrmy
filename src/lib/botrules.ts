@@ -16,7 +16,7 @@ export type Channel = keyof typeof CHANNELS
 export const FORUMS = {
   requests: { name: 'Requests', private: false, topic: 'One thread per Request: the search, the download and when it became Available.', tags: ['Movie', 'TV', 'Audiobook', 'Requested', 'Downloading', 'Available', 'Removed'] },
   activity: { name: 'Activity', private: false, topic: 'One thread per movie, show or book: who played it, on what, and for how long.', tags: ['Movie', 'TV', 'Audiobook'] },
-  problems: { name: 'Problems', private: true, topic: 'One thread per Problem, with what the doctor checked and fixed.', tags: ['Open', 'Doctor working', 'Needs you', 'Resolved'] },
+  problems: { name: 'Problems', private: true, topic: 'One thread per Problem, with what The Doctarr checked and fixed.', tags: ['Open', 'Doctarr working', 'Needs you', 'Resolved'] },
   admin: { name: 'Admin', private: true, topic: 'One thread per subject: the apps, the VPN, disks, backups, settings, access and updates.', tags: ['Admin log', 'System', 'Updates'] },
 } as const
 export type Forum = keyof typeof FORUMS

@@ -5,7 +5,7 @@
 // It's its own small server on an internal port, not a Next.js route: LazyLibrarian opens book pages imitating Chrome,
 // which asks to switch to HTTP/2 mid-request, and Next.js's server leaves that hanging. Node's plain server answers it
 // as HTTP/1.1. The port isn't published or tunnelled, and the key in the address is checked anyway. /doctor/ addresses
-// are the doctor's own questions (doctorapi.ts).
+// are The Doctarr's own questions (doctorapi.ts).
 import { createServer } from 'node:http'
 import { fetch as undiciFetch, ProxyAgent } from 'undici'
 // .ts so plain node (the tests) can load this file too

@@ -65,7 +65,7 @@ test('init makes the folders autobrr and Tdarr keep their settings in', () => {
   }
 })
 
-test('init gives gluetun the doctor\'s key, keeps it in step, and leaves a file the user wrote', () => {
+test('init gives gluetun The Doctarr\'s key, keeps it in step, and leaves a file the user wrote', () => {
   const root = mkdtempSync(join(tmpdir(), 'arrmy-init-'))
   try {
     const [data, config] = [join(root, 'data'), join(root, 'config')]

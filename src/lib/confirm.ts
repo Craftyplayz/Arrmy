@@ -1,4 +1,4 @@
-// Fixes the doctor can only ask for: removing a Request and deleting a torrent can't be undone, so the doctor posts
+// Fixes The Doctarr can only ask for: removing a Request and deleting a torrent can't be undone, so The Doctarr posts
 // what it would do with Go ahead and Cancel buttons, and only the Admin's click runs it (Discord sends the click to
 // /api/discord). The buttons' rules are in replyrules.ts.
 import { randomUUID } from 'node:crypto'
@@ -35,7 +35,7 @@ async function requestsOf(p: Problem): Promise<{ requests: RequestRow[]; season?
 
 const who = (requests: RequestRow[]) => [...new Set(requests.map((r) => r.username))].join(', ')
 
-/** Checks what the doctor asked for and how to say it, before any button is shown. */
+/** Checks what The Doctarr asked for and how to say it, before any button is shown. */
 async function describe(p: Problem, action: ConfirmAction, arg?: string) {
   if (action === 'remove-request') {
     const { requests, season } = await requestsOf(p)
@@ -51,7 +51,7 @@ async function describe(p: Problem, action: ConfirmAction, arg?: string) {
   return `Delete the torrent ${t.name} from qBittorrent, with its files?`
 }
 
-/** The doctor's ask: posts the question with the two buttons in the Problem's thread. Returns what to tell the doctor. */
+/** The Doctarr's ask: posts the question with the two buttons in the Problem's thread. Returns what to tell The Doctarr. */
 export async function askToConfirm(problemKey: string, action: ConfirmAction, arg?: string) {
   const thread = `problem:${problemKey}`
   const state = threadStates()[thread]

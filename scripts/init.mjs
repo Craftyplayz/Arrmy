@@ -1,6 +1,6 @@
 // One-shot setup the Stack needs before qBittorrent and Arrmy start (the `init` service, run as root):
 // the TRaSH /data folders, Arrmy's config folder, qBittorrent's login, and LazyLibrarian's and Tautulli's settings, and the folders autobrr and Tdarr keep theirs in,
-// and the doctor's key to gluetun's control server. Safe to re-run; never overwrites a file the user may have changed.
+// and The Doctarr's key to gluetun's control server. Safe to re-run; never overwrites a file the user may have changed.
 import { createHmac, pbkdf2Sync, randomBytes } from 'node:crypto'
 import { chownSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
@@ -115,7 +115,7 @@ if (!existsSync(watch)) {
   writeFileSync(watch, `${lines.join('\n')}\n`)
   own(watch)
 }
-// gluetun's control server refuses everything until it has a role. This one lets the doctor (doctor.mjs gluetunKey
+// gluetun's control server refuses everything until it has a role. This one lets The Doctarr (doctor.mjs gluetunKey
 // derives the same key) see the VPN's IP and status and reconnect it, nothing else: GET /v1/vpn/settings shows the VPN login.
 // Rewritten each deploy while it carries the marker; a file without it is the user's own and stays.
 const ARRMY_MARK = '# Written by Arrmy (scripts/init.mjs). Delete this line to keep your own changes.'

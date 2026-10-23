@@ -50,7 +50,7 @@ services:
       TMDB_API_KEY: ${TMDB_API_KEY:-}
       HARDCOVER_TOKEN: ${HARDCOVER_TOKEN:-}
       ABB_PROXY: http://gluetun:8888 # AudioBook Bay times out on the home connection: through the VPN instead
-      DOCTOR: ${CLAUDE_CODE_OAUTH_TOKEN:+on} # hands Problems to the doctor only when it's set up
+      DOCTOR: ${CLAUDE_CODE_OAUTH_TOKEN:+on} # hands Problems to The Doctarr only when it's set up
     volumes:
       - ${CONFIG_DIR:-/opt/arrmy}/arrmy:/config
       - ${BACKUP_DIR:-/opt/arrmy-backups}:/backups:ro # so the Discord bot can report the nightly backup
@@ -97,8 +97,8 @@ services:
       VPN_PORT_FORWARDING_DOWN_COMMAND: >-
         /bin/sh -c 'wget -O- -nv --retry-connrefused --post-data "json={\"listen_port\":0,\"current_network_interface\":\"lo\"}" http://127.0.0.1:8080/api/v2/app/setPreferences'
     volumes:
-      # Keeps the forwarded port across restarts, and holds auth/config.toml: init writes the doctor's key to
-      # gluetun's control server (gluetun:8000, inside Docker only) there, so the doctor can change VPN region.
+      # Keeps the forwarded port across restarts, and holds auth/config.toml: init writes The Doctarr's key to
+      # gluetun's control server (gluetun:8000, inside Docker only) there, so The Doctarr can change VPN region.
       - ${CONFIG_DIR:-/opt/arrmy}/gluetun:/gluetun
     ports:
       - ${QBIT_PORT:-7655}:8080 # qBittorrent web UI: qBittorrent lives inside gluetun's network
@@ -244,7 +244,7 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}/kometa:/config
     depends_on: *after-init
 
-  # The doctor: Claude looks into each Problem and posts what it found in its thread, on your Claude subscription. It reads
+  # The Doctarr: Claude looks into each Problem and posts what it found in its thread, on your Claude subscription. It reads
   # the apps' APIs and can only run a few safe fixes (search again, another release, restart an app): scripts/doctor.mjs.
   # Reply in the thread and it carries on, and can do a few more things you ask for (grab a release by its number).
   # Without CLAUDE_CODE_OAUTH_TOKEN it exits at once and stays stopped.

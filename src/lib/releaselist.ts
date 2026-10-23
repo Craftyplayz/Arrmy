@@ -1,4 +1,4 @@
-// The doctor's numbered list of every release found for a Problem, posted in its thread with the whole list attached
+// The Doctarr's numbered list of every release found for a Problem, posted in its thread with the whole list attached
 // as a text file, so the Admin can reply "download number 36". Built here rather than by Claude: exact, and free
 // however long it is. The rules (order, lines, cards) are in replyrules.ts.
 import { arr } from './arr'
@@ -121,7 +121,7 @@ export async function postReleaseList(p: Problem, posted: (id: string) => void =
 
 /**
  * When nothing in a wanted quality can be had, grabs the best release in another one (otherQuality) and says so in the
- * thread: a watchable copy now beats waiting. Only on the doctor's first look.
+ * thread: a watchable copy now beats waiting. Only on The Doctarr's first look.
  */
 export async function grabOtherQuality(p: Problem, list: Stored, posted: (id: string) => void = () => {}) {
   const pick = otherQuality(list.entries)
@@ -141,7 +141,7 @@ export async function grabOtherQuality(p: Problem, list: Stored, posted: (id: st
   )
 }
 
-/** The latest list as the doctor reads it (`get arrmy /releases`): one line per release, without the grab details. */
+/** The latest list as The Doctarr reads it (`get arrmy /releases`): one line per release, without the grab details. */
 export function readableList(problemKey: string) {
   const list = storedList(problemKey)
   if (!list) return { error: 'No list of releases has been made for this Problem yet: run `fix list-releases`.' }

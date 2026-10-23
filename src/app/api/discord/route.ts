@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   return Response.json({ type: 5, data: { flags: 64 } }) // 64: only whoever asked sees it
 }
 
-/** Go ahead or Cancel under something the doctor asked to do (confirm.ts). Only the Admin's click counts. */
+/** Go ahead or Cancel under something The Doctarr asked to do (confirm.ts). Only the Admin's click counts. */
 function button(interaction: Interaction) {
   const parsed = parseButton(interaction.data?.custom_id ?? '')
   if (!parsed) return new Response(null, { status: 400 })

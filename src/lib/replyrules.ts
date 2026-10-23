@@ -1,4 +1,4 @@
-// Rules for talking to the doctor in a Problem's thread: the numbered list of every release found, which of the
+// Rules for talking to The Doctarr in a Problem's thread: the numbered list of every release found, which of the
 // Admin's messages count as a reply, and the buttons that confirm a fix that can't be undone. No I/O here, so they can
 // be unit-tested.
 // .ts so plain node (the tests) can load this file too
@@ -140,7 +140,7 @@ export function newMessages(messages: Message[], adminId: string, botId: string,
   return { admin, bot, latest: sorted.at(-1)?.id, ready: !!last && now - Date.parse(last.timestamp) >= quietMs }
 }
 
-/** The Admin's messages as one reply, without @mentions of the bot. Attachments are named: the doctor can't open them. */
+/** The Admin's messages as one reply, without @mentions of the bot. Attachments are named: The Doctarr can't open them. */
 export const replyText = (admin: Message[], botId = '') =>
   admin
     .map((m) => [m.content.replaceAll(`<@${botId}>`, '').replaceAll(`<@!${botId}>`, '').trim(), ...(m.attachments ?? []).map((a) => `(attached ${a.filename}, which you can't open)`)].filter(Boolean).join('\n'))
@@ -153,14 +153,14 @@ export const replyText = (admin: Message[], botId = '') =>
  */
 export const contentHidden = (admin: Message[]) => admin.length > 0 && admin.every((m) => !m.content && !m.attachments?.length && !m.embeds?.length)
 
-/** The bot's cards since the doctor last looked, as lines of what happened meanwhile. */
+/** The bot's cards since The Doctarr last looked, as lines of what happened meanwhile. */
 export const meanwhile = (bot: Message[]) =>
   bot.flatMap((m) => (m.embeds ?? []).map((e) => [e.title, e.description].filter(Boolean).join(': ')).filter(Boolean)).map((t) => t.slice(0, 600))
 
 /** How long after a follow-up said it was solved the Admin can still reply ("no, it's still stuck"). */
 export const OPEN_FOR = 60 * 60_000
 
-/** Whether the Admin's reply in a Problem thread goes to the doctor: Needs you, or Open for an hour after a reply run. */
+/** Whether the Admin's reply in a Problem thread goes to The Doctarr: Needs you, or Open for an hour after a reply run. */
 export const replyable = (tags: string[], openUntil: number | undefined, now: number) =>
   tags.includes('Needs you') || (tags.includes('Open') && (openUntil ?? 0) > now)
 

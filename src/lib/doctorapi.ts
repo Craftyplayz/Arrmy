@@ -1,4 +1,4 @@
-// What the doctor (scripts/doctor.mjs) can ask Arrmy, on the AudioBook Bay relay's internal port (see abbrelay.ts):
+// What The Doctarr (scripts/doctor.mjs) can ask Arrmy, on the AudioBook Bay relay's internal port (see abbrelay.ts):
 // the Editions still waiting, a live AudioBook Bay test through the VPN, and a fresh search for one Edition. On a run
 // that answers the Admin's reply, also: a Problem's numbered list of releases (read it, make a new one, grab a number),
 // a look again later, and the Go ahead buttons for what can't be undone. <key> is the Problem's key (botrules.ts).
@@ -41,7 +41,7 @@ export async function doctorApi(req: IncomingMessage, res: ServerResponse) {
       const key = decodeURIComponent(rawKey)
       const state = threadStates()[`problem:${key}`]
       if (!state) return json(res, 404, { error: 'No thread for that Problem' })
-      // Grabbing, looking later and asking to remove are the Admin's to ask for: only while the doctor answers a reply.
+      // Grabbing, looking later and asking to remove are the Admin's to ask for: only while The Doctarr answers a reply.
       const readOrList = what === 'releases' && (req.method === 'GET' || sub === 'list')
       if (!readOrList && !replying.has(`problem:${key}`)) return json(res, 403, { error: 'Only when answering the Admin' })
       if (what === 'releases' && req.method === 'GET' && !sub) return json(res, 200, readableList(key))

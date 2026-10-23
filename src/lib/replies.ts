@@ -1,6 +1,6 @@
-// The Admin replying to the doctor in a Problem's thread, in plain words. Discord sends Arrmy no messages (only slash
+// The Admin replying to The Doctarr in a Problem's thread, in plain words. Discord sends Arrmy no messages (only slash
 // commands and button clicks), so every 20 seconds Arrmy reads the threads waiting on the Admin, and hands what they
-// wrote to the doctor, with what the bot posted there meanwhile. Only DISCORD_ADMIN_ID's messages count. The rules are
+// wrote to The Doctarr, with what the bot posted there meanwhile. Only DISCORD_ADMIN_ID's messages count. The rules are
 // in replyrules.ts; the run itself in doctor.ts.
 import { problemThread } from './botrules'
 import { cancelPending } from './confirm'
@@ -20,15 +20,15 @@ export async function checkReplies(now = Date.now()) {
   for (const [key, s] of Object.entries(threadStates())) {
     const row = getThread(key)
     const tags: string[] = row ? JSON.parse(row.tags) : []
-    // Deleted by hand, or the Problem went away: if it comes back, the doctor looks again and this starts afresh.
+    // Deleted by hand, or the Problem went away: if it comes back, The Doctarr looks again and this starts afresh.
     if (!row || tags.includes('Resolved')) {
       updateState(key, () => undefined)
       continue
     }
     if (busy.has(key)) continue // what's written meanwhile waits until this run ends
-    if (tags.includes('Doctor working')) {
+    if (tags.includes('Doctarr working')) {
       // Working, but no run: Arrmy restarted mid-run, and its answer is lost.
-      await post(problemThread(s.problem, 'Needs you'), embed({ colour: 'danger', app: 'Arrmy', description: 'Arrmy restarted while the doctor was working, so its answer is lost. Reply to have it carry on.' }))
+      await post(problemThread(s.problem, 'Needs you'), embed({ colour: 'danger', app: 'Arrmy', description: 'Arrmy restarted while The Doctarr was working, so its answer is lost. Reply to have it carry on.' }))
         .then((id) => remember(key, id))
         .catch((e: Error) => console.warn(`[replies] ${key}: ${e.message}`))
       continue

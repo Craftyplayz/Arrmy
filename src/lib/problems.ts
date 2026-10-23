@@ -19,7 +19,7 @@ export type Problem = {
   hash?: string
   /** The poster or cover, for Discord. */
   poster?: string | null
-  /** What Radarr or Sonarr search for it: the movie, or one season of a show (the doctor's numbered list of releases). */
+  /** What Radarr or Sonarr search for it: the movie, or one season of a show (The Doctarr's numbered list of releases). */
   media?: { movieId: number } | { seriesId: number; season: number }
 }
 
