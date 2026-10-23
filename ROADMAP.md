@@ -212,7 +212,7 @@ Asked for 2026-10-23. **Planned, not built.** The first step away from a read-on
 
 1. Arrmy tags the thread **Doctor working**, shows "Arrmy is typing…" (`POST /channels/<thread>/typing`) and posts a compact card: "Got it, looking at this again."
 2. It sends the doctor (`POST /reply` on port 3002, same token) the Problem, the Admin's words and the thread's key.
-3. The doctor resumes the same Claude Code conversation it had for this Problem (`claude -p --resume <session id>`), so Claude remembers what it checked and why it gave up. The session id comes from the `result` event of `stream-json`, and is kept per Problem in the doctor's `/config` with the conversation files, so it survives a restart. If that conversation is gone, it starts a new one with the Problem, its last answer and the Admin's reply in the prompt.
+3. The doctor resumes the same Claude Code conversation it had for this Problem (`claude -p --resume <session id>`), so Claude remembers what it checked and why it gave up. The session id comes from the `result` event of `stream-json`, and is kept per Problem in the doctor's `/config` with the conversation files, so it survives a restart. If that conversation is gone, it starts a new one with the Problem, its last answer and the Admin's reply in the prompt. Along with the reply, Arrmy sends everything posted in the thread since the doctor's last run: the Admin's own notes from before (typed while it was working, or before it gave up) and the bot's cards (another dead release swapped, the Problem's detail changing). Claude reads these as what happened since, not as instructions; the Admin's notes count as the Admin's words. The reading for replies already fetches them, so this costs no extra calls.
 4. The steps (**Checked**, **Fixed**) and the answer are posted as they are today. The answer ends with `Solved: yes` or `Solved: no` as before: yes goes back to **Open** until the feed sees the Problem gone and marks it **Resolved**; no goes back to **Needs you**, without another @mention, since the Admin is already in the thread. The Admin can reply again, as many times as they like.
 5. The Admin replying while the doctor is still working is queued and sent once the run ends.
 
@@ -242,7 +242,7 @@ About a day and a half: the reading and the doctor's `/reply` with `--resume` ha
 
 **Choices to settle:**
 
-1. 20 seconds by reading the thread, or at once through the Gateway (an always-open connection)?
+1. ~~20 seconds by reading the thread, through the Gateway, or a `/reply` command?~~ Settled 2026-10-23: plain replies, read every 20 seconds. `/reply` would have saved about half a day, but means remembering a command.
 2. Which of the reply-only fixes to build, and any to add (e.g. change the Size Limit for one title, set a Request's quality)?
 3. Buttons to confirm `remove-request` and `delete-torrent`, or a typed "yes"?
 4. **Later:** the same in Requests threads for the Admin ("get this in 4K instead"), and in Admin threads ("restart it"), once Problems has been used for a while.
