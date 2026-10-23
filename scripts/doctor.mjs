@@ -245,7 +245,7 @@ const confirm = async (action, arg) =>
 /** Fixes only for a run answering the Admin's reply: things the Admin decides, not the doctor. */
 export const REPLY_FIXES = {
   grab: {
-    usage: 'grab <number>: download that release from the numbered list ("download number 36"); Radarr or Sonarr import it as usual',
+    usage: 'grab <number>: download that release from the numbered list ("download number 36"); Radarr or Sonarr import it as usual, and Arrmy files an audiobook into Audiobookshelf',
     run: async (n) => {
       if (!/^\d{1,4}$/.test(n ?? '')) throw new Error('number must be a release number from the list, e.g. grab 36')
       return arrmy(`/releases/${await problem(true)}/grab/${Number(n)}`, 'POST')

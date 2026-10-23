@@ -233,11 +233,11 @@ Plus `list-releases`, on any run: search again and post a new numbered list. Two
 
 - Movies and TV: Radarr's or Sonarr's own search for the movie or the season (`GET /release?movieId=`, or `?seriesId=&seasonNumber=`, as Interactive Search in their pages), with why each release would be turned down.
 - Edition audiobooks: everything Arrmy's Edition search finds on AudioBook Bay and Prowlarr. A book LazyLibrarian wants: the same Prowlarr search LazyLibrarian makes.
-- One line each: number, release name, size, seeders, where it came from, quality, and why it was turned down (or "tried already, never started" for a release that died). Acceptable first, then turned down, then dead; most seeders first within each.
+- One line each: number, release name, size, seeders, where it came from, quality, and why it was turned down (or "tried already, never started" for a release that died). Acceptable first, then turned down, then dead; most seeders first within each, not Radarr's or Sonarr's own order (kept 2026-10-24).
 - A first card says how many were found and how to pick one, with the whole list attached as a text file, always, however short. Then the releases on compact cards, as many lines as fit in each, the first 200.
 - "Number 36" always means the latest list; `list-releases` makes a new one with new numbers. Claude reads it with `get arrmy /releases` only when it needs to.
 - Grabbing goes through `POST /release`, so Radarr or Sonarr track and import it as usual (they forget a search's releases after about 30 minutes, so an old number is searched for again first), or through Arrmy's own Edition download for Editions (a series pack downloads only this book's files). No button: grabbing deletes nothing.
-- **Not built:** grabbing by number for a book LazyLibrarian wants. LazyLibrarian only files a download it grabbed itself, so one sent straight to qBittorrent would never reach Audiobookshelf. Its list is posted, and the doctor says it can't grab from it.
+- A book LazyLibrarian wants (chosen 2026-10-24): LazyLibrarian only files a download it grabbed itself, so Arrmy downloads the pick and files it into Audiobookshelf as `Author/Title`, the way it does Editions, and LazyLibrarian stops looking for the book. The Request shows Downloading and then Available from Arrmy's download. If the pick's torrent is deleted before it finishes, LazyLibrarian wants the book and searches again; a second pick replaces the first; removing the Request deletes the pick and its files. Unit (unchanged), Local (against a fake LazyLibrarian and qBittorrent; the filing itself is the Editions' own).
 
 **Asking before it can't be undone** (`confirm.ts`). `remove-request` and `delete-torrent` post what they would do ("Delete the torrent Dune.2021.2160p from qBittorrent, with its files?") with **Go ahead** and **Cancel** buttons. Discord sends the click to `/api/discord`; only the Admin's click counts, anyone else is told so, and one left for a day expires. Replying instead of clicking cancels it, and the reply says what to do now. The bot's first buttons.
 
@@ -245,7 +245,7 @@ Plus `list-releases`, on any run: search again and post a new numbered list. Two
 
 **Safety.** The Admin's words are the only instructions: release names, logs, API answers and the bot's cards are data, and the prompt says so; the fixes' checks are the real limit, whatever the text says.
 
-**Later:** the same in Requests threads for the Admin ("get this in 4K instead"), and in Admin threads ("restart it"), once Problems has been used for a while. Grabbing by number for LazyLibrarian's books. If replies to long investigations cost too much, start them from a short summary instead of the whole conversation.
+**Later:** the same in Requests threads for the Admin ("get this in 4K instead"), and in Admin threads ("restart it"), once Problems has been used for a while. Starting replies to long investigations from a short summary was considered and turned down (2026-10-24): replies carry on the whole conversation.
 
 ### Request Log
 

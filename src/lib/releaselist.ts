@@ -7,7 +7,7 @@ import { ll } from './books'
 import { problemKey, problemThread } from './botrules'
 import { deadHashes, getSetting, setSetting } from './db'
 import { post } from './discord'
-import { grabEditionRelease, searchEditionReleases } from './editions'
+import { grabEditionRelease, pickBookRelease, searchEditionReleases } from './editions'
 import { embed } from './embeds'
 import type { Problem } from './problems'
 import { listCards, listFile, listIntro, numbered, type Found, type Listed, type ReleaseList } from './replyrules'
@@ -92,9 +92,8 @@ async function search(p: Problem): Promise<Found[]> {
         source: r.indexer?.replace(/ \(Prowlarr\)$/, '') ?? 'Prowlarr',
         rejections: r.size && r.size < 50e6 ? ['too small for an audiobook (probably an ebook)'] : [],
         dead: dead.has(hashOf(r) ?? ''),
-        // shortcut: LazyLibrarian only files a download it grabbed itself, so a pick sent straight to qBittorrent would
-        // download and never reach Audiobookshelf.
-        grab: { app: 'none' as const, why: "grabbing by number isn't built for books LazyLibrarian looks for yet: it only files downloads it grabbed itself" },
+        // LazyLibrarian only files a download it grabbed itself, so Arrmy downloads the pick and files it (editions.ts).
+        grab: r.magnetUrl || r.downloadUrl ? { app: 'book' as const, id: p.book!, release: r } : { app: 'none' as const, why: 'it has no link to download' },
       }))
   }
   throw new Error(`nothing to search for ${p.title}`)
@@ -131,7 +130,7 @@ export function readableList(problemKey: string) {
 
 /**
  * Downloads release `n` of the Problem's latest list: through Radarr or Sonarr, which track and import it as usual, or
- * Arrmy's own Edition download. Radarr and Sonarr forget a search's releases after about 30 minutes, so a release they
+ * Arrmy's own download, which files an Edition or a book LazyLibrarian was looking for into Audiobookshelf. Radarr and Sonarr forget a search's releases after about 30 minutes, so a release they
  * no longer know is searched for again first.
  */
 export async function grabListed(problemKey: string, n: number) {
@@ -141,6 +140,10 @@ export async function grabListed(problemKey: string, n: number) {
   if (!r) throw new Error(`There is no number ${n}: the latest list has ${list.entries.length}`)
   const g = r.grab
   if (g.app === 'none') throw new Error(`Can't grab number ${n}: ${g.why}`)
+  if (g.app === 'book') {
+    await pickBookRelease(g.id, g.release)
+    return `Sent number ${n} (${r.title}) to qBittorrent. Arrmy files it into Audiobookshelf when it finishes, and LazyLibrarian has stopped looking for the book.`
+  }
   if (g.app === 'edition') {
     await grabEditionRelease(g.id, g.release, g.pack)
     return `Sent number ${n} (${r.title}) to qBittorrent for the Edition${g.pack ? ', downloading only this book\'s files' : ''}.`

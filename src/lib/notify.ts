@@ -2,6 +2,7 @@
 // happened to it (embeds.ts has the look, botrules.ts the thread). The Request Log's events (see logrules.ts) are posted
 // as they're recorded, through log().
 import { editionOf } from './bookrules'
+import { isPicked } from './editions'
 import { duration, linked, requestThread, size, type RequestStatus } from './botrules'
 import { addLog, getSetting, getThread, listRequests, logFor, logItem, requestsFor, seasonsOf, setSetting, type RequestRow } from './db'
 import { announce, botEnabled, post, publicUrl, retag } from './discord'
@@ -18,7 +19,7 @@ export const titleOf = (r: Pick<RequestRow, 'title' | 'year'>) => `${r.title}${r
 function service(r: RequestItem) {
   if (r.media_type === 'movie') return 'Radarr'
   if (r.media_type === 'tv') return 'Sonarr'
-  return editionOf(r.external_id) ? 'Arrmy' : 'LazyLibrarian' // see editions.ts
+  return editionOf(r.external_id) || isPicked(r.external_id) ? 'Arrmy' : 'LazyLibrarian' // see editions.ts
 }
 
 /** The title's page in Arrmy: Discover when there's a TMDB id, otherwise the Request's own page. */

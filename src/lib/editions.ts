@@ -6,8 +6,8 @@ import { link, mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { searchAudiobookBay } from './abb'
 import { arr } from './arr'
-import { commonDir, editionCandidates, editionOf, packFiles, safeName, searchText, seriesOf, titleVariants, type EditionSearch, type Release } from './bookrules'
-import { abs, owned, scanLibrary } from './books'
+import { commonDir, editionCandidates, editionOf, packFiles, safeName, searchText, seriesOf, titleVariants, type EditionSearch, type LLBook, type Release } from './bookrules'
+import { abs, ll, owned, scanLibrary } from './books'
 import { getSetting, markAvailable, setSetting, waitingOfType, type RequestRow } from './db'
 import { tellDiscord } from './notify'
 import type { Torrent } from './problems'
@@ -19,8 +19,13 @@ const OPENLIBRARY_URL = process.env.OPENLIBRARY_URL ?? 'https://openlibrary.org'
 export const EDITIONS_CATEGORY = 'editions'
 const SEARCH_EVERY = 6 * 3_600_000
 
-/** What Arrmy keeps per Edition id. `series` is OpenLibrary's name for it (null: it has none). `folder` (Author/Title (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. */
-type Edition = { title: string; author: string; series?: string | null; folder?: string; searchedAt?: number; search?: EditionSearch }
+/**
+ * What Arrmy keeps per Edition id. `series` is OpenLibrary's name for it (null: it has none). `folder` (Author/Title
+ * (Edition), under AUDIOBOOKS_ROOT) is set once it's filed. `picked`: not an Edition but a book LazyLibrarian was looking
+ * for (keyed by its BookID), whose release the Admin picked from the doctor's list: Arrmy downloads and files it the
+ * same way, as Author/Title, and LazyLibrarian stops looking.
+ */
+type Edition = { title: string; author: string; series?: string | null; folder?: string; searchedAt?: number; search?: EditionSearch; picked?: boolean }
 
 // shortcut: kept in one settings row, read and rewritten whole; fine for a family's few dozen Editions.
 const editions = () => getSetting<Record<string, Edition>>('editions') ?? {}
@@ -34,6 +39,9 @@ function update(id: string, change: Partial<Edition> | undefined) {
 /** The qBittorrent tag that marks an Edition's torrent. */
 const tagOf = (id: string) => `edition-${createHash('sha1').update(id).digest('hex').slice(0, 12)}`
 export const editionForTags = (tags: string) => Object.keys(editions()).find((id) => tags.split(', ').includes(tagOf(id)))
+
+/** A LazyLibrarian book the Admin picked a release for, which Arrmy downloads and files itself. */
+export const isPicked = (id: number | string) => !!editions()[String(id)]?.picked
 
 const editionTorrents = async (): Promise<Torrent[]> => (await qbit(`/torrents/info?category=${EDITIONS_CATEGORY}`)).json()
 const torrentOf = (list: Torrent[], id: string) => list.find((t) => t.tags.split(', ').includes(tagOf(id)))
@@ -226,9 +234,9 @@ async function grabPack(r: Release, tag: string, titles: string[]) {
   return false
 }
 
-/** Hard-links a finished torrent into Author/Title (Edition), without its own top folder, and has Audiobookshelf scan. */
+/** Hard-links a finished torrent into Author/Title (Edition), or Author/Title for a pick, without its own top folder, and has Audiobookshelf scan. */
 async function file(id: string, e: Edition, t: Torrent) {
-  const folder = `${safeName(e.author)}/${safeName(`${e.title} (${editionOf(id)!.edition})`)}`
+  const folder = `${safeName(e.author)}/${safeName(e.picked ? e.title : `${e.title} (${editionOf(id)!.edition})`)}`
   const dir = path.join(AUDIOBOOKS_ROOT, folder)
   const files = (await torrentFiles(t.hash)).filter((f) => (f.priority ?? 1) > 0) // a pack's other books are skipped
   const shared = commonDir(files.map((f) => f.name))
@@ -264,13 +272,43 @@ export async function watchEditions(waiting: RequestRow[]) {
     if (!e) continue
     const t = torrentOf(list, id)
     if (!e.folder && t && (t.progress >= 1 || t.completion_on > 0)) await file(id, e, t)
-    else if (!e.folder && !t && (!e.search || Date.now() - (e.searchedAt ?? 0) > SEARCH_EVERY)) void findEdition(id)
+    else if (e.picked && !e.folder && !t) {
+      // The pick's torrent was deleted before it finished: LazyLibrarian looks for the book again.
+      update(id, undefined)
+      await ll('queueBook', { id, type: 'AudioBook' })
+      await ll('searchBook', { id, type: 'AudioBook' })
+      console.log(`[editions] ${e.title}: the picked release is gone, so LazyLibrarian is looking again`)
+      continue
+    } else if (!e.folder && !t && !e.picked && (!e.search || Date.now() - (e.searchedAt ?? 0) > SEARCH_EVERY)) void findEdition(id)
     if (!editions()[id]?.folder) continue
     for (const r of waiting.filter((r) => String(r.external_id) === id)) {
       markAvailable(r.id)
       tellDiscord(r)
     }
   }
+}
+
+/**
+ * Downloads the release the Admin picked for a book LazyLibrarian was looking for, and files it into Audiobookshelf
+ * when it finishes (watchEditions), as Author/Title. LazyLibrarian stops looking, so it doesn't download a second copy.
+ * A pick made before replaces the earlier one.
+ */
+export async function pickBookRelease(bookId: string, release: Release) {
+  const before = editions()[bookId]
+  if (before && !before.picked) throw new Error('That id is an Edition, not a LazyLibrarian book')
+  if (before?.folder) throw new Error('It is in Audiobookshelf already')
+  const book = (await ll<LLBook[]>('getAllBooks')).find((b) => b.BookID === bookId)
+  if (!book) throw new Error('LazyLibrarian no longer has that book')
+  const earlier = before && torrentOf(await editionTorrents(), bookId)
+  if (earlier) await deleteTorrents([earlier.hash])
+  update(bookId, { title: book.BookName, author: book.AuthorName, picked: true, searchedAt: Date.now() })
+  try {
+    await grab(release, tagOf(bookId))
+  } catch (e) {
+    update(bookId, undefined)
+    throw e
+  }
+  await ll('unqueueBook', { id: bookId, type: 'AudioBook' })
 }
 
 /** Deletes the Edition's torrent and, once filed, its folder in Audiobookshelf. Its folder is always one Arrmy made. */

@@ -4,7 +4,7 @@ import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, type Me
 import { cleanEdition, editionId, editionOf } from './bookrules'
 import { addAudiobook, removeAudiobook } from './books'
 import { addRequest, deleteRequest, hasRequest, logItem, otherRequests, requestsFor, seasonsOf, setSeasons, type RequestRow, type User } from './db'
-import { addEdition, removeEdition } from './editions'
+import { addEdition, isPicked, removeEdition } from './editions'
 import { showLimitProblem } from './limits'
 import { log, tellRemoved, tellRequest } from './notify'
 import { searchMovie } from './requestlog'
@@ -75,7 +75,7 @@ export const by = (user: { id: number; username: string }, request: { user_id: n
 export async function removeRequestAs(user: { id: number; username: string }, request: RequestRow) {
   const others = otherRequests(request)
   let note: string | undefined
-  if (editionOf(request.external_id)) {
+  if (editionOf(request.external_id) || isPicked(request.external_id)) {
     if (!others.length) await removeEdition(String(request.external_id))
   } else if (request.media_type === 'audiobook') {
     if (!others.length) note = await removeAudiobook(request)

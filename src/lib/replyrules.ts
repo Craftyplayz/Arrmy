@@ -5,10 +5,14 @@
 import type { Release } from './bookrules.ts'
 import { size } from './botrules.ts'
 
-/** How a numbered release is downloaded: through Radarr or Sonarr, Arrmy's own Edition download, or not at all. */
+/**
+ * How a numbered release is downloaded: through Radarr or Sonarr, Arrmy's own Edition download, Arrmy's own download of
+ * a book LazyLibrarian was looking for (`book`, filed into Audiobookshelf by Arrmy), or not at all.
+ */
 export type Grab =
   | { app: 'radarr' | 'sonarr'; guid: string; indexerId: number }
   | { app: 'edition'; id: string; release: Release; pack: boolean }
+  | { app: 'book'; id: string; release: Release }
   | { app: 'none'; why: string }
 
 /** One release a search found, whatever searched. `rejections` empty = acceptable. */
