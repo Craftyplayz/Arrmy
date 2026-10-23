@@ -79,15 +79,15 @@ export function releaseLine(r: Listed) {
 }
 
 /**
- * The list as card texts: as many lines as fit in each (Discord allows 4,096 characters a card), and only the first
- * `max` releases; the attached file always has every one.
+ * The list as card texts, one page each: `per` releases, fewer if they don't fit (Discord allows 4,096 characters a
+ * card), and only the first `max` releases; the attached file always has every one.
  */
-export function listCards(list: Listed[], max = 200, budget = 3900) {
+export function listCards(list: Listed[], max = 200, budget = 3900, per = 10) {
   const cards: string[] = []
   let card = ''
   for (const r of list.slice(0, max)) {
     const line = releaseLine(r)
-    if (card && card.length + 1 + line.length > budget) {
+    if (card && (card.length + 1 + line.length > budget || card.split('\n').length >= per)) {
       cards.push(card)
       card = ''
     }
@@ -188,6 +188,39 @@ export const confirmButtons = (id: string) => [
     ],
   },
 ]
+
+/** The Doctarr's answer as pages, one per **Heading** that starts a line (Cause, What I did…), each with its heading. */
+export function answerPages(text: string): { heading?: string; body: string }[] {
+  const pages: { heading?: string; body: string }[] = []
+  for (const line of text.split('\n')) {
+    const m = /^\s*\*\*([^*\n]{1,60}?):?\*\*:?\s*(.*)$/.exec(line)
+    if (m) pages.push({ heading: m[1].trim(), body: m[2] })
+    else if (pages.length) pages[pages.length - 1].body += `\n${line}`
+    else pages.push({ body: line })
+  }
+  return pages.map((p) => ({ ...p, body: p.body.trim().slice(0, 4000) || 'Nothing.' })).filter((p) => p.heading || p.body !== 'Nothing.')
+}
+
+/** A page button's id: which answer and which page it turns to. */
+const pageId = (id: string, page: number) => `doctor:page:${id}:${page}`
+export function parsePage(customId: string) {
+  const m = /^doctor:page:([\w-]{1,40}):(\d{1,2})$/.exec(customId)
+  return m ? { id: m[1], page: Number(m[2]) } : undefined
+}
+
+/** Back and Next under page `page` of `total` (style 2 is grey), or no buttons for a single page. */
+export const pageButtons = (id: string, page: number, total: number) =>
+  total < 2
+    ? []
+    : [
+        {
+          type: 1,
+          components: [
+            { type: 2, style: 2, label: '◀ Back', custom_id: pageId(id, page - 1), disabled: page === 0 },
+            { type: 2, style: 2, label: 'Next ▶', custom_id: pageId(id, page + 1), disabled: page === total - 1 },
+          ],
+        },
+      ]
 
 /** "later 90" and the like: whole minutes from 5 minutes to a week. */
 export function laterMinutes(value: unknown) {

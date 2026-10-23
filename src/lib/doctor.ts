@@ -1,5 +1,5 @@
 // Hands each Problem #problems announces to The Doctarr (scripts/doctor.mjs), which has Claude look into it and maybe fix
-// it, and posts what it checked, what it fixed and its answer in the Problem's thread. Its first look also posts every
+// it, and posts its answer in the Problem's thread, one page per part (Cause, What I did…). Its first look also posts every
 // release found, numbered (releaselist.ts). The Admin's replies in the thread go back to The Doctarr (replies.ts). On
 // only when CLAUDE_CODE_OAUTH_TOKEN is set (docker-compose.yml sets DOCTOR).
 import { request } from 'node:http'
@@ -9,7 +9,8 @@ import { getSetting, setSetting } from './db'
 import { embed } from './embeds'
 import type { Problem } from './problems'
 import { grabOtherQuality, postReleaseList } from './releaselist'
-import { OPEN_FOR } from './replyrules'
+import { postPages } from './pages'
+import { answerPages, OPEN_FOR } from './replyrules'
 import { doctorToken, sessionSecret } from './token'
 
 const DOCTOR_URL = process.env.DOCTOR_URL ?? 'http://doctor:3002'
@@ -82,6 +83,13 @@ function ask(path: '/investigate' | '/reply', body: string, started: () => void,
 const card = (description: string, colour: 'info' | 'ok' | 'danger' | 'neutral' = 'neutral') =>
   embed({ colour, app: 'Claude', description: description.slice(0, 4000) })
 
+/** The answer's cards, one per part (Cause, What I did…), titled Resolved or Needs you. */
+const answerCards = (text: string, solved: boolean) =>
+  answerPages(text).map((p) => {
+    const status = solved ? 'Resolved' : 'Needs you'
+    return embed({ colour: solved ? 'ok' : 'danger', app: 'Claude', title: p.heading ? `${status}: ${p.heading}` : status, description: p.body, at: false })
+  })
+
 /**
  * One Doctarr run on a Problem, posting its steps and answer in the thread. Without the bot (only the webhook) just the
  * start and the answer go out. Not solved: the thread is tagged Needs you, and the Admin is @mentioned unless they
@@ -91,39 +99,26 @@ const card = (description: string, colour: 'info' | 'ok' | 'danger' | 'neutral' 
 function run(path: '/investigate' | '/reply', p: Problem, body: object, o: { start: string; ping: boolean; busyText: string; started?: (id?: string) => void }) {
   const thread = problemThread(p)
   const key = thread.key
-  const say = async (tag: 'Doctarr working' | 'Open' | 'Needs you' | undefined, c: ReturnType<typeof card>, ping = false) => {
+  const say = async (tag: 'Doctarr working' | 'Open' | 'Needs you' | undefined, c: ReturnType<typeof card>, ping = false, pages?: ReturnType<typeof card>[]) => {
     if (!botEnabled()) return void announce(problemThread(p, tag), c, ping)
     try {
-      const id = await post(problemThread(p, tag), c, ping)
+      const id = pages ? await postPages(problemThread(p, tag), pages, ping) : await post(problemThread(p, tag), c, ping)
       remember(key, id)
       return id
     } catch (e) {
       console.warn(`[doctarr] ${p.title}: ${(e as Error).message}`)
     }
   }
-  // Steps are posted together every 5 seconds, so a burst of reads can't flood the thread. Only in the bot's forum:
-  // the webhook's single channel would fill up with them.
-  let steps: string[] = []
-  let timer: NodeJS.Timeout | undefined
+  // Only the start and the answer are posted: each step it checked or fixed would bury the answer.
   let posting = Promise.resolve()
-  const flush = () => {
-    clearTimeout(timer)
-    timer = undefined
-    const text = steps.join('\n')
-    steps = []
-    if (text) posting = posting.then(async () => void (await say(undefined, card(text))))
-    return posting
-  }
   let last: Event | undefined
   const onEvent = (e: Event) => {
-    if (!e.step) return void (last = e)
-    if (!botEnabled()) return
-    steps.push(`**${e.step}** \`${(e.text ?? '').replace(/`/g, "'")}\`${e.failed ? ' (failed)' : ''}`)
-    timer ??= setTimeout(flush, 5000)
+    if (!e.step) last = e
   }
   const finish = async (solved: boolean, text: string) => {
-    await flush()
-    await say(solved ? 'Open' : 'Needs you', card(text, solved ? 'ok' : 'danger'), !solved && o.ping)
+    await posting
+    // The webhook can't take buttons, so it gets the whole answer on one card.
+    await say(solved ? 'Open' : 'Needs you', card(text, solved ? 'ok' : 'danger'), !solved && o.ping, answerCards(text, solved))
     updateState(key, (s) => s && { ...s, openUntil: solved ? Date.now() + OPEN_FOR : undefined })
     busy.delete(key)
     replying.delete(key)
@@ -138,7 +133,7 @@ function run(path: '/investigate' | '/reply', p: Problem, body: object, o: { sta
       if (status === 204 || status === 429) return finish(false, o.busyText)
       if (status !== 200) throw new Error(`${status} ${text.slice(0, 300)}`)
       if (last?.answer === undefined) throw new Error(last?.error ?? 'The Doctarr stopped without an answer')
-      return finish(!!last.solved, `${last.answer}\n\n**Solved:** ${last.solved ? 'Yes' : 'No'}`)
+      return finish(!!last.solved, last.answer)
     })
     .catch((e: Error) => {
       console.warn(`[doctarr] ${p.title}: ${e.message}`)

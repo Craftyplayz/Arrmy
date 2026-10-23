@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { admitReply, FIXES, REPLY_FIXES, replyPrompt } from '../scripts/doctor.mjs'
 import {
+  answerPages,
   byId,
   confirmButtons,
   contentHidden,
@@ -14,7 +15,9 @@ import {
   newMessages,
   numbered,
   otherQuality,
+  pageButtons,
   parseButton,
+  parsePage,
   releaseLine,
   replyable,
   replyText,
@@ -135,6 +138,22 @@ test('buttons: Go ahead and Cancel, and only their own ids are read back', () =>
   assert.deepEqual(parseButton('doctor:go:abc123'), { choice: 'go', id: 'abc123' })
   assert.equal(parseButton('doctor:go:../x'), undefined)
   assert.equal(parseButton('other:go:abc'), undefined)
+})
+
+test('pages: one per bold heading, with Back and Next only when there are several', () => {
+  const pages = answerPages('**Cause**\nEvery 1080p release failed.\n\n**What I did**: Searched again.\n**What you need to do:** Nothing')
+  assert.deepEqual(pages, [
+    { heading: 'Cause', body: 'Every 1080p release failed.' },
+    { heading: 'What I did', body: 'Searched again.' },
+    { heading: 'What you need to do', body: 'Nothing' },
+  ])
+  assert.deepEqual(answerPages('Plain answer, no parts.'), [{ body: 'Plain answer, no parts.' }])
+  assert.deepEqual(pageButtons('abc', 0, 1), [])
+  const [row] = pageButtons('abc', 0, 3)
+  assert.deepEqual(row.components.map((c) => [c.custom_id, c.disabled]), [['doctor:page:abc:-1', true], ['doctor:page:abc:1', false]])
+  assert.deepEqual(parsePage('doctor:page:abc:2'), { id: 'abc', page: 2 })
+  assert.equal(parsePage('doctor:page:abc:-1'), undefined)
+  assert.equal(parseButton('doctor:page:abc:1'), undefined)
 })
 
 test('later: whole minutes from 5 to a week', () => {

@@ -9,6 +9,7 @@ import { deadHashes, getSetting, setSetting } from './db'
 import { post } from './discord'
 import { grabEditionRelease, pickBookRelease, searchEditionReleases } from './editions'
 import { embed } from './embeds'
+import { postPages } from './pages'
 import type { Problem } from './problems'
 import { escape, listCards, listFile, listIntro, numbered, otherQuality, type Found, type Listed, type ReleaseList } from './replyrules'
 
@@ -110,12 +111,13 @@ export async function postReleaseList(p: Problem, posted: (id: string) => void =
   const entries = numbered(await search(p))
   const list: Stored = { at: Date.now(), title: p.title, entries, problem: p }
   setSetting(keyOf(p), list)
-  const shown = Math.min(entries.length, LIST_MAX)
-  const cards = listCards(entries, LIST_MAX)
+  const intro = listIntro(list, Math.min(entries.length, LIST_MAX))
+  const cards = listCards(entries, LIST_MAX, 3900 - intro.length)
   const thread = problemThread(p)
   const file = { name: `releases-${new Date(list.at).toISOString().slice(0, 10)}.txt`, text: listFile(list) }
-  posted(await post(thread, embed({ colour: 'info', app: 'Arrmy', title: 'Every release found', description: listIntro(list, shown) }), false, { file }))
-  for (const c of cards) posted(await post(thread, embed({ colour: 'neutral', description: c, at: false })))
+  // One message with Back and Next: the intro, then 10 releases a page.
+  const pages = (cards.length ? cards : ['']).map((c) => embed({ colour: 'info', app: 'Arrmy', title: 'Every release found', description: `${intro}\n\n${c}`.trim(), at: false }))
+  posted(await postPages(thread, pages, false, file))
   return list
 }
 

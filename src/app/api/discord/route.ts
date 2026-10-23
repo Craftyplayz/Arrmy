@@ -4,7 +4,8 @@ import { answer } from '@/lib/commands'
 import { clicked } from '@/lib/confirm'
 import { answerInteraction } from '@/lib/discord'
 import { embed } from '@/lib/embeds'
-import { parseButton } from '@/lib/replyrules'
+import { turnPage } from '@/lib/pages'
+import { parseButton, parsePage } from '@/lib/replyrules'
 
 // Discord's public key is the raw 32 bytes of an Ed25519 key; this prefix makes it a key node:crypto can read.
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
@@ -54,6 +55,13 @@ export async function POST(request: Request) {
 
 /** Go ahead or Cancel under something The Doctarr asked to do (confirm.ts). Only the Admin's click counts. */
 function button(interaction: Interaction) {
+  // Back and Next (pages.ts): anyone who can see the thread may turn the pages.
+  const page = parsePage(interaction.data?.custom_id ?? '')
+  if (page) {
+    const turned = turnPage(page.id, page.page)
+    if (!turned) return Response.json({ type: 4, data: { flags: 64, content: "This message's pages are gone, so they can't be turned." } })
+    return Response.json({ type: 7, data: { embeds: [turned.card], components: turned.components } }) // 7: edit the clicked message
+  }
   const parsed = parseButton(interaction.data?.custom_id ?? '')
   if (!parsed) return new Response(null, { status: 400 })
   const clicker = interaction.member?.user.id ?? interaction.user?.id
