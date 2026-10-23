@@ -142,10 +142,37 @@ async function reconnected(before) {
 }
 
 /**
- * Moves the VPN to other regions until AudioBook Bay answers, up to 4 tries, and remembers where it worked.
- * gluetun reconnects when its regions change (PUT /v1/vpn/settings) and keeps them until it restarts.
+ * What reconnect-vpn checks after each move: "abb" and Prowlarr indexer ids as given, or with none the indexers
+ * Prowlarr marks as failing, or AudioBook Bay when none are. Each check is a name and a test that throws when blocked.
  */
-async function reconnectVpn() {
+async function vpnChecks(args) {
+  const named = args.length ? args : (await arr('prowlarr', '/indexerstatus').then((s) => JSON.parse(s).map((x) => String(x.indexerId)), () => []))
+  const checks = []
+  for (const a of named.length ? [...new Set(named)] : ['abb']) {
+    if (a === 'abb') {
+      checks.push({
+        name: 'AudioBook Bay',
+        test: async () => {
+          const abb = JSON.parse(await arrmy('/abb?s=tolkien'))
+          if (abb.ok !== true) throw new Error(abb.error)
+        },
+      })
+      continue
+    }
+    const [id] = ids([a])
+    const indexer = JSON.parse(await arr('prowlarr', `/indexer/${id}`))
+    checks.push({ name: indexer.name, indexer: true, test: () => arr('prowlarr', '/indexer/test', 'POST', indexer) })
+  }
+  return checks
+}
+
+/**
+ * Moves the VPN to other regions until everything vpnChecks names works (AudioBook Bay, indexers Cloudflare or the
+ * site blocks), up to 4 tries, and remembers where it worked. gluetun reconnects when its regions change
+ * (PUT /v1/vpn/settings) and keeps them until it restarts. Indexers that work again are re-enabled (Prowlarr's test all).
+ */
+async function reconnectVpn(...args) {
+  const checks = await vpnChecks(args)
   let history = {}
   try {
     history = JSON.parse(readFileSync(REGIONS, 'utf8'))
@@ -168,9 +195,16 @@ async function reconnectVpn() {
       }
       const ip = await reconnected(before)
       line += `${ip.public_ip} (${[ip.city, ip.country].filter(Boolean).join(', ')}), `
-      const abb = JSON.parse(await arrmy('/abb?s=tolkien'))
-      ok = abb.ok === true
-      line += ok ? `AudioBook Bay ok in ${abb.ms} ms` : `AudioBook Bay failed: ${abb.error}`
+      const results = []
+      for (const c of checks)
+        results.push(
+          await c.test().then(
+            () => `${c.name} ok`,
+            (e) => `${c.name} failed: ${e.message.slice(0, 150)}`,
+          ),
+        )
+      ok = results.every((r) => r.endsWith(' ok'))
+      line += results.join('; ')
     } catch (e) {
       line += `failed: ${e.message}`
     }
@@ -184,7 +218,13 @@ async function reconnectVpn() {
   } catch (e) {
     report.push(`Could not check the VPN is up: ${e.message}`)
   }
-  report.push(ok ? 'AudioBook Bay works again.' : 'AudioBook Bay failed in every region tried.')
+  const names = checks.map((c) => c.name).join(', ')
+  if (ok && checks.some((c) => c.indexer))
+    await arr('prowlarr', '/indexer/testall', 'POST').then(
+      () => report.push('Prowlarr tested every indexer, so the ones that work again are back on.'),
+      (e) => report.push(`Prowlarr's test of every indexer failed: ${e.message.slice(0, 150)}`),
+    )
+  report.push(ok ? `${names}: working again.` : `${names}: still failing in every region tried.`)
   return report.join('\n')
 }
 
@@ -251,8 +291,9 @@ export const FIXES = {
   recheck: { usage: 'recheck <hash>: have qBittorrent recheck a torrent’s files', run: (h) => qbit('/torrents/recheck', new URLSearchParams({ hashes: hash(h) })) },
   resume: { usage: 'resume <hash>: start a paused or stopped torrent', run: (h) => qbit('/torrents/start', new URLSearchParams({ hashes: hash(h) })) },
   'reconnect-vpn': {
-    usage: 'reconnect-vpn: move the VPN to other regions until AudioBook Bay answers (up to 4 tries; can take 10 minutes)',
-    run: () => reconnectVpn(),
+    usage:
+      'reconnect-vpn [abb] [indexerId...]: move the VPN to other regions until AudioBook Bay and/or those Prowlarr indexers work (none given: the indexers Prowlarr marks failing, else AudioBook Bay), re-enabling the indexers (up to 4 tries; can take 10 minutes)',
+    run: (...args) => reconnectVpn(...args),
   },
   'edition-search': {
     usage: 'edition-search <id>: search again for a waiting Edition, e.g. edition-search "OL27513W~andy serkis"',
@@ -381,7 +422,10 @@ VPN region is the cause: run \`fix reconnect-vpn\` (give the command a 10-minute
 
 A failing indexer (\`get prowlarr /indexer\` for ids, \`get prowlarr /indexerstatus\`, \`get prowlarr /indexer/<id>\`):
 "blocked by CloudFlare" → \`fix indexer-flaresolverr <id>\`; unreachable, DNS, timeouts or errors from the site itself →
-\`fix indexer-mirror <id>\`. A torrent stalled with no peers while others download fine → \`fix reannounce <hash>\`.
+\`fix indexer-mirror <id>\`. Indexer traffic and FlareSolverr go through the VPN, so if an indexer is still blocked after
+that (Cloudflare, 403, a ban on the IP), run \`fix reconnect-vpn <id>\` (10-minute timeout): it moves the VPN until the
+indexer passes Prowlarr's test and re-enables it, so then search again yourself. Don't leave the region change to the
+Admin. A torrent stalled with no peers while others download fine → \`fix reannounce <hash>\`.
 
 Fix it only when you're sure, and only with \`${tool} fix <name> <args...>\`:
 ${Object.values(FIXES)

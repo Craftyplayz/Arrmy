@@ -269,11 +269,13 @@ export function edit(target: Target, id: string, embed: Embed) {
   })
 }
 
-/** Deletes a message the bot posted. Already gone is fine. */
-export function remove(channel: Channel, id: string) {
+/** Deletes a message the bot posted in a channel or thread. Already gone is fine. */
+export function remove(target: Target, id: string) {
   return serial(async () => {
+    const at = await messagesOf(target)
+    if (!at) return
     try {
-      await discord(`/channels/${await channelId(channel)}/messages/${id}`, 'DELETE')
+      await discord(`${at}/messages/${id}`, 'DELETE')
     } catch (e) {
       if (!gone(e)) throw e
     }

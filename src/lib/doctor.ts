@@ -4,7 +4,7 @@
 // only when CLAUDE_CODE_OAUTH_TOKEN is set (docker-compose.yml sets DOCTOR).
 import { request } from 'node:http'
 import { problemKey, problemThread } from './botrules'
-import { announce, botEnabled, post } from './discord'
+import { announce, botEnabled, post, remove } from './discord'
 import { getSetting, setSetting } from './db'
 import { embed } from './embeds'
 import type { Problem } from './problems'
@@ -96,7 +96,12 @@ const answerCards = (text: string, solved: boolean) =>
  * asked (`ping` false). Solved: back to Open, until the feed sees the Problem gone and marks it Resolved; for an hour
  * the Admin can still reply.
  */
-function run(path: '/investigate' | '/reply', p: Problem, body: object, o: { start: string; ping: boolean; busyText: string; started?: (id?: string) => void }) {
+function run(
+  path: '/investigate' | '/reply',
+  p: Problem,
+  body: object,
+  o: { start: string; ping: boolean; busyText: string; started?: (id?: string) => void; waiting?: boolean },
+) {
   const thread = problemThread(p)
   const key = thread.key
   const say = async (tag: 'Doctarr working' | 'Open' | 'Needs you' | undefined, c: ReturnType<typeof card>, ping = false, pages?: ReturnType<typeof card>[]) => {
@@ -111,6 +116,9 @@ function run(path: '/investigate' | '/reply', p: Problem, body: object, o: { sta
   }
   // Only the start and the answer are posted: each step it checked or fixed would bury the answer.
   let posting = Promise.resolve()
+  // `waiting`: the start card goes up at once, saying to wait, and is deleted when the answer is posted.
+  let wait: Promise<string | undefined> | undefined
+  if (o.waiting && botEnabled()) posting = (wait = say('Doctarr working', card(o.start, 'info'))).then(() => {})
   let last: Event | undefined
   const onEvent = (e: Event) => {
     if (!e.step) last = e
@@ -119,6 +127,8 @@ function run(path: '/investigate' | '/reply', p: Problem, body: object, o: { sta
     await posting
     // The webhook can't take buttons, so it gets the whole answer on one card.
     await say(solved ? 'Open' : 'Needs you', card(text, solved ? 'ok' : 'danger'), !solved && o.ping, answerCards(text, solved))
+    const waitId = await wait
+    if (waitId) await remove(thread, waitId).catch((e: Error) => console.warn(`[doctarr] ${p.title}: ${e.message}`))
     updateState(key, (s) => s && { ...s, openUntil: solved ? Date.now() + OPEN_FOR : undefined })
     busy.delete(key)
     replying.delete(key)
@@ -127,7 +137,7 @@ function run(path: '/investigate' | '/reply', p: Problem, body: object, o: { sta
   if (path === '/reply') replying.add(key)
   if (botEnabled()) updateState(key, (s) => ({ ...s, problem: p })) // only the bot's threads take replies
   return ask(path, JSON.stringify({ key: problemKey(p), problem: p, ...body }), () => {
-    posting = posting.then(async () => o.started?.(await say('Doctarr working', card(o.start, 'info'))))
+    if (!wait) posting = posting.then(async () => o.started?.(await say('Doctarr working', card(o.start, 'info'))))
   }, onEvent)
     .then(({ status, text }) => {
       if (status === 204 || status === 429) return finish(false, o.busyText)
@@ -167,8 +177,9 @@ export function investigate(p: Problem) {
  */
 export function reply(p: Problem, words: string, meanwhile: string[]) {
   return run('/reply', p, { reply: words, meanwhile }, {
-    start: 'Got it, looking at this again.',
+    start: "Got it, I'm working on this now. Please wait: this message goes away when my answer is ready.",
     ping: false,
+    waiting: true,
     busyText: "The Doctarr has answered as many replies as it may today (DOCTOR_REPLIES). Reply again tomorrow, or fix it on the Admin page.",
   })
 }
