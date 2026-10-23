@@ -196,6 +196,57 @@ About 2–3 days (the first-run backfill and the status tags add most of a day).
 
 **Later:** a page on the site with the weekly summary.
 
+### Replying to the doctor in Problems
+
+Asked for 2026-10-23. **Planned, not built.** The first step away from a read-only bot. When the doctor has looked into a Problem and couldn't solve it (the thread is tagged **Needs you**), the Admin just types a reply in that thread, in plain English, like talking to a person: no slash command, no @mention, no special words. The doctor reads it, carries on from where it stopped, and answers in the same thread. A reply can be a question ("why did the first two releases die?"), an instruction ("try the 1080p one from YTS instead", "search again tomorrow", "leave it, I'll sort it myself") or extra facts ("the indexer's login changed, I've fixed it in Prowlarr").
+
+**Seeing the reply without a live connection.** Discord only sends Arrmy interactions (slash commands, buttons), never ordinary messages; the only ways to see a message are the Gateway (a websocket kept open all the time) or reading the thread's messages over the API. The plan reads them, so the bot keeps having no live connection:
+
+- Every 20 seconds, for each Problem thread tagged **Needs you**, Arrmy reads `GET /channels/<thread>/messages?after=<last seen>`. Usually that's zero or one thread, so zero or one call; nothing is read when nothing needs the Admin. A reply is picked up within about 20 seconds.
+- Only messages whose author is `DISCORD_ADMIN_ID` count. The bot's own posts and anyone else's are skipped (the forum is the Admin's only anyway). The last message id seen is kept per thread (a column on the threads table), so a restart doesn't answer the same reply twice.
+- Several messages typed within 30 seconds of each other go to the doctor as one reply.
+- Discord hides what a message says from bots unless the app has the **Message Content Intent** switched on (Developer Portal → Bot → Privileged Gateway Intents). It's a switch, free for a bot in fewer than 100 servers, and the README's setup gains a step for it. Without it, the text comes back empty; Arrmy then posts once in the thread that the switch is off, and a reply that @mentions the bot still works, since Discord always shows a bot the messages that mention it.
+- The Gateway was considered: replies would arrive at once, but it means a connection that's always open, reconnecting and heartbeating, in a container that today only answers requests. 20 seconds is fine for a Problem that has waited 20 minutes already.
+
+**What happens with the reply.**
+
+1. Arrmy tags the thread **Doctor working**, shows "Arrmy is typing…" (`POST /channels/<thread>/typing`) and posts a compact card: "Got it, looking at this again."
+2. It sends the doctor (`POST /reply` on port 3002, same token) the Problem, the Admin's words and the thread's key.
+3. The doctor resumes the same Claude Code conversation it had for this Problem (`claude -p --resume <session id>`), so Claude remembers what it checked and why it gave up. The session id comes from the `result` event of `stream-json`, and is kept per Problem in the doctor's `/config` with the conversation files, so it survives a restart. If that conversation is gone, it starts a new one with the Problem, its last answer and the Admin's reply in the prompt.
+4. The steps (**Checked**, **Fixed**) and the answer are posted as they are today. The answer ends with `Solved: yes` or `Solved: no` as before: yes goes back to **Open** until the feed sees the Problem gone and marks it **Resolved**; no goes back to **Needs you**, without another @mention, since the Admin is already in the thread. The Admin can reply again, as many times as they like.
+5. The Admin replying while the doctor is still working is queued and sent once the run ends.
+
+Replies also work in a thread tagged **Open** after a follow-up said it was solved, for an hour, in case the Admin disagrees ("no, it's still stuck"). Not in **Resolved** threads: those are closed and the Admin's notes there are left alone.
+
+**What the Admin can ask for.** Everything the doctor can do by itself (search again, another release, test indexers, restart Radarr, Sonarr or Prowlarr, recheck or start a torrent, reconnect the VPN, search an Edition again), plus a few that it only does when the Admin asks in a reply, since it shouldn't decide them alone:
+
+| Fix | What it does |
+|---|---|
+| `grab <radarr\|sonarr> <guid>` | Grabs one release the Admin picked from a search (`POST /release` with the guid and indexer id Radarr or Sonarr gave), e.g. "grab the 4 GB one". |
+| `snooze <minutes>` | Arrmy stops raising this Problem for a while ("check again tomorrow"), through Arrmy's doctor API. |
+| `unmonitor <radarr\|sonarr> <id>` | Stops Radarr or Sonarr looking for a movie or episode that will never be found. |
+| `remove-request <id>` | Removes the Request, as the Remove button does: deletes the download and its files unless another Request wants them. |
+| `delete-torrent <hash>` | Deletes a torrent and its files from qBittorrent. |
+
+The doctor's own runs never get these: `doctor.mjs` only lets them through on a reply run (an environment variable the run is started with, which the agent can't change). Every fix still checks its arguments, and there is still no shell, no file edits and no Docker (ADR 0001).
+
+**Asking before it can't be undone.** `remove-request` and `delete-torrent` don't run straight away. The doctor posts what it is about to do ("Remove the Request for Dune: Part Two and delete 58 GB of files?") with two buttons, **Go ahead** and **Cancel**. Buttons are interactions, so Discord sends the click to `/api/discord` like a slash command, with no reading of messages; only the Admin's click counts, and an unanswered one expires after a day. Replying instead of clicking cancels it and counts as a new reply. These are the bot's first buttons, the ones the Discord bot rework left room for.
+
+**Limits.** Replies don't count towards `DOCTOR_DAILY`, which is there so a broken indexer can't use up the subscription by itself; the Admin asking is the Admin's choice. There is a separate cap of `DOCTOR_REPLIES` (30) a day, after which the bot says so in the thread. Runs still go one at a time.
+
+**Safety.** The Admin's reply is the only thing treated as an instruction. Everything else Claude reads (release names, indexer errors, logs, the cards in the thread) is data, and the prompt says so; the fixes' argument checks are the real limit, whatever the text says. Only `DISCORD_ADMIN_ID`'s messages and clicks are acted on; a reply from anyone else gets nothing, not even an answer.
+
+**Changes.** `discord.ts` (reading a thread's messages, typing, buttons), `feeds.ts` (the 20-second check), `db.ts` (last message id per thread), `doctor.ts` (sending a reply), `scripts/doctor.mjs` (`/reply`, `--resume`, the session ids, the reply-only fixes), `doctorapi.ts` (snooze, remove a Request), `/api/discord` (button clicks), `botrules.ts` (which messages count, how they're joined, which fixes need a click), and tests for those rules. A new ADR records that the bot now acts on what the Admin says, and why by reading threads rather than through the Gateway. The README's Discord steps gain the Message Content Intent switch, and the line "It only reads and reports" changes.
+
+About a day and a half: the reading and the doctor's `/reply` with `--resume` half a day, the reply-only fixes half a day, the buttons and the tests the rest. Build in that order; the first part works on its own with only the fixes the doctor already has.
+
+**Choices to settle:**
+
+1. 20 seconds by reading the thread, or at once through the Gateway (an always-open connection)?
+2. Which of the reply-only fixes to build, and any to add (e.g. change the Size Limit for one title, set a Request's quality)?
+3. Buttons to confirm `remove-request` and `delete-torrent`, or a typed "yes"?
+4. **Later:** the same in Requests threads for the Admin ("get this in 4K instead"), and in Admin threads ("restart it"), once Problems has been used for a while.
+
 ### Request Log
 
 Built (see Done): the log from Radarr's and Sonarr's webhooks, qBittorrent and Plex; Arrmy's own movie search with every release and indexer health; edits and one-click fixes; audiobooks; #problems when a movie search finds nothing acceptable (dead releases were already there). Still to come: Arrmy running TV searches (waits on the season pack question below), refused Requests (they have no Request to hang a log on yet), and removals (the log goes with the Request).
