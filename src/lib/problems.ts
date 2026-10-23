@@ -103,7 +103,7 @@ export type MissingEpisode = {
 
 const HOUR = 3_600_000
 /** How long a fresh Request's first search gets before nothing found is a Problem. */
-const FIRST_SEARCH = 15 * 60_000
+const FIRST_SEARCH = 10 * 60_000
 const age = (iso?: string) => (iso ? Date.now() - Date.parse(iso) : 0)
 
 export function nameOf(r: QueueRecord) {

@@ -141,12 +141,13 @@ async function downloads() {
   if (JSON.stringify(tracked) !== saved) setSetting('bot:downloads', tracked)
 }
 
-// The Problems forum. Arrmy fixes most stalled downloads by itself within 15 minutes (dead.ts), so a failure is only
-// announced once it has lasted 15; Missing, which has waited already, and one Arrmy raised itself after its tries ran
-// out are announced at once. The Admin is
-// only @mentioned when the doctor can't solve it (doctor.ts). A Problem that goes away gets "Issue resolved".
-type Seen = Record<string, { first: number; told: boolean; thread?: ThreadRef }>
-const GRACE = 15 * 60_000
+// The Problems forum. A failure is only announced once it has lasted GRACE, giving Arrmy's own fixes (dead.ts) a go;
+// Missing, which has waited already, and one Arrmy raised itself after its tries ran out are announced at once. The
+// doctor looks DOCTOR_AFTER later (at once for the dead-release ones), and the Admin is only @mentioned when it can't
+// solve it (doctor.ts). A Problem that goes away gets "Issue resolved".
+type Seen = Record<string, { first: number; told: boolean; toldAt?: number; asked?: boolean; thread?: ThreadRef }>
+const GRACE = 10 * 60_000
+const DOCTOR_AFTER = 10 * 60_000
 const SERVICE_APPS = { radarr: 'Radarr', sonarr: 'Sonarr', lazylibrarian: 'LazyLibrarian', editions: 'Arrmy' } // Arrmy: no app page to link
 
 async function problems() {
@@ -167,9 +168,15 @@ async function problems() {
     const s = (seen[key] = before?.[key] ?? { first: now, told: !before })
     if (before && !s.thread) s.told = false // told before the forums: it gets its thread now
     s.thread = problemThread(p)
+    // A Problem told before toldAt was kept was handed to the doctor then, so it isn't asked again.
+    if (s.told && !s.asked && s.toldAt !== undefined && (raisedByArrmy || now - s.toldAt >= DOCTOR_AFTER)) {
+      s.asked = true
+      investigate(p)
+    }
     // Missing has waited already (FIRST_SEARCH in problems.ts), so only failures get the grace.
     if (s.told || (!raisedByArrmy && p.kind !== 'Missing' && now - s.first < GRACE)) continue
     s.told = true
+    s.toldAt = now
     const admin = publicUrl('arrmy', '/admin#problems')
     // The doctor pings when it can't solve a Problem; without the doctor every Problem needs the Admin.
     const doctor = !!process.env.DOCTOR
@@ -190,7 +197,10 @@ async function problems() {
       }),
       !doctor,
     )
-    investigate(p)
+    if (raisedByArrmy) {
+      s.asked = true
+      investigate(p)
+    }
   }
   setSetting('bot:problems', seen)
 }
