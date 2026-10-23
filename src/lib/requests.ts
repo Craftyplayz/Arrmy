@@ -1,13 +1,14 @@
 // Making a Request, whoever asks: a person clicking Request (actions.ts), and later watchlists and lists. Approval,
 // quotas and the title blocklist belong here too, so every way of asking follows the same rules.
-import { addMovie, addSeries, arr, posterOf, type Media } from './arr'
-import { cleanEdition, editionId } from './bookrules'
-import { addAudiobook } from './books'
-import { addRequest, hasRequest, requestsFor, seasonsOf, type User } from './db'
-import { addEdition } from './editions'
+import { addMovie, addSeries, arr, posterOf, removeMovie, removeSeasons, type Media } from './arr'
+import { cleanEdition, editionId, editionOf } from './bookrules'
+import { addAudiobook, removeAudiobook } from './books'
+import { addRequest, deleteRequest, hasRequest, logItem, otherRequests, requestsFor, seasonsOf, setSeasons, type RequestRow, type User } from './db'
+import { addEdition, removeEdition } from './editions'
 import { showLimitProblem } from './limits'
-import { tellRequest } from './notify'
+import { log, tellRemoved, tellRequest } from './notify'
 import { searchMovie } from './requestlog'
+import { seasonLabel } from './status'
 
 /** A title's first Request starts its thread as Requested; a later one leaves it as it is (Downloading, Available). */
 const firstFor = (type: 'movie' | 'audiobook', id: number | string) => (requestsFor(type, id).length === 1 ? ('Requested' as const) : undefined)
@@ -61,4 +62,41 @@ export async function createAudiobookRequest(user: User, book: string, rawEditio
     const item = { media_type: 'audiobook' as const, external_id: id, title, year: found.year ?? null, poster: found.poster ?? null }
     tellRequest(item, 'info', `Requested by **${user.username}**.`, [['Author', found.author]], firstFor('audiobook', id))
   }
+}
+
+/** "Mum removed Dune" also says whose it was when the Admin changes someone else's Request. */
+export const by = (user: { id: number; username: string }, request: { user_id: number; username: string }) =>
+  `**${user.username}**${request.user_id !== user.id ? ` (for ${request.username})` : ''}`
+
+/**
+ * Removes a Request, whoever asks (the Remove button, or the Admin's click in Discord): cancels it, or deletes its
+ * download and files, keeping whatever another Request still wants. Returns a note for the person when files had to stay.
+ */
+export async function removeRequestAs(user: { id: number; username: string }, request: RequestRow) {
+  const others = otherRequests(request)
+  let note: string | undefined
+  if (editionOf(request.external_id)) {
+    if (!others.length) await removeEdition(String(request.external_id))
+  } else if (request.media_type === 'audiobook') {
+    if (!others.length) note = await removeAudiobook(request)
+  } else if (request.media_type === 'movie') {
+    if (!others.length) await removeMovie(Number(request.external_id))
+  } else {
+    const wanted = new Set(others.flatMap(seasonsOf))
+    await removeSeasons(Number(request.external_id), seasonsOf(request).filter((n) => !wanted.has(n)))
+  }
+  deleteRequest(request.id)
+  tellRemoved(request, `${by(user, request)} removed this Request.${others.length ? ' Its files stay: someone else requested it too.' : ''}`, others.length > 0)
+  return note
+}
+
+/** Takes one season out of a TV Request, as unticking it on the Requests page does; the last season removes the Request. */
+export async function removeSeasonAs(user: { id: number; username: string }, request: RequestRow, season: number) {
+  const after = seasonsOf(request).filter((n) => n !== season)
+  if (!after.length) return removeRequestAs(user, request)
+  const wanted = new Set(otherRequests(request).flatMap(seasonsOf))
+  if (!wanted.has(season)) await removeSeasons(Number(request.external_id), [season])
+  setSeasons(request.id, after, false)
+  tellRequest(request, 'info', `${by(user, request)} removed ${seasonLabel([season])}.`, [['Seasons', after.join(', ')]])
+  log(logItem('tv', request.external_id), 'note', { text: `Removed ${seasonLabel([season])}`, by: user.username, request: request.id })
 }

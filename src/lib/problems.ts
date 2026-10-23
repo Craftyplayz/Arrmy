@@ -19,6 +19,8 @@ export type Problem = {
   hash?: string
   /** The poster or cover, for Discord. */
   poster?: string | null
+  /** What Radarr or Sonarr search for it: the movie, or one season of a show (the doctor's numbered list of releases). */
+  media?: { movieId: number } | { seriesId: number; season: number }
 }
 
 /** A torrent as qBittorrent's /torrents/info lists it. */
@@ -134,7 +136,8 @@ export function queueProblem(service: Service, group: QueueRecord[]): Problem | 
         : undefined
   if (!kind) return
   const detail = r.statusMessages?.flatMap((m) => m.messages).find(Boolean) ?? r.errorMessage ?? r.title
-  return { kind, service, title: nameOf(r), detail, fix: 'retry', ids: group.map((g) => g.id), poster: posterIn(r.movie?.images ?? r.series?.images) }
+  const media = r.movieId ? { movieId: r.movieId } : r.seriesId && r.seasonNumber !== undefined ? { seriesId: r.seriesId, season: r.seasonNumber } : undefined
+  return { kind, service, title: nameOf(r), detail, fix: 'retry', ids: group.map((g) => g.id), poster: posterIn(r.movie?.images ?? r.series?.images), ...(media && { media }) }
 }
 
 /** Missing = nothing found for over FIRST_SEARCH (a fresh Request's first search gets that long), and not downloading. */
@@ -151,6 +154,7 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
       fix: 'search',
       ids: [m.id],
       poster: posterIn(m.images),
+      media: { movieId: m.id },
     }))
 
   const seasons = new Map<string, MissingEpisode[]>()
@@ -169,6 +173,7 @@ export function missingProblems(movies: MissingMovie[], episodes: MissingEpisode
       fix: 'search',
       ids: eps.map((e) => e.id),
       poster: posterIn(eps[0].series?.images),
+      media: { seriesId: eps[0].seriesId, season: eps[0].seasonNumber },
     })
   }
   return problems

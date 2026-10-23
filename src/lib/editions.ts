@@ -69,7 +69,57 @@ export async function addEdition(id: string) {
 
 const searching = new Set<string>()
 
-/** Searches Prowlarr and AudioBook Bay for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
+/**
+ * Searches Prowlarr and AudioBook Bay for the Edition: every release found, the ones that are this Edition (best
+ * first), and the search's summary. Nothing is grabbed.
+ */
+export async function searchEditionReleases(id: string) {
+  const e = editions()[id]
+  const edition = editionOf(id)?.edition
+  if (!e || !edition) throw new Error(`No Edition ${id}`)
+  // Indexers match words loosely: the edition's own words with each title the book goes by, the series (for packs) and the
+  // title alone, with the edition checked here. Audio/Audiobook, and Audio for the indexers that file audiobooks there.
+  const search = (query: string) =>
+    arr<(Release & { indexer?: string })[]>('prowlarr', `/search?${new URLSearchParams({ query, type: 'search' })}&categories=3030&categories=3000`)
+  const titles = titleVariants(e.title)
+  const series = e.series ?? seriesOf(e.title)
+  const queries = [...new Set([...titles.map((t) => `${t} ${edition}`), ...(series !== e.title ? [`${series} ${edition}`] : []), ...titles])]
+  // AudioBook Bay isn't in Prowlarr and has narrated editions it lacks; only the queries with the edition, as each
+  // result costs a page fetch. Down or changed: Prowlarr's results still count, and the summary says it failed.
+  let abbFound = 0
+  let abbAnswered = false
+  let abbFailed = 0
+  let abbError: string | undefined
+  const abb = (query: string) =>
+    searchAudiobookBay(query).then(
+      (r) => ((abbAnswered = true), (abbFound += r.length), r.map((x) => ({ ...x, indexer: 'AudioBook Bay' }))),
+      (err) => {
+        abbFailed++
+        abbError = (err as Error).message.slice(0, 120)
+        console.warn(`[editions] AudioBook Bay: ${abbError}`)
+        return [] as (Release & { indexer?: string })[]
+      },
+    )
+  const abbQueries = queries.filter((q) => q.endsWith(` ${edition}`))
+  const found = await Promise.all([...queries.map(search), ...abbQueries.map(abb)])
+  const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
+  const candidates = editionCandidates(releases, titles, edition, series)
+  const summary: EditionSearch = {
+    at: Date.now(),
+    found: releases.filter((r) => r.protocol === 'torrent').length,
+    singles: candidates.filter((c) => c.kind !== 'pack').length,
+    seeded: candidates.filter((c) => c.kind === 'single').length,
+    packs: candidates.filter((c) => c.kind === 'pack').length,
+    // Failed only when no AudioBook Bay search answered: one that did still counts its results, and the error says
+    // how many didn't (the series search that finds packs may be among them).
+    ...(abbError && !abbAnswered
+      ? { abb: 'failed' as const, abbError }
+      : { abb: abbFound, ...(abbError && { abbError: `${abbFailed} of ${abbQueries.length} searches failed: ${abbError}` }) }),
+  }
+  return { releases, candidates, summary, titles }
+}
+
+/** Searches for the Edition and sends the best release to qBittorrent. Nothing found: tried again later. */
 export async function findEdition(id: string) {
   let e = editions()[id]
   const edition = editionOf(id)?.edition
@@ -83,45 +133,7 @@ export async function findEdition(id: string) {
       e = editions()[id] ?? e
     }
     update(id, { searchedAt: Date.now() })
-    // Indexers match words loosely: the edition's own words with each title the book goes by, the series (for packs) and the
-    // title alone, with the edition checked here. Audio/Audiobook, and Audio for the indexers that file audiobooks there.
-    const search = (query: string) =>
-      arr<Release[]>('prowlarr', `/search?${new URLSearchParams({ query, type: 'search' })}&categories=3030&categories=3000`)
-    const titles = titleVariants(e.title)
-    const series = e.series ?? seriesOf(e.title)
-    const queries = [...new Set([...titles.map((t) => `${t} ${edition}`), ...(series !== e.title ? [`${series} ${edition}`] : []), ...titles])]
-    // AudioBook Bay isn't in Prowlarr and has narrated editions it lacks; only the queries with the edition, as each
-    // result costs a page fetch. Down or changed: Prowlarr's results still count, and the summary says it failed.
-    let abbFound = 0
-    let abbAnswered = false
-    let abbFailed = 0
-    let abbError: string | undefined
-    const abb = (query: string) =>
-      searchAudiobookBay(query).then(
-        (r) => ((abbAnswered = true), (abbFound += r.length), r),
-        (err) => {
-          abbFailed++
-          abbError = (err as Error).message.slice(0, 120)
-          console.warn(`[editions] AudioBook Bay: ${abbError}`)
-          return [] as Release[]
-        },
-      )
-    const abbQueries = queries.filter((q) => q.endsWith(` ${edition}`))
-    const found = await Promise.all([...queries.map(search), ...abbQueries.map(abb)])
-    const releases = [...new Map(found.flat().map((r) => [r.downloadUrl ?? r.magnetUrl ?? r.title, r])).values()]
-    const candidates = editionCandidates(releases, titles, edition, series)
-    const summary: EditionSearch = {
-      at: Date.now(),
-      found: releases.filter((r) => r.protocol === 'torrent').length,
-      singles: candidates.filter((c) => c.kind !== 'pack').length,
-      seeded: candidates.filter((c) => c.kind === 'single').length,
-      packs: candidates.filter((c) => c.kind === 'pack').length,
-      // Failed only when no AudioBook Bay search answered: one that did still counts its results, and the error says
-      // how many didn't (the series search that finds packs may be among them).
-      ...(abbError && !abbAnswered
-        ? { abb: 'failed' as const, abbError }
-        : { abb: abbFound, ...(abbError && { abbError: `${abbFailed} of ${abbQueries.length} searches failed: ${abbError}` }) }),
-    }
+    const { candidates, summary, titles } = await searchEditionReleases(id)
     for (const { release, kind } of candidates) {
       if (kind === 'pack' ? !(await grabPack(release, tagOf(id), titles).catch(() => false)) : !(await grab(release, tagOf(id)).then(() => true, () => false))) continue
       summary.grabbed =
@@ -140,6 +152,19 @@ export async function findEdition(id: string) {
   } finally {
     searching.delete(id)
   }
+}
+
+/**
+ * Sends one release the Admin picked to qBittorrent for the Edition, as findEdition would: a pack downloads only this
+ * book's files. Throws if it can't (a pack without this book in it is deleted again).
+ */
+export async function grabEditionRelease(id: string, release: Release, pack: boolean) {
+  if (!editions()[id]) throw new Error('That Edition is no longer requested')
+  if (pack) {
+    if (!(await grabPack(release, tagOf(id), titleVariants(editions()[id].title)))) throw new Error("None of that pack's files is this book, so it was deleted again")
+  } else await grab(release, tagOf(id))
+  const before = editions()[id].search ?? { at: Date.now(), found: 0, singles: 0, seeded: 0, packs: 0 }
+  update(id, { search: { ...before, grabbed: `The Admin picked ${release.title}.` } })
 }
 
 /**

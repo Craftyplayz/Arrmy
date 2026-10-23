@@ -244,8 +244,9 @@ services:
       - ${CONFIG_DIR:-/opt/arrmy}/kometa:/config
     depends_on: *after-init
 
-  # The doctor: Claude looks into each Problem and posts what it found to #problems, on your Claude subscription. It reads
+  # The doctor: Claude looks into each Problem and posts what it found in its thread, on your Claude subscription. It reads
   # the apps' APIs and can only run a few safe fixes (search again, another release, restart an app): scripts/doctor.mjs.
+  # Reply in the thread and it carries on, and can do a few more things you ask for (grab a release by its number).
   # Without CLAUDE_CODE_OAUTH_TOKEN it exits at once and stays stopped.
   doctor:
     image: ghcr.io/craftyplayz/arrmy:latest
@@ -258,6 +259,7 @@ services:
       CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:-}
       DISABLE_AUTOUPDATER: 1 # doctor.mjs updates it on each start
       DOCTOR_DAILY: ${DOCTOR_DAILY:-10}
+      DOCTOR_REPLIES: ${DOCTOR_REPLIES:-30} # answers to the Admin's replies in Problem threads, a day
       RADARR_API_KEY: ${RADARR_API_KEY}
       SONARR_API_KEY: ${SONARR_API_KEY}
       PROWLARR_API_KEY: ${PROWLARR_API_KEY}
