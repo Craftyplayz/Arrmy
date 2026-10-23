@@ -222,13 +222,24 @@ Replies also work in a thread tagged **Open** after a follow-up said it was solv
 
 | Fix | What it does |
 |---|---|
-| `grab <radarr\|sonarr> <guid>` | Grabs one release the Admin picked from a search (`POST /release` with the guid and indexer id Radarr or Sonarr gave), e.g. "grab the 4 GB one". |
+| `grab <number>` | Grabs one release from the Problem's numbered list (below), e.g. "download number 36". |
 | `snooze <minutes>` | Arrmy stops raising this Problem for a while ("check again tomorrow"), through Arrmy's doctor API. |
 | `unmonitor <radarr\|sonarr> <id>` | Stops Radarr or Sonarr looking for a movie or episode that will never be found. |
 | `remove-request <id>` | Removes the Request, as the Remove button does: deletes the download and its files unless another Request wants them. |
 | `delete-torrent <hash>` | Deletes a torrent and its files from qBittorrent. |
 
 The doctor's own runs never get these: `doctor.mjs` only lets them through on a reply run (an environment variable the run is started with, which the agent can't change). Every fix still checks its arguments, and there is still no shell, no file edits and no Docker (ADR 0001).
+
+**Every release found, numbered.** Asked for 2026-10-23. When the doctor first looks into a Problem by itself, the thread also gets a numbered list of every release found for the title, so the Admin can reply "download number 36", or anything else. The list is built by Arrmy's own code, not written by Claude, so it's exact and costs no tokens however long it is:
+
+- Movies and TV: Radarr's or Sonarr's own search for the movie or the missing episodes (`GET /release?movieId=` or `?episodeId=`, the same as Interactive Search in their pages), which lists every release with why each was turned down.
+- Audiobooks: everything Arrmy's Edition search finds, from AudioBook Bay and Prowlarr. For a book LazyLibrarian wants, the same Prowlarr search, since LazyLibrarian finds its releases through Prowlarr.
+- One line each: number, release name, size, seeders, where it came from (the indexer, or AudioBook Bay), and why it was turned down if it was (too big for the Size Limit, wrong language, blocklisted, already failed). The likeliest ones first: not turned down, then most seeders. Releases already tried and dead are marked so.
+- Discord allows 6,000 characters a message, so the list goes in as many compact cards as it needs, about 40 lines each. Past 200 releases, the first 200 are cards and the full list is attached as a text file, numbered the same.
+- The list is kept per Problem with what each number needs to download it (Radarr's or Sonarr's guid and indexer id; the AudioBook Bay page or the Prowlarr guid). "Number 36" always means the latest list in the thread; a new search ("search again", or the doctor's next look a day later) posts a new list with new numbers and says so.
+- `grab <number>` becomes a reply-only fix in place of `grab <radarr|sonarr> <guid>`: Claude reads which number the Admin means (also "the 4 GB one from YTS", "the second one") and grabs it; Arrmy looks up the number, so Claude never handles guids. Movies and TV go through `POST /release` so Radarr or Sonarr track and import it as usual; Edition audiobooks through Arrmy's own Edition download. No button: grabbing undoes nothing.
+- Claude gets the list only when it needs it (`get arrmy /releases/<problem>`), not in every prompt, so a long list doesn't cost tokens on every run.
+- To check when building: grabbing a release by hand for a book LazyLibrarian wants, since a torrent Prowlarr sends straight to qBittorrent isn't one LazyLibrarian knows to file. Arrmy's Edition download (its own filing) may be the way.
 
 **Asking before it can't be undone.** `remove-request` and `delete-torrent` don't run straight away. The doctor posts what it is about to do ("Remove the Request for Dune: Part Two and delete 58 GB of files?") with two buttons, **Go ahead** and **Cancel**. Buttons are interactions, so Discord sends the click to `/api/discord` like a slash command, with no reading of messages; only the Admin's click counts, and an unanswered one expires after a day. Replying instead of clicking cancels it and counts as a new reply. These are the bot's first buttons, the ones the Discord bot rework left room for.
 
@@ -238,7 +249,7 @@ The doctor's own runs never get these: `doctor.mjs` only lets them through on a 
 
 **Changes.** `discord.ts` (reading a thread's messages, typing, buttons), `feeds.ts` (the 20-second check), `db.ts` (last message id per thread), `doctor.ts` (sending a reply), `scripts/doctor.mjs` (`/reply`, `--resume`, the session ids, the reply-only fixes), `doctorapi.ts` (snooze, remove a Request), `/api/discord` (button clicks), `botrules.ts` (which messages count, how they're joined, which fixes need a click), and tests for those rules. A new ADR records that the bot now acts on what the Admin says, and why by reading threads rather than through the Gateway. The README's Discord steps gain the Message Content Intent switch, and the line "It only reads and reports" changes.
 
-About a day and a half: the reading and the doctor's `/reply` with `--resume` half a day, the reply-only fixes half a day, the buttons and the tests the rest. Build in that order; the first part works on its own with only the fixes the doctor already has.
+About two days: the reading and the doctor's `/reply` with `--resume` half a day, the numbered list and `grab` half a day, the other reply-only fixes half a day, the buttons and the tests the rest. Build in that order; the first part works on its own with only the fixes the doctor already has.
 
 **Choices to settle:**
 
