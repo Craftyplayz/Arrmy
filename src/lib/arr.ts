@@ -330,6 +330,12 @@ export async function addSeries(tvdbId: number, seasons: number[]): Promise<Medi
   const existing = await librarySeries(tvdbId)
   const series = existing ?? (await arr<LookupSeries[]>('sonarr', `/series/lookup?term=tvdb:${tvdbId}`))[0]
   if (!series) throw new Error(`No show with TVDB id ${tvdbId}`)
+  if (seasons.some((n) => !seasonNumbers(series.seasons).includes(n))) {
+    // Sonarr's tvdb: lookup can lag behind its title search, which is where the season picker got them
+    const byTitle = (await arr<LookupSeries[]>('sonarr', `/series/lookup?term=${encodeURIComponent(series.title)}`)).find((s) => s.tvdbId === tvdbId)
+    const known = new Set(series.seasons.map((s) => s.seasonNumber))
+    series.seasons = [...series.seasons, ...(byTitle?.seasons ?? []).filter((s) => !known.has(s.seasonNumber))]
+  }
   const valid = seasonNumbers(series.seasons)
   if (seasons.some((n) => !valid.includes(n))) throw new Error(`Show ${tvdbId} has no season(s) ${seasons}`)
   const monitor = (s: Season) => ({ ...s, monitored: (!!existing && s.monitored) || seasons.includes(s.seasonNumber) })
